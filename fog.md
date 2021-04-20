@@ -1,3 +1,3 @@
-# RFC policy - Consensus
+# RFC policy - Fog
 
-There are no additional requirements for consensus team systems beyond those in the top-level README, though that may change.
+There are no additional requirements for fog team systems beyond those in the top-level README, though that may change.
