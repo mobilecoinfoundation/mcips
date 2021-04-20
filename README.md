@@ -244,7 +244,7 @@ consensus and community norms, not impose more structure than necessary.
 
 This repository is licensed as:
 
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or https://opensource.org/licenses/MIT)
+* MIT license ([LICENSE](LICENSE) or https://opensource.org/licenses/MIT)
 
 ### Contributions
 [Contributions]: #contributions
