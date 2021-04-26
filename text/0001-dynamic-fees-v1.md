@@ -1,6 +1,6 @@
 - Feature Name: Dynamic Fees V1 (Configurable Fees)
 - Start Date: (2021-04-20)
-- RFC PR: [mobilecoinfoundation/rfcs#0000](https://github.com/mobilecoinfoundation/rfcs/pull/0000)
+- RFC PR: [mobilecoinfoundation/rfcs#1](https://github.com/mobilecoinfoundation/rfcs/pull/1)
 - MobileCoin Epic: MCC-2301
 
 # Summary
