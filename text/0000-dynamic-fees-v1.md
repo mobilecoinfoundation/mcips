@@ -54,56 +54,40 @@ Because of this, two nodes with different fees will produce different encryption
 # Drawbacks
 [drawbacks]: #drawbacks
 
-There are several drawbacks to 
+The primary drawback to this approach is that it requires a restart of a quorum of the network in order to adjust to a new fee. In the intended common-case (low fees generally, higher fees in response to an active denial-of-service), this will entail restarting the network twice, and when a node is restarted, any pending transactions which did not make it into the current SCP slot will be discarded.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-- Why is this design the best in the space of possible designs?
-- What other designs have been considered and what is the rationale for not choosing them?
-- What is the impact of not doing this?
+The first alternative considered was simply lowering the fees to 400uMOB, or 0.02USD @ 50USD/MOB. As noted above, while this accomplishes the initial goal of lowering the fees, it does not provide the ability to raise them without another enclave upgrade, which is costly, time-consuming, and will take upwards of 120 days to complete.
+
+The next alternative was using a "fee schedule", or "fee calendar"---that is, rather than having a single fee which is constructed at startup time, use a configuration file which provides a series of "fee ranges" `(fee, startBlock, endBlock)` that are hashed into the key exchange.
+
+This alternative scheme does have the advantage of allowing a reconfiguration to "script" the denial-of-service response, and it's subsequent unwind, in a single restart. The devil, however, is in the details: how should pending and future transactions be handled?
+
+This is actually quite tricky to get right: obviously you want to immediately reject any transactions which do not meet the currently configured fee requirements, but it's entirely possible that your node is already queuing transactions when this comes in.
+
+In this scenario, a client submits a transaction, and it goes into a queue behind hundreds of other transactions. The fee is "correct" for the current block, but the transaction will not actually be entertained for acceptance until after the fee has been raised, and the fee is no longer valid.
+
+Chosing to simply accept that if any node has accepted a proposed transaction at a lower fee, that fee is (or would have been) valid for all nodes is an option, but this does make the ability to enforce fees dependent on the union of all SGX functionality, which is a change from our ad-hoc norms around the use of SGX as a privacy-enhancement technology, rather than a security-critical technology.
+
+The second option is to only check fees lazily, which will produce the scenario where a client could submit a transaction, and have it appear to "time out" later, because it was accepted into the queue at a low fee, then later judged to have an insufficient fee.
+
+The "restart for each change" system will have similar properties for users---when a node is restarted, any pending transactions it has are lost---but is dramatically simpler to implement, and does not require special thought about validity periods of a particular transactions' fee-paid status.
+
+The primary rationale, then, is that this is "good enough" for right now, and we will follow this up with a "dynamic fees v2" that settles all questions properly under easier time constraints.
 
 # Prior art
 [prior-art]: #prior-art
 
-Discuss prior art, both the good and the bad, in relation to this proposal.
-A few examples of what this can include are:
-
-- For consensus and fog proposals: Does this feature exist in other systems, and what experience have their community had?
-- For community proposals: Is this done by some other community and what were their experiences with it?
-- For other teams: What lessons can we learn from what other communities have done here?
-- Papers: Are there any published papers or great posts that discuss this? If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
-
-This section is intended to encourage you as an author to think about the lessons from other systems, provide readers of your RFC with a fuller picture.
-If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other systems.
-
-Note that while precedent set by other systems is some motivation, it does not on its own motivate an RFC.
-Please also take into consideration that MobileCoin sometimes intentionally diverges from common cryptocurrency features.
+Unfortunately, due to the limited scope of this PR, prior art is going to be difficult to discuss. There is obviously a much larger conversation to be had about Etherium gas, Bitcoin transaction fees, etc., and how MobileCoin fees differ from them, but that honestly belongs in a future RFC. This is about doing the minimum viable to get us to a baseline fees, without compromising our ability to respond to denial of service attacks.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-- What parts of the design do you expect to resolve through the RFC process before this gets merged?
-- What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-- What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+- There are no unresolved questions which should be resolved by this RFC.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-Think about what the natural extension and evolution of your proposal would
-be and how it would affect the project as a whole in a holistic way. Try to
-use this section as a tool to more fully consider all possible interactions
-with aspects of the project in your proposal. Also consider how this all
-fits into the roadmap for the project and of the relevant team.
-
-This is also a good place to "dump ideas", if they are out of scope for the
-RFC you are writing but otherwise related.
-
-If you have tried and cannot think of any future possibilities,
-you may simply state that you cannot think of anything.
-
-Note that having something written down in the future-possibilities section
-is not a reason to accept the current or a future RFC; such notes should be
-in the section on motivation or rationale in this or subsequent RFCs.
-The section merely provides additional information.
-
+One desirable end-state is a world where all transactions are algorithmicly sorted in some fair manner, and the minimum fee is set to something truly deminimus. The consensus nodes could aggregate and publish the minimum fee necessary to get a transaction onto the blockchain, queue depth, etc. This information which can feed back into users who wish to propose transactions.
