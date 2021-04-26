@@ -90,4 +90,4 @@ Unfortunately, due to the limited scope of this PR, prior art is going to be dif
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-One desirable end-state is a world where all transactions are algorithmicly sorted in some fair manner, and the minimum fee is set to something truly deminimus. The consensus nodes could aggregate and publish the minimum fee necessary to get a transaction onto the blockchain, queue depth, etc. This information which can feed back into users who wish to propose transactions.
+One desirable end-state is a world where all transactions are algorithmicly sorted in some fair manner, and the minimum fee is set to something truly deminimus. The consensus nodes could aggregate and publish the minimum fee necessary to get a transaction onto the blockchain, queue depth, etc. This information can feed back into users who wish to propose transactions.
