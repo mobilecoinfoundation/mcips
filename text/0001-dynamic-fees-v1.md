@@ -80,7 +80,7 @@ The primary rationale, then, is that this is "good enough" for right now, and we
 # Prior art
 [prior-art]: #prior-art
 
-Unfortunately, due to the limited scope of this PR, prior art is going to be difficult to discuss. There is obviously a much larger conversation to be had about Etherium gas, Bitcoin transaction fees, etc., and how MobileCoin fees differ from them, but that honestly belongs in a future RFC. This is about doing the minimum viable to get us to a baseline fees, without compromising our ability to respond to denial of service attacks.
+Unfortunately, due to the limited scope of this PR, prior art is going to be difficult to discuss. There is obviously a much larger conversation to be had about Etherium gas, Bitcoin transaction fees, etc., and how MobileCoin fees differ from them, but that honestly belongs in a future RFC. This is about doing the minimum viable to get us to a baseline fee-adjustment strategy, without compromising our ability to respond to denial of service attacks.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
