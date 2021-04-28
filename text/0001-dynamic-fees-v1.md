@@ -69,7 +69,7 @@ This is actually quite tricky to get right: obviously you want to immediately re
 
 In this scenario, a client submits a transaction, and it goes into a queue behind hundreds of other transactions. The fee is "correct" for the current block, but the transaction will not actually be entertained for acceptance until after the fee has been raised, and the fee is no longer valid.
 
-Chosing to simply accept that if any node has accepted a proposed transaction at a lower fee, that fee is (or would have been) valid for all nodes is an option, but this does make the ability to enforce fees dependent on the union of all SGX functionality, which is a change from our ad-hoc norms around the use of SGX as a privacy-enhancement technology, rather than a security-critical technology.
+Choosing to simply accept that if any node has accepted a proposed transaction at a lower fee, that fee is (or would have been) valid for all nodes is an option, but this does make the ability to enforce fees dependent on the union of all SGX functionality, which is a change from our ad-hoc norms around the use of SGX as a privacy-enhancement technology, rather than a security-critical technology.
 
 The second option is to only check fees lazily, which will produce the scenario where a client could submit a transaction, and have it appear to "time out" later, because it was accepted into the queue at a low fee, then later judged to have an insufficient fee.
 
