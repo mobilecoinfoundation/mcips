@@ -26,7 +26,7 @@ In our current environment, it takes at least a month to change the fee, and the
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-When a node operator starts the consensus service, it may optionally provide a configuration option or command-line argument overriding fee. The fee will be appended (as a string) to the existing to the key exchange "prologue" (a series of bytes that both sides agree upon in advance) when performing node-to-node attestation.
+When a node operator starts the consensus service, it may optionally provide a configuration option or command-line argument overriding fee. The fee will be appended (as a string) to the existing key exchange "prologue" (a series of bytes that both sides agree upon in advance) when performing node-to-node attestation.
 
 If two nodes with different fees attempt to communicate, the result will be an `AeadError` during the handshake phase.
 
