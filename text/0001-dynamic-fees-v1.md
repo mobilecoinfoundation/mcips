@@ -15,7 +15,7 @@ MobileCoin launched with a hard-coded minimum fee of 0.01 MOB. When this constan
 
 This fee is too high to reasonably support the cannonical use-case---purchasing a cup of coffee---and we would like to lower the fee to $0.04 to bring it back in line with that use-case.
 
-However, this creates up a different problem. If the consensus system is roughly capable of completing 50tps (transactions per second), then the cost of conducting a denial of service attack is directly related to the size of the fees. At 0.50 USD/tx, consuming the entire consensus power of the network would cost over 2 MUSD/day.
+However, this creates a different problem. If the consensus system is roughly capable of completing 50tps (transactions per second), then the cost of conducting a denial of service attack is directly related to the size of the fees. At 0.50 USD/tx, consuming the entire consensus power of the network would cost over 2 MUSD/day.
 
 At the desired 0.04 USD/tx, however, the cost of conducing a denial of service attack would be less than 175 kUSD/day. This may seem like a lot of money, but recall that at peak trading on FTX, 80 MMOB or 4 GUSD changed hands, which gives some sense of scale to those costs (i.e. they are too low).
 
