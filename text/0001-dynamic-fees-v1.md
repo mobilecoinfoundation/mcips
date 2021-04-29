@@ -35,7 +35,7 @@ The currently-configured fee should be made available to consensus clients direc
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The `consensus_service` application will be extended to add a new `--minimum-fee` command-line argument and `MC_MINIMUM_FEE` environment variable. These values will be merged (environment-variable, then command-line option). This value will contain a string indicating the quantity and SI-scale of the minimum fee. Fees with out units will be considered to be denominated in picoMOB. Therefore, all these values are equivilent fees:
+The `consensus_service` application will be extended to add a new `--minimum-fee` command-line argument and `MC_MINIMUM_FEE` environment variable. These values will be filled in order of precedence by the command-line option, environment variable, and hard-coded minimum. Failure to parse the value being used will result in an error, and will not "fall through" to the next source. The value will contain a string indicating the quantity and SI-scale of the minimum fee. Fees with out units will be considered to be denominated in picoMOB. Therefore, all these values are equivilent fees:
 
 - 10mMOB
 - 10000uMOB
@@ -54,7 +54,9 @@ Because of this, two nodes with different fees will produce different encryption
 # Drawbacks
 [drawbacks]: #drawbacks
 
-The primary drawback to this approach is that it requires a restart of a quorum of the network in order to adjust to a new fee. In the intended common-case (low fees generally, higher fees in response to an active denial-of-service), this will entail restarting the network twice, and when a node is restarted, any pending transactions which did not make it into the current SCP slot will be discarded.
+The primary drawback to this approach is that it requires a restart of a quorum of the network in order to adjust to a new fee. In the intended common-case (low fees generally, higher fees in response to an active denial-of-service), this will entail restarting the network twice, and when a node is restarted, any pending transactions which did not make it into the current SCP slot will be discarded. That said, if node operators follow the existing enclave upgrade procedures (using firewalls to prevent new inbound transactions, allowing the network to reach a quiescent state with no pending values, then restarting), no pending transactions will be lost.
+
+Another drawback is the increased debugging difficulty in the event of a failed attestation. In the current system, a mismatched `ResponderId` (prologue) is the most likely source of an `AeadError` during authentication (the other cause would be an active MiTM attack replacing a public key). In the proposed system, because a configured fee is appended to the `ResponderId` to produce the prologue, a mismatch of either value would cause the `AeadError`, and thus both must be checked.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
@@ -73,7 +75,7 @@ Choosing to simply accept that if any node has accepted a proposed transaction a
 
 The second option is to only check fees lazily, which will produce the scenario where a client could submit a transaction, and have it appear to "time out" later, because it was accepted into the queue at a low fee, then later judged to have an insufficient fee.
 
-The "restart for each change" system will have similar properties for users---when a node is restarted, any pending transactions it has are lost---but is dramatically simpler to implement, and does not require special thought about validity periods of a particular transactions' fee-paid status.
+The "restart for each change" system will have similar properties for users as an emergency restart to introduce new fees---when a node is restarted without following the upgrade procedure, any pending transactions it has are lost---but is dramatically simpler to implement, and does not require special thought about validity periods of a particular transactions' fee-paid status.
 
 The primary rationale, then, is that this is "good enough" for right now, and we will follow this up with a "dynamic fees v2" that settles all questions properly under easier time constraints.
 
