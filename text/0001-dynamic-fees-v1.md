@@ -61,7 +61,11 @@ Another drawback is the increased debugging difficulty in the event of a failed 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
+## Alt: Just Lower The Fee
+
 The first alternative considered was simply lowering the fees to 400uMOB, or 0.02USD @ 50USD/MOB. As noted above, while this accomplishes the initial goal of lowering the fees, it does not provide the ability to raise them without another enclave upgrade, which is costly, time-consuming, and will take upwards of 120 days to complete.
+
+## Alt: Fee Schedule
 
 The next alternative was using a "fee schedule", or "fee calendar"---that is, rather than having a single fee which is constructed at startup time, use a configuration file which provides a series of "fee ranges" `(fee, startBlock, endBlock)` that are hashed into the key exchange.
 
@@ -76,6 +80,14 @@ Choosing to simply accept that if any node has accepted a proposed transaction a
 The second option is to only check fees lazily, which will produce the scenario where a client could submit a transaction, and have it appear to "time out" later, because it was accepted into the queue at a low fee, then later judged to have an insufficient fee.
 
 The "restart for each change" system will have similar properties for users as an emergency restart to introduce new fees---when a node is restarted without following the upgrade procedure, any pending transactions it has are lost---but is dramatically simpler to implement, and does not require special thought about validity periods of a particular transactions' fee-paid status.
+
+## Alt: Allow Divergent Fees
+
+The last alternative scheme is to remove agreement on minimum fee amounts outside of consensus altogether. In this version, each node can configure it's own minimum fee, and use it when verifying a transaction submitted by clients, but simply ignore the fee when treating transactions received by peers. This deviates in spirit, though not form, from the earlier "accept a node enforced its fees before proposing to the wider network" above, in that it removes consideration of fees entirely from the consensus.
+
+In other words, if you decide the fee amount is not a criteria for a valid transaction, then the question of trusting SGX to enforce the fee is no longer a coherent objection. The nature of the alternative warrants deeper consideration and wider discussion, but that discussion would delay the immediate reduction of fees, which is believed to be a higher priority.
+
+## Rationale
 
 The primary rationale, then, is that this is "good enough" for right now, and we will follow this up with a "dynamic fees v2" that settles all questions properly under easier time constraints.
 
