@@ -189,6 +189,24 @@ The 44-byte memo data is laid out as follows:
 
 The HMAC is computed in the same way as for 0x0100 Authenticated Sender Memo.
 
+Clients may interpret this memo in the same way as the 0x0100 Authenticated Sender Memo,
+and additionally conclude that the sender wished to associate this payment to a specific
+payment request.
+
+There is an additional way that the client can handle this memo which we wish to call out:
+
+In some payment flows, Bob would like to request payment from Alice, but Bob does not
+yet have Alice's public address. We propose that as long as Bob chooses a (secure) uniformly random
+64-bit payment request id and includes this in the payment request that he sends to Alice,
+Bob's client may conclude that a payment came from Alice based on matching the value in
+the payment request id field, even if he does not check the HMAC (he cannot do that
+if he doesn't yet have Alice's public address). Later, if Bob's device is lost, he may
+lose track of these payment request id numbers, but can still associate this payment to Alice
+by validating the memo along the normal pathway if at that later time she has entered his contacts.
+
+In such a case, it is acceptable to interpret the memo and access the payment request id
+number, even if we haven't validated the memo by confirming the HMAC.
+
 ## 0x0200 Destination Memo
 
 The 44-byte memo data is laid out as follows:
@@ -210,7 +228,8 @@ The destination memo imposes some limits:
   The client should choose one of them.
 * It is assumed that the fee, when represented as a 64-bit number in big endian bytes, has
   a high order byte which is 0. If the fee is larger than this, it implies that on the order
-  of 1% of the total supply of MOB are being spent in the fee, but it is technically possible.
+  of 1% of the total supply of MOB are being spent in the fee. This is considered implausible,
+  but technically possible.
   In this case, the Destination memo cannot be used.
 * It is assumed that the total outlay, when represented as a 64-bit number, does not overflow.
   It is technically possible for this value to overflow. In that case, the Destination memo cannot
