@@ -171,6 +171,16 @@ If in the future we desired to pivot to a strategy like this, one approach would
 implicitly an enum. This would compress the memo type bytes into the protobuf tag when the TxOut is encoded. So, this proposal does not rule that out as a future direction.
 However, lacking any compelling reason to choose this alternative, we prefer to encrypt the memo type bytes.
 
+A second drawback of this approach is even if we did this and we used an AEAD to encrypt, in several intended use-cases we still would need to have an extra MAC value.
+For example: In one desired memo type, the sender sends a hash of their public address, and then a MAC value over a key which depends on their identity.
+The recipient needs to look up the public address based on the hash, and then they can derive the key that is appropriate for the MAC and confirm that their identity
+is tied to this memo.
+
+Clearly, the address hash needs to be encrypted somehow, to meet the privacy goal. And the key for that cannot depend on the sender's identity, because the recipient
+doesn't know that before they decrypt the memo.
+If that encryption is an AEAD mode, then we have one MAC for that implicitly. But then we still need an additional MAC that depends on a key that is tied to the sender to meet the
+authenticity goal of the memo. So, any version of this that uses an AEAD results in a redundant MAC and doesn't fit in 46 bytes.
+
 ## Rationale
 
 This is likely the simplest proposal that supports the memo types that we are most interested in, and reserves as much space as possible for future uses that we didn't anticipate, before starting to impact the performance of Fog / the cost of running Fog.
