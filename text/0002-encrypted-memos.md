@@ -133,6 +133,60 @@ However, the memos are completely optional, and those users can use clients conf
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
+## Alt: Use a longer memo size
+
+The justification for 46 bytes comes from an analysis of the impact that increasing this size has on the fog-view service.
+
+The fog-view enclave uses an Oblivious Map to privately map from fog-search-keys (16 byte outputs from a KexRng) to ETxOutRecords.
+
+This is implemented as a special form of Cuckoo hash table using buckets, where each bucket is a value served by an underlying Oblivious RAM.
+
+After Circuit ORAM is implemented, we believe the optimal value size will be 2048. So that will be the bucket size in the hash map.
+
+The hashmap divides each bucket into as many `KeySize + ValueSize` pairs it can, which are consecutive ranges of bytes with no padding at all.
+These sizes are fixed at compile-time for the enclave.
+
+(See in code: https://github.com/mobilecoinofficial/mc-oblivious/blob/2b620343e27f652d5efeda5af248901436f06832/mc-oblivious-map/src/lib.rs#L187)
+
+However, the `ETxOutStore` `in fog-view-enclave-impl` is meant to allow that some `ETxOutRecord`'s could be shorter than others. This would happen if we made a ledger format
+change and added a field, then the older `ETxOutRecord`'s are shorter. To achieve this, the value that it stores in the Oblivious Map is encoded, so that the first byte to say how many bytes
+less than the maximum the payload is, and rest of the bytes are the bytes of the `ETxOutRecord`.
+
+(See in code: https://github.com/mobilecoinfoundation/fog/blob/817d151c1035aaa32458dd281fd10cbd33848ca5/fog/view/enclave/impl/src/e_tx_out_store.rs#L108)
+
+The upshot is that the number items that we can fit into a bucket will be `2048 / (16 + 1 + sizeof(ETxOutRecord))` rounded down to the nearest integer.
+
+With 46 byte memos, we measure that the size of an ETxOutRecord is 207 bytes:
+
+(See in code: https://github.com/mobilecoinfoundation/fog/pull/122/files#r688751880)
+
+This chart illustrates the breakpoints and what the points of maximum memory utilization are:
+
+| size of `ETxOutRecord` | `2048 / (16 + 1 + sizeof(ETxOutRecord)` |
+| ---------------------- | --------------------------------------- |
+| 187                    | 10.0392156863 |
+| 188                    | 9.99024390244 |
+| 207                    | 9.14285714286 |
+| 210                    | 9.02202643172 |
+| 211                    | 8.98245614035 |
+| 239                    | 8.0           |
+
+Before this revision, the size of `ETxOutRecord` is 159 bytes (and this does not include protobuf
+overhead for representing the `e_memo` field.)
+
+With 26 byte memos, we would have the size of `ETxOutRecord` at 187 and hit the 10 threshold.
+But 26 bytes is extremely limiting and we would not be able to use cryptographic primitives
+with 128-bit security in applications if we had this much space.
+
+An `ETxOutRecord` size of 207 is actually 3 bytes below the threshold for 9. So, we are leaving 3 bytes
+on the table. It seems okay to leave a small fudge factor in case there is something we overlooked
+in the enclave code or some other need that arises.
+
+OTOH, we could also justify increasing the `e_memo`
+size to 48 bytes, so that there are 2 more bytes for future use in the memo. (It seems likely that we made
+a slight error in calculating how much smaller the `ETxOutRecord` would get due to the optimization that omits
+the compressed commitment.)
+
 ## Alt: Just use protobuf
 
 Typically, it is better from an engineering point of view to use an existing serialization format rather than create a new format for data.
