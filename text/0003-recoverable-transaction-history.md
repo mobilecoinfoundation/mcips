@@ -249,10 +249,10 @@ party (at a time determined by the timestamp associated to the change output).
 
 Besides category 0x00 (Unvalidated) which contains only the Unused memo at time of writing, we now have:
 
-* Category 0x01 (HMAC), which consists of memos for which the last 16 bytes are an HMAC-SHA512
-computed in the specific way outlined before
-* Cateogry 0x02 (Change), which consists of memos which are only valid when the transaction output
-matches to the Change subaddress.
+| Memo category byte | Name        | Validation |
+| -----------        | ----------- | ---------- |
+| 0x01               | HMAC        | Last 16 bytes of memo data are HMAC-SHA512 computed as documented earlier |
+| 0x02               | Change      | Output must match to the change subaddress for this memo to be valid |
 
 # Drawbacks
 [drawbacks]: #drawbacks
