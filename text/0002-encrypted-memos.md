@@ -52,7 +52,7 @@ The plaintext bytes have the following interpretation:
 
 When the memo type bytes are both zero, this indicates an "Unused" memo, regardless of the contents of the memo data bytes.
 
-Additional memo types / schemas can be specified by MCIPs, and their assigned memo type bytes SHALL unique, so that all clients conforming to the MCIPs
+Additional memo types / schemas can be specified by MCIPs, and their assigned memo type bytes SHALL be unique, so that all clients conforming to the MCIPs
 may unambiguously interpret the contents of memos. This promotes interoperability among clients.
 
 Memo category 0x00 consists of unvalidated memos.
