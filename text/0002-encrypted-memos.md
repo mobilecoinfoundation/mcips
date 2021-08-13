@@ -73,7 +73,7 @@ memo_okm =
 	hkdf-sha512("mc-memo-okm",  tx_out_shared_secret_bytes).expand("", 48)
 ```
 
-Here okm means "output key material", see RFC5869 HKDF. (Specifically: The input key material to hkdf is the canonical bytes of the tx_out_shared_secret. The salt is the string “mc-memo-okm”. The info-string is empty, when expanding to a 48 byte secret with hkdf.)
+Here okm means "output key material", see RFC5869 HKDF. (Specifically: The input key material to hkdf is the canonical bytes of the `tx_out_shared_secret`. The salt is the string “mc-memo-okm”. The info-string is empty, when expanding to a 48 byte secret with hkdf.) (SHA512 refers here to the 512-bit variant of SHA-2 hashing standard.)
 
 The first 32 bytes are interpreted as an AES key, and remaining 16 bytes as an AES nonce.
 
@@ -140,6 +140,8 @@ For example we could have a protobuf enum over the possible memo types.
 
 The main justification to avoid protobuf is that we want to make as effective use as possible of the space of the memo, and using an off-the-shelf approach like protobuf would create overheads that would prevent us from storing all the data that we want to in 46 bytes.
 
+Nothing stops a memo type from being introduced that uses protobuf to encode its memo data.
+
 ## Alt: Use AES-GCM
 
 Typically, it is better to use an AEAD than to use a stream cipher like AES in counter mode. For example, we could have selected AES-GCM, and then we have
@@ -154,6 +156,9 @@ For this reason, we leave the selection of a MAC and what is being MAC'ed to the
 
 One concern when we MAC and then encrypt, rather than encrypting and then applying a MAC, is that some form of the Vaudenay attack may occur. However, because
 these memos are fixed length, and an incorrect length is an immediate deserialization error, this turns out to be a non-issue.
+
+Additionally, the key used to encrypt here is derived in a one-off manner from the transaction output's shared secret, and is not used for anything else, so
+that aspect of the attack scenario also doesn't apply.
 
 ## Alt: Memo type bytes are not encrypted
 
