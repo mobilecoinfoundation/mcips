@@ -1,6 +1,6 @@
 - Feature Name: Encrypted Memos
 - Start Date: (2021-06-18)
-- RFC PR: [mobilecoinfoundation/rfcs#3](https://github.com/mobilecoinfoundation/rfcs/pull/3)
+- RFC PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
 - MobileCoin Epic: None
 
 # Summary
@@ -84,10 +84,11 @@ memo_aes_nonce = memo_okm[32..48]
 
 A 46-byte `memo_payload` consists of:
 
-```
-Bytes [0 .. 2]: memo_type
-Bytes [2 .. 46]: memo_data
-```
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 2      | `memo_type` |
+| 2 - 46     | `memo_data` |
 
 The memo payload data can only be interpreted given the memo payload type.
 
@@ -238,7 +239,8 @@ is tied to this memo.
 Clearly, the address hash needs to be encrypted somehow, to meet the privacy goal. And the key for that cannot depend on the sender's identity, because the recipient
 doesn't know that before they decrypt the memo.
 If that encryption is an AEAD mode, then we have one MAC for that implicitly. But then we still need an additional MAC that depends on a key that is tied to the sender to meet the
-authenticity goal of the memo. So, any version of this that uses an AEAD results in a redundant MAC and doesn't fit in 46 bytes.
+authenticity goal of the memo. So, the use-case really needs that encryption is happening with a different key than authentication.
+Any version of this that uses an AEAD results in a redundant MAC and doesn't fit in 46 bytes if we use primitives secure at a 128 bit security level.
 
 ## Rationale
 
@@ -247,7 +249,14 @@ This is likely the simplest proposal that supports the memo types that we are mo
 # Prior art
 [prior-art]: #prior-art
 
-We are not aware of useful prior art on this, or of any other blockchains that have created standardized encrypted memos.
+ZCash on their 512-byte encrypted memo: https://electriccoin.co/blog/encrypted-memo-field/
+
+Memo types in Stellar, with space for 28 bytes of text, or a 32 byte hash: https://developers.stellar.org/docs/glossary/transactions/#memo
+
+Bitcoin and Ethereum do not have memos.
+
+Monero discussion on removing "tx_extra": https://github.com/monero-project/monero/issues/6668
+which is unstructured data attached to transactions, not of a fixed size or encrypted in a standard way.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
