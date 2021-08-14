@@ -66,7 +66,7 @@ payment flows.
 In the typical scenario, when a sender sends money to a recipient, there is one transaction output
 that is created for the recipient, and a *change output* that the sender sends back to themselves.
 The value of the change output is whatever is needed to balance the transaction, so that sum of the
-value of the inputs equals the sum of the value of the outputs.
+value of the inputs equals the sum of the value of the outputs and fees.
 
 To implement recoverable transaction history, we can store some information in the "normal" output memo,
 which is read by the recipient, and some information in the change output memo, which is read by the sender.
@@ -78,7 +78,7 @@ amount that was sent to the recipient, and the fee.
 ## Sender memo
 
 The sender memo, with type bytes `0x0100`, includes a hash of the sender's public address,
-and an HMAC value. This is used to inform the sender of who the recipient is in a verifiable way.
+and an HMAC value. This is used to inform the recipient of who the sender is in a verifiable way.
 
 The key to this HMAC is the result of a key exchange between the sender's
 spend key, and the recipient's view key. It can be constructed (and verified) by either the sender, OR the
@@ -92,7 +92,8 @@ property.
 Note that the sender can use any address to identify themself, so long as they know the private spend key of that address.
 
 The sender memo with payment request id, with type bytes `0x0101`, is the same as `0x0100` except that the schema includes a
-payment request id in the payload under the HMAC.
+payment request id in the payload under the HMAC. (The payment request id is a 64-bit number which identifies a payment request.
+This proposal does not specify how payment requests work, but is compatible with many realistic proposals for that.)
 
 To prevent a malicious party from confusing the recipient, a client should not associate a payment to a sender automatically
 unless the HMAC check passes.
