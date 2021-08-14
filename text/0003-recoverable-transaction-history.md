@@ -112,7 +112,7 @@ that went to the change subaddress.
 
 ## Change subaddress
 
-The "change subaddress" is a new standard subaddress, like the default subaddress. It should be used when sending change ouptuts.
+The "change subaddress" is a new standard subaddress, like the default subaddress. It should be used when sending change outputs.
 It is specified to be subaddress index 1.
 
 The change subaddress should be kept secret, so that only authentic 0x0200 Destination memos will pass validation.
