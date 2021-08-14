@@ -258,7 +258,7 @@ Bitcoin and Ethereum do not have memos.
 Monero discussion on removing "tx_extra": https://github.com/monero-project/monero/issues/6668
 which is unstructured data attached to transactions, not of a fixed size or encrypted in a standard way.
 
-The author would like to think Koe for their work on a draft version of this proposal,
+The author would like to thank Koe for their work on a draft version of this proposal,
 and for many contributions that helped shape the proposal.
 
 # Unresolved questions
