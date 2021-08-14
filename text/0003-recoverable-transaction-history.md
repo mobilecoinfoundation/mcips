@@ -322,7 +322,13 @@ and will provide us with more tools to craft an excellent user experience on mob
 # Prior art
 [prior-art]: #prior-art
 
-We are not aware of useful prior art on this, or of any other privacy coins that have used standardized the use of memos in this way.
+Memo types in Stellar: https://developers.stellar.org/docs/glossary/transactions/#memo
+
+Payment ids in Monero: https://www.getmonero.org/resources/moneropedia/paymentid.html
+
+Signal on Deniability: https://signal.org/blog/simplifying-otr-deniability/
+
+We are not aware of privacy coins that have standardized the use of memos for transaction history in this manner.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
