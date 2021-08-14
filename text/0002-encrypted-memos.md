@@ -20,7 +20,7 @@ seamlessly.
 
 Memo fields, which are uninterpretted by consensus and pass-through to the blockchain, offer a way of attaching metadata permanently to transaction outputs. There are many use-cases for payments that are simplified by the ability to do this, and many blockchains support memos.
 
-In some blockchains, memos are simply human readable text displayed directly to the user.
+In some blockchains, memos are simply human-readable text displayed directly to the user.
 However, one major consideration is how memos affect the privacy of transactions.
 In order to ensure output uniformity, it is desirable to have these memos encrypted, such
 that only the sender and recipient can read them.
@@ -31,10 +31,10 @@ that helps a user figure out who a payment is from or what it is for.
 
 In order to make the memo feature maximally useful, we would like:
 
-(1) A standard encryption scheme for memos, so that all encrypted memos are decrypted in the same way regardless of schema.
-(2) A standard way of determining the schema, so that clients can interoperate seamlessly.
-(3) The memos are passed through both Consensus and Fog uninterpreted and unchanged. Only Alice and Bob can read the memo.
-(4) The memos do not substantially impact the performance of MobileCoin Consensus or Fog.
+1. A standard encryption scheme for memos, so that all encrypted memos are decrypted in the same way regardless of schema.
+2. A standard way of determining the schema, so that clients can interoperate seamlessly.
+3. The memos are passed through both Consensus and Fog uninterpreted and unchanged. Only Alice and Bob can read the memo.
+4. The memos do not substantially impact the performance of MobileCoin Consensus or Fog.
 
 We determined that 46 bytes was the largest we could make the memo before it will start to negatively impact Fog,
 and that this was also more than adequate for use-cases that were considered most interesting.
@@ -48,14 +48,14 @@ The `e_memo` data is encrypted using AES, with a key specific to the TxOut. Only
 
 The plaintext bytes have the following interpretation:
 - First 2 bytes indicate "memo type".
-- Remaining bytes indicate the "memo data". These can only be interepretted in the context of the memo type, and their semantics and interpretation SHOULD be specified in an MCIP.
+- Remaining bytes indicate the "memo data". These can only be interepretted in the context of the memo type, and their semantics and interpretation should be specified in an MCIP.
 
 When the memo type bytes are both zero, this indicates an "Unused" memo, regardless of the contents of the memo data bytes.
 
-Additional memo types / schemas can be specified by MCIPs, and their assigned memo type bytes SHALL be unique, so that all clients conforming to the MCIPs
+Additional memo types / schemas can be specified by MCIPs, and their assigned memo type bytes shall be unique, so that all clients conforming to the MCIPs
 may unambiguously interpret the contents of memos. This promotes interoperability among clients.
 
-Memo category 0x00 consists of unvalidated memos.
+Memo category 0x00 consists of unvalidated memos. (Memos with no defined validation mechanism.)
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -82,11 +82,11 @@ memo_aes_key = memo_okm[0..32]
 memo_aes_nonce = memo_okm[32..48]
 ```
 
-A 46-byte memo-payload consists of:
+A 46-byte `memo_payload` consists of:
 
 ```
-Bytes [0-2]: "memo_payload_type"
-Bytes [2-46]: "memo_payload_data"
+Bytes [0 .. 2]: memo_type
+Bytes [2 .. 46]: memo_data
 ```
 
 The memo payload data can only be interpreted given the memo payload type.
@@ -94,24 +94,24 @@ The memo payload data can only be interpreted given the memo payload type.
 A 46-byte encrypted-memo is computed by AES-256 in counter mode:
 
 ```
-encrypted_memo = AES256Ctr(memo_payload, memo_aes_key, memo_aes_nonce)
+e_memo = AES256Ctr(memo_payload, memo_aes_key, memo_aes_nonce)
 ```
 
 Because only the sender and recipient can know the TxOut shared secret, only the sender and recipient can decrypt the memo.
 
-The first byte of the "memo_payload_type" indicates a "memo type category", and the second byte indicates a type within the category.
+The first byte of the `memo_type` indicates a "memo type category", and the second byte indicates a type within the category.
 
-Each memo type may specify additional steps for the recipient to validate the memo data as necessary.
+Each memo type may specify additional steps for the recipient to validate the `memo_data` as necessary.
 
 Memo type categories should typically consist of memos with the same or similar validation, which may also be extensions of one another.
 This is meant to help promote reuse of the memo validation code in implementations.
 
-Additional memo categories and types can be specified by MCIPs, and their assigned memo type bytes SHALL unique, so that all clients conforming to the MCIPs
+Additional memo categories and types can be specified by MCIPs, and their assigned memo type bytes shall be unique, so that all clients conforming to the MCIPs
 may unambiguously interpret the contents of memos. This promotes interoperability among clients.
 
-Memo category 0x00 consists of unvalidated memos.
+Memo category 0x00 consists of unvalidated memos. (Memos with no defined validation mechanism.)
 
-Memo type 0x0000 indicates the Unused memo. It's memo data shall not be interpretted by the client.
+Memo type 0x0000 indicates the Unused memo. Its memo data shall not be interpretted by the client.
 
 # Drawbacks
 [drawbacks]: #drawbacks
@@ -141,7 +141,7 @@ The fog-view enclave uses an Oblivious Map to privately map from fog-search-keys
 
 This is implemented as a special form of Cuckoo hash table using buckets, where each bucket is a value served by an underlying Oblivious RAM.
 
-After Circuit ORAM is implemented, we believe the optimal value size will be 2048. So that will be the bucket size in the hash map.
+After Circuit ORAM is implemented (scheduled for this quarter), we believe the optimal value size will be 2048. So that will be the bucket size in the hash map.
 
 The hashmap divides each bucket into as many `KeySize + ValueSize` pairs it can, which are consecutive ranges of bytes with no padding at all.
 These sizes are fixed at compile-time for the enclave.
@@ -156,7 +156,12 @@ less than the maximum the payload is, and rest of the bytes are the bytes of the
 
 The upshot is that the number items that we can fit into a bucket will be `2048 / (16 + 1 + sizeof(ETxOutRecord))` rounded down to the nearest integer.
 
-With 46 byte memos, we measure that the size of an ETxOutRecord is 207 bytes:
+When this number gets smaller, it impacts memory utilization both because we can't fit as many items in a bucket, but also because, when the buckets can
+hold fewer items, the Cuckoo hashing algorithm requires more cuckoo steps to achieve the same memory utilization as before, which means we either accept
+more steps and more Oblivious RAM operations to support a single query, or we accept a further reduction in memory utilization. It is difficult to accurately
+predict the magnitude of this effect using a pencil and paper, and in practice we measure it empirically.
+
+With 46 byte memos, we measure that the size of an `ETxOutRecord` is 207 bytes:
 
 (See in code: https://github.com/mobilecoinfoundation/fog/pull/122/files#r688751880)
 
@@ -175,8 +180,8 @@ Before this revision, the size of `ETxOutRecord` is 159 bytes (and this does not
 overhead for representing the `e_memo` field.)
 
 With 26 byte memos, we would have the size of `ETxOutRecord` at 187 and hit the 10 threshold.
-But 26 bytes is extremely limiting and we would not be able to use cryptographic primitives
-with 128-bit security in applications if we had this much space.
+But with this size, we would not be able to use multiple cryptographic primitives
+with 128-bit security in a single memo, which is what we would like to be able to do in applications.
 
 An `ETxOutRecord` size of 207 is actually 3 bytes below the threshold for 9. So, we are leaving 3 bytes
 on the table. It seems okay to leave a small fudge factor in case there is something we overlooked
