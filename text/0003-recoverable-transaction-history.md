@@ -77,7 +77,7 @@ amount that was sent to the recipient, and the fee.
 
 ## Sender memo
 
-The sender memo, with type bytes `0x0100`, includes a hash of the sender's address,
+The sender memo, with type bytes `0x0100`, includes a hash of the sender's public address,
 and an HMAC value. This is used to inform the sender of who the recipient is in a verifiable way.
 
 The key to this HMAC is the result of a key exchange between the sender's
