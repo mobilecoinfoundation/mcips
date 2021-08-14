@@ -157,8 +157,8 @@ The 44-byte memo data is laid out as follows:
 | 28 - 44    | HMAC                  |
 
 The HMAC is computed using HMAC-SHA512. 
-(HMAC refers to RFC 2104 HMAC.)
-(SHA512 refers to the 512 bit variant of SHA-2.)
+(HMAC refers to [RFC 2104 HMAC](https://datatracker.ietf.org/doc/html/rfc2104).)
+(SHA512 refers to the 512 bit variant of [SHA-2](https://en.wikipedia.org/wiki/SHA-2).)
 
 The key to this HMAC is the 32-byte shared secret computed from Ristretto key exchange
 using the Sender's spend key, and the Recipient's view key. (For the sender, we multiply
@@ -176,6 +176,8 @@ The text to this HMAC is the concatenation of:
 The HMAC output is truncated to 16 bytes.
 
 This HMAC text is computed in the same way for all category 0x01 memos.
+
+(See in code: https://github.com/mobilecoinfoundation/mobilecoin/pull/814/files#diff-681e5a738ac3ba20d8bcb29bcd66424b189075a4a2c1a27b9429b9da78aa7946R14)
 
 Clients should interpret this memo as indicating who sent them this payment,
 once it has been validated. If the address hash is unknown, or the validation fails,
@@ -221,7 +223,7 @@ The 44-byte memo data is laid out as follows:
 | 0 - 16     | Recipient's Address Hash |
 | 16 - 17    | The number of recipients, as an unsigned 8-bit number |
 | 17 - 24    | Big-endian bytes of fee amount, as an unsinged 56-bit number |
-| 24 - 28    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
+| 24 - 32    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
 | 32 - 44    | Unused bytes                  |
 
 Here, the "total outlay" means the total amount that this transaction is deducting
@@ -248,6 +250,8 @@ on a change output, which is sent to the (secret) change subaddress.
 Clients should only consider this memo valid if the transaction output that it is attached
 to matches the change subaddress. This prevents a malicious party from confusing the user
 using malicious destination memos.
+
+(See in code: https://github.com/mobilecoinfoundation/mobilecoin/pull/814/files#r686397798)
 
 Clients should interpret this memo as recording that they sent a certain amount to a certain
 party (at a time determined by the timestamp associated to the change output).
