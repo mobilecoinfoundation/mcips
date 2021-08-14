@@ -330,6 +330,12 @@ Signal on Deniability: https://signal.org/blog/simplifying-otr-deniability/
 
 We are not aware of privacy coins that have standardized the use of memos for transaction history in this manner.
 
+The author would like to thank Koe for their work on a draft version of this proposal,
+and for many contributions that helped shape the proposal.
+
+The author would like to thank Kyle Fleming for many contributions
+that helped shape the proposal.
+
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
