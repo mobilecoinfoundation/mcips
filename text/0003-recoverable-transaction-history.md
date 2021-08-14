@@ -1,6 +1,6 @@
 - Feature Name: Recoverable Transaction History
 - Start Date: (2021-06-18)
-- RFC PR: [mobilecoinfoundation/rfcs#4](https://github.com/mobilecoinfoundation/rfcs/pull/4)
+- RFC PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
 - MobileCoin Epic: None
 
 # Summary
@@ -8,7 +8,7 @@
 
 We propose to specify three memo types that support a "recoverable transaction history" feature.
 
-(See [mobilecoinfoundation/rfcs#3](https://github.com/mobilecoinfoundation/rfcs/pull/3) for a
+(See [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3) for a
 description of memos and memo types.)
 
 When a sender sends money to a recipient, the "sender memo" is attached to the TxOut that the
@@ -150,9 +150,11 @@ Three new memo types are specified:
 
 The 44-byte memo data is laid out as follows:
 
-[0 -  16] Sender's Address Hash
-[16 - 28] Unused bytes
-[28 - 44] HMAC
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Sender's Address Hash |
+| 16 - 28    | Unused bytes          |
+| 28 - 44    | HMAC                  |
 
 The HMAC is computed using HMAC-SHA512. 
 (HMAC refers to RFC 2104 HMAC.)
@@ -165,7 +167,7 @@ by the view public key from the recipient's public address. For the recipient, w
 the view private key of the subaddress that recieved the payment by the spend key
 from the public address that the sender used to identify themselves.)
 
-The text to this HMAC is:
+The text to this HMAC is the concatenation of:
 - The domain separation string "mc-memo-mac"
 - The 32-byte public key of the transaction output to which this memo is attached
 - The memo type bytes
@@ -183,10 +185,12 @@ then they should not associate this payment with a sender.
 
 The 44-byte memo data is laid out as follows:
 
-[0 -  16] Sender's Address Hash
-[16 - 24] Big-endian bytes of 8-byte payment request id number
-[16 - 28] Unused bytes
-[28 - 44] HMAC
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Sender's Address Hash |
+| 16 - 24    | Big-endian bytes of 8-byte payment request id number |
+| 24 - 28    | Unused bytes          |
+| 28 - 44    | HMAC                  |
 
 The HMAC is computed in the same way as for 0x0100 Authenticated Sender Memo.
 
@@ -212,11 +216,13 @@ number, even if we haven't validated the memo by confirming the HMAC.
 
 The 44-byte memo data is laid out as follows:
 
-[0 -  16] Recipient's Address Hash
-[16] The number of recipients, as an unsigned 8-bit number
-[17 - 24] The big-endian bytes of the fee amount, as an unsigned 56-bit number.
-[24 - 32] The big-endian bytes of the total outlay amount, as an unsigned 64-bit number.
-[32 - 44] Unused
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Recipient's Address Hash |
+| 16 - 17    | The number of recipients, as an unsigned 8-bit number |
+| 17 - 24    | Big-endian bytes of fee amount, as an unsinged 56-bit number |
+| 24 - 28    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
+| 32 - 44    | Unused bytes                  |
 
 Here, the "total outlay" means the total amount that this transaction is deducting
 from the Sender's balance. It is the sum of the value of all non-change outputs,
