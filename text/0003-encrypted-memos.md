@@ -184,14 +184,20 @@ With 26 byte memos, we would have the size of `ETxOutRecord` at 187 and hit the 
 But with this size, we would not be able to use multiple cryptographic primitives
 with 128-bit security in a single memo, which is what we would like to be able to do in applications.
 
-An `ETxOutRecord` size of 207 is actually 3 bytes below the threshold for 9. So, we are leaving 3 bytes
-on the table. It seems okay to leave a small fudge factor in case there is something we overlooked
-in the enclave code or some other need that arises.
+In fact, a parallel change which is planned for release in 1.2 is reducing the size of an `ETxOutRecord`
+by about 28 bytes. (This is the change that omits the compressed commitment from the amount data in a `TxOut`
+that fog-view returns to the user, since the user can reproduce this anyway.) This means that the first 28 bytes of memo
+are not adding any burden to Fog relative to the status quo.
 
-OTOH, we could also justify increasing the `e_memo`
-size to 48 bytes, so that there are 2 more bytes for future use in the memo. (It seems likely that we made
-a slight error in calculating how much smaller the `ETxOutRecord` would get due to the optimization that omits
-the compressed commitment.)
+An `ETxOutRecord` size of 207 is actually 3 bytes below the threshold for 9. So, we are leaving 3 bytes
+on the table if we choose 46 byte memos.
+
+We could therefore justify increasing the `e_memo` by a few bytes, so that there are a few more bytes for future use in the memo.
+(It seems likely that we made a slight error when planning the change in calculating how much smaller the `ETxOutRecord` would get
+due to the optimization that omits the compressed commitment.)
+
+OTOH, it seems okay to leave a small fudge factor in case there is something we overlooked
+in the enclave code or some other need that arises.
 
 ## Alt: Just use protobuf
 
