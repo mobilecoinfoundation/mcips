@@ -271,7 +271,7 @@ Besides category 0x00 (Unvalidated) which contains only the Unused memo at time 
 One drawback of 16 byte address hashes is that an attacker can likely find a collision by hashing about 2^64 addresses,
 which is feasible within our threat model.
 
-However, to obtain an exploitable collision, this collision has to be with a random address and an address which
+However, to obtain an exploitable collision, this collision has to involve an address which
 belongs to a real person. This requires hashing about 2^128 addresses, which is similar in difficulty to brute-forcing
 our other cryptographic primitives.
 
