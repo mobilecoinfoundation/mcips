@@ -177,8 +177,6 @@ The HMAC output is truncated to 16 bytes.
 
 This HMAC text is computed in the same way for all category 0x01 memos.
 
-(See in code: https://github.com/mobilecoinfoundation/mobilecoin/pull/814/files#diff-681e5a738ac3ba20d8bcb29bcd66424b189075a4a2c1a27b9429b9da78aa7946R14)
-
 Clients should interpret this memo as indicating who sent them this payment,
 once it has been validated. If the address hash is unknown, or the validation fails,
 then they should not associate this payment with a sender.
@@ -248,10 +246,8 @@ The 0x0200 Destination Memo does not have a MAC. Instead, it is ONLY used by the
 on a change output, which is sent to the (secret) change subaddress.
 
 Clients should only consider this memo valid if the transaction output that it is attached
-to matches the change subaddress. This prevents a malicious party from confusing the user
+to matches the *change subaddress*. This prevents a malicious party from confusing the user
 using malicious destination memos.
-
-(See in code: https://github.com/mobilecoinfoundation/mobilecoin/pull/814/files#r686397798)
 
 Clients should interpret this memo as recording that they sent a certain amount to a certain
 party (at a time determined by the timestamp associated to the change output).
