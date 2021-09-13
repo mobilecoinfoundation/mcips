@@ -220,7 +220,7 @@ The 44-byte memo data is laid out as follows:
 | ---------- | ---- |
 | 0 - 16     | Recipient's Address Hash |
 | 16 - 17    | The number of recipients, as an unsigned 8-bit number |
-| 17 - 24    | Big-endian bytes of fee amount, as an unsinged 56-bit number |
+| 17 - 24    | Big-endian bytes of fee amount, as an unsigned 56-bit number |
 | 24 - 32    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
 | 32 - 44    | Unused bytes                  |
 
@@ -291,7 +291,7 @@ One drawback of the Authenticated Sender memo design is that it doesn't have a f
 this somewhat weaker HMAC-over-key-exchange mechanism. However, the HMAC mechanism results in a significantly shorter signature, and it
 achieves our deniability goal, which a full digital signature would not.
 
-One drawback of the Authenticated Sender With Payment Request Id memo design is that the pyament request id is limited to 8 bytes. However,
+One drawback of the Authenticated Sender With Payment Request Id memo design is that the payment request id is limited to 8 bytes. However,
 we believe that this will be adequate in practice.
 
 One drawback of the Destination Memo design is that it imposes numerous limits on the total outlay, fee, number of recipients, etc.
