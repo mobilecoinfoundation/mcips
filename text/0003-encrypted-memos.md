@@ -57,12 +57,22 @@ may unambiguously interpret the contents of memos. This promotes interoperabilit
 
 Memo category 0x00 consists of unvalidated memos. (Memos with no defined validation mechanism.)
 
+To ease the release of the change, there will be an interim period during which `e_memo` field is optional.
+After a period of time, memos will become mandatory and consensus will be modified to reject any transaction
+containing a `TxOut` that doesn't have a memo. This will enforce output uniformity, which improves the privacy of users.
+
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The `e_memo` field shall appear on every MobileCoin TxOut, starting with BLOCK_VERSION = 1.
+The `e_memo` field is an optional field on every MobileCoin TxOut, starting with BLOCK_VERSION = 1.
 
-It is exactly 46 bytes long. Exactly 46 bytes of plaintext are selected when the TxOut is constructed, and then encrypted.
+After an interim period, a release will be made that makes memos mandatory.
+(We will update this document to reflect when the interim period has ended.)
+
+The release that makes memos mandatory will result in a new MRENCLAVE value for consensus, but not a new
+`BLOCK_VERSION` as it is not a breaking change to the ledger format.
+
+The `e_memo` field, when present, is exactly 46 bytes long. Exactly 46 bytes of plaintext are selected when the TxOut is constructed, and then encrypted.
 
 Encryption is performed using AES with a secret key derived from the TxOut shared secret.
 
