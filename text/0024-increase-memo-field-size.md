@@ -67,7 +67,7 @@ This expansion of the memo field without immediate usecase could leave inadequat
 
 ## Alt: Use a smaller memo size
 
-Alternatively we could try reducing the memo size by 3 bytes. This would allow the 6 bytes required for tokens to use the 3 additional bytes unused and the 3 bytes removed from the memo field to be provided to the tokens. This change would impact recoverable transaction history memos which although no particular memo type uses all 44 bytes, does require all 44 bytes to be used between the 3 memo types. This is therefore, not recommended.
+Alternatively we could try reducing the memo size by 3 bytes. This would allow the 6 bytes required for tokens to use the 3 additional bytes unused and the 3 bytes removed from the memo field to be provided to the tokens. This change would impact recoverable transaction history memos which although no particular memo type uses all 44 bytes of the memo data field, does require all 44 bytes to be used between the 3 memo types. This is therefore, not recommended.
 
 ## Alt: Increase memo size even further
 
