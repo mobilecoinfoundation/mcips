@@ -1,6 +1,6 @@
 - Feature Name: Encrypted Memos
 - Start Date: (2021-06-18)
-- RFC PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
+- MCIP PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
 - MobileCoin Epic: None
 
 # Summary
@@ -280,7 +280,7 @@ and for many contributions that helped shape the proposal.
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-- There are no unresolved questions which should be resolved by this RFC.
+- There are no unresolved questions which should be resolved by this MCIP.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
