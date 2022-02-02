@@ -148,7 +148,7 @@ merged into the MCIP repository as a markdown file. At that point the MCIP is
     the FCP is canceled, and the MCIP goes back into development mode.
 
 ## The MCIP life-cycle
-[The MCIP life-cycle]: #the-MCIP-life-cycle
+[The MCIP life-cycle]: #the-mcip-life-cycle
 
 Once an MCIP becomes "active" then authors may implement it and submit the
 feature as a pull request to the relevant repo. Being "active" is not a rubber
@@ -178,7 +178,7 @@ as a "very minor change" is up to the team to decide; check
 
 
 ## Reviewing MCIPs
-[Reviewing MCIPs]: #reviewing-MCIPs
+[Reviewing MCIPs]: #reviewing-mcips
 
 While the MCIP pull request is up, the team may schedule meetings with the
 author and/or relevant stakeholders to discuss the issues in greater detail,
@@ -194,7 +194,7 @@ rationale for the decision.
 
 
 ## Implementing an MCIP
-[Implementing an MCIP]: #implementing-an-MCIP
+[Implementing an MCIP]: #implementing-an-mcip
 
 Some accepted MCIPs represent vital features that need to be implemented right
 away. Other accepted MCIPs can represent features that can wait until some
@@ -213,7 +213,7 @@ cannot determine if someone else is already working on it, feel free to ask
 
 
 ## MCIP Postponement
-[MCIP Postponement]: #MCIP-postponement
+[MCIP Postponement]: #mcip-postponement
 
 Some MCIP pull requests are tagged with the "postponed" label when they are
 closed (as part of the rejection process). An MCIP closed with "postponed" is
@@ -252,4 +252,4 @@ This repository is licensed as:
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you shall be licensed as above, without any additional terms or conditions.
 
 
-[MCIP repository]: https://github.com/mobilecoinfoundation/MCIPs
+[MCIP repository]: https://github.com/mobilecoinfoundation/mcips

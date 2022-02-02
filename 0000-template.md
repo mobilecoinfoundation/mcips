@@ -1,6 +1,6 @@
 - Feature Name: (fill me in with a unique ident, `my_awesome_feature`)
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
-- MCIP PR: [mobilecoinfoundation/MCIPs#0000](https://github.com/mobilecoinfoundation/MCIPs/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
 - MobileCoin Epic: JIRA-1234
 
 # Summary
