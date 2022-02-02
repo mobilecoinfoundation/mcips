@@ -1,6 +1,6 @@
 - Feature Name: Dynamic Fees V1 (Configurable Fees)
 - Start Date: (2021-04-20)
-- RFC PR: [mobilecoinfoundation/rfcs#1](https://github.com/mobilecoinfoundation/rfcs/pull/1)
+- MCIP PR: [mobilecoinfoundation/mcips#1](https://github.com/mobilecoinfoundation/mcips/pull/1)
 - MobileCoin Epic: MCC-2301
 
 # Summary
@@ -94,12 +94,12 @@ The primary rationale, then, is that this is "good enough" for right now, and we
 # Prior art
 [prior-art]: #prior-art
 
-Unfortunately, due to the limited scope of this PR, prior art is going to be difficult to discuss. There is obviously a much larger conversation to be had about Etherium gas, Bitcoin transaction fees, etc., and how MobileCoin fees differ from them, but that honestly belongs in a future RFC. This is about doing the minimum viable to get us to a baseline fee-adjustment strategy, without compromising our ability to respond to denial of service attacks.
+Unfortunately, due to the limited scope of this PR, prior art is going to be difficult to discuss. There is obviously a much larger conversation to be had about Etherium gas, Bitcoin transaction fees, etc., and how MobileCoin fees differ from them, but that honestly belongs in a future MCIP. This is about doing the minimum viable to get us to a baseline fee-adjustment strategy, without compromising our ability to respond to denial of service attacks.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-- There are no unresolved questions which should be resolved by this RFC.
+- There are no unresolved questions which should be resolved by this MCIP.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities

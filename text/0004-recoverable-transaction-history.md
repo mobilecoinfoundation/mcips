@@ -1,6 +1,6 @@
 - Feature Name: Recoverable Transaction History
 - Start Date: (2021-06-18)
-- RFC PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
+- MCIP PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
 - MobileCoin Epic: None
 
 # Summary
@@ -339,7 +339,7 @@ that helped shape the proposal.
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-- There are no unresolved questions which should be resolved by this RFC.
+- There are no unresolved questions which should be resolved by this MCIP.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
