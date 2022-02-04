@@ -37,6 +37,8 @@ A 66-byte memo_payload consists of:
 | 0 - 2      | `memo_type` |
 | 2 - 66     | `memo_data` |
 
+The fog-view enclave uses an Oblivious Map to privately map from fog-search-keys (16 byte outputs from a KexRng) to ETxOutRecords. The hashmap divides each bucket into as many KeySize + ValueSize pairs it can, which are consecutive ranges of bytes with no padding at all. These sizes are fixed at compile-time for the enclave.
+
 As seen in the [original proposal](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0003-encrypted-memos.md#alt-use-a-longer-memo-size) for encrypted memos, the number of items that we can fit into a bucket is `2048 / (16 + 1 + sizeof(ETxOutRecord))` rounded down to the nearest integer.
 
 With our current 46 byte memos, and an anticipated additional 6 byte Token field, we measure that the size of the `ETxOutRecord` is 213 bytes.
