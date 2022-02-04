@@ -3,6 +3,8 @@
 - RFC PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
 - MobileCoin Epic: None
 
+This MPIC describes a memo which has had its size adjusted from 46 to 66 in a [later mcip](https://github.com/mobilecoinfoundation/mcips/pull/24) 
+
 # Summary
 [summary]: #summary
 
