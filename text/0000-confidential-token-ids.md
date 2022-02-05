@@ -1,6 +1,6 @@
 - Feature Name: `confidential_token_ids`
 - Start Date: 2022-02-05
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0025](https://github.com/mobilecoinfoundation/mcips/pull/0025)
 - MobileCoin Epic: TBD
 
 # Summary
