@@ -83,7 +83,7 @@ This would go against our privacy goals because variable length memo fields woul
 
 ## Rationale
 
-This is a minimal change that aligns and standardizes our number of items per bucket to 8, and reserves as much space as possible for future uses that we didn't anticipate, before starting to impact the performance of Fog / the cost of running Fog given that we anticipate additional space per ETxOutRecord being used for Tokens. 
+This is a minimal change that aligns and standardizes our number of items per bucket to 8, and reserves as much space as possible for future uses that we didn't anticipate, before starting to impact the performance of Fog / the cost of running Fog given that we anticipate additional space per ETxOutRecord being used for Tokens. This additional space provides flexibility for any requirements from the SDK team for the memo field. More specifically, by increasing the memo size to 64 bytes the memo is big enough to hold a Schnorr-style digital signature (which in some variants is 64 bytes and in some variants is 48 bytes, for 128 bit security). 
 
 # Prior art
 [prior-art]: #prior-art
