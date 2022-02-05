@@ -41,7 +41,7 @@ struct TokenType {
     u32 token_id,
     
     \\\ Curve base point, unique for each TokenType, from which the TXO's commitment is 
-    \\\ generated with the `masked_amount`
+    \\\ generated with the value of the `amount` in the TXO
     RistrettoPoint H_i
 }
 ```
