@@ -196,7 +196,6 @@ The 64-byte memo data is laid out as follows:
 | 28 - 44    | HMAC                  |
 | 44 - 64    | Unused bytes          |
 
-
 The HMAC is computed in the same way as for 0x0100 Authenticated Sender Memo.
 
 Clients may interpret this memo in the same way as the 0x0100 Authenticated Sender Memo,
