@@ -16,7 +16,7 @@ The MobileCoin ledger protocol currently supports one token type, MOB. We would 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A Transaction Output (TXO) has a TokenType enum field (`token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
+A Transaction Output (TXO) has a confidential TokenType enum field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
 
 Each TokenType has an explicit minimum fee specified by node operators, and included in the attestation handshake, ensuring that all nodes in the network are configured with the same fee minimums and TokenType sets. New TokenTypes can be added only with unanimous agreement from all node operators. 
 
