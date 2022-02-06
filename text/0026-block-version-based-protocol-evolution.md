@@ -210,4 +210,19 @@ ignore fields they don't know about, and don't pass them to `mc-crypto-digestibl
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-None at this time.
+It may be possible to avoid incrementing `block_version` if new fields are not added
+to the hash, e.g. if they are marked `digestible(omit)`. However, this means that they
+are light-weight in the chain and could conceiveably by changed after the block is signed,
+which is usually undesirable.
+
+It may be possible to specify that a different set of fields in `TxOut` is hashed for purpose
+of computing merkle proofs of membership. For instance, some fields like the encrypted memo
+and the encrypted fog hint do not play a rule in transaction validation when a `TxOut` is spent.
+This would also lead to efficiency gains because the memo and the fog hint are large,
+and if fog-ledger doesn't have to send them back when buliding merkle proofs and mixins for the
+clients, that saves the client bandwidth and avoids sending them data they wouldn't need anymore.
+
+It may be possible that they original plan for rolling out `0003-encrypted-memo` would work if
+we can omit the memo from the hash that is used to build the merkle proofs of membership. (Removing
+the encrypted fog hint from this hash would be a breaking change, but not adding the memos to that
+hash would not be a breaking change.) This requires more thought and discussion.
