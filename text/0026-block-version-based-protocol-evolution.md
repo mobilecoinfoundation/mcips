@@ -115,8 +115,8 @@ Summary of block versions:
 | Block Version | New Field                 | Description                                                                                                                                                  |
 | ------------- | ---------                 | -----------                                                                                                                                                  |
 | 1             |    -                      | Status quo                                                                                                                                                   |
-| 2             | `TxOut::e_memo`           | This is the first block version at which `e_memo` field will be accepted, and it will be required going forwards. This represents the changes in MCIP #3.    |
-| 3             | `Amount::masked_token_id` | This is the first block version at which `masked_token_id` will be accepted, and it will be required going forward. This represents the changes in MCIP #25. |
+| 2             | `TxOut::e_memo`           | This is the first block version at which `e_memo` field will be accepted, and it will be required going forwards. This represents the changes in [MCIP #3](https://github.com/mobilecoinfoundation/mcips/pull/0003).    |
+| 3             | `Amount::masked_token_id` | This is the first block version at which `masked_token_id` will be accepted, and it will be required going forward. This represents the changes in [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/0025). |
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 We'll attempt to describe code changes that would be needed in mobilecoin software to implement this:
