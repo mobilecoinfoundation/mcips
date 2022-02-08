@@ -59,6 +59,14 @@ clients are shipped, and new behavior is triggered everywhere at once after a su
 old clients. Transaction validation enforces that new fields do not appear (which could break the old clients) until
 the appropriate time.
 
+This means we can adhere to a support model like the following:
+* Clients (e.g. for individuals or merchants) are shipped and supported for `X` days
+* Users are expected to update their software at least every `X` days
+* Clients are never broken as long as they update on schedule
+
+If we don't accept some proposal like this, then (we argue) we are forced into a world
+where clients sometimes break prematurely.
+
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
