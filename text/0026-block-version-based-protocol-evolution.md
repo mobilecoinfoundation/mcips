@@ -99,7 +99,17 @@ should both be `block_version` aware and support multiple block versions when an
 * We propose that the `masked_token_id` field from the  `0023-confidential-token-ids` MCIP should be associated to a bump to `block_version = 3`.
   That is, consensus will reject `Tx` that contain any `TxOut` that have this field until `block_version = 3`.
 * We propose that `block_version = 3` may be triggered by the acceptance of the first minting transaction to the blockchain.
-* FIXME: We do not at this point have a proposal for how to trigger `block_version = 2`.
+* We do not at this point have a concrete proposal for how to trigger `block_version = 2`.
+
+Summary of block versions:
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Block Version | New Field                 | Description                                                                                                                                                  |
+| ------------- | ---------                 | -----------                                                                                                                                                  |
+| 1             |    -                      | Status quo                                                                                                                                                   |
+| 2             | `TxOut::e_memo`           | This is the first block version at which `e_memo` field will be accepted, and it will be required going forwards. This represents the changes in MCIP #3.    |
+| 3             | `Amount::masked_token_id` | This is the first block version at which `masked_token_id` will be accepted, and it will be required going forward. This represents the changes in MCIP #25. |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 We'll attempt to describe code changes that would be needed in mobilecoin software to implement this:
 
@@ -119,8 +129,8 @@ Mobile clients SHOULD use the `latest_block_version` number to indicate to the u
 Desktop clients, which use the lmdb database `mc-ledger-db`, already work by comparing the block version of new blocks to the
 `mc_transaction_core::BLOCK_VERSION` constant. They should continue doing this, but the constant should be renamed `MAX_BLOCK_VERSION`.
 
-We do not at this time propose that the `Tx` object itself should contain a `block_version`,
-instead, transactions are valid if they conform to the rules for the current block version.
+We do not at this time propose that the `Tx` object itself should contain a `block_version`.
+Instead, transactions are valid if they conform to the rules for the current block version.
 
 # Drawbacks
 [drawbacks]: #drawbacks
@@ -169,7 +179,17 @@ changes and the confidential token ids change. Another alternative may be to imp
   fn feature_masked_token_id_is_supported(block_version: u32) -> bool { block_version >= 3 }
   ```
   and using these in the transaction validation and construction routines, which will get us most of the benefits
-  of a feature-flag based system from a programming point of view.
+  of a feature-flag based system from an engineering point of view.
+
+* Another alternative might have been to completely scrap `mc-crypto-digestible`. Instead, when we need to compute
+  canonical hashes, use either a canonical serialization format such as Libra Canonical Serialization, or, describe and
+  implement canonical protobuf serializers, or a protobuf canonizer routine. Then, clients always compute hashes of
+  serialized objects, preserving unknown fields.
+  * One reason not to do this is practical, it would be a pretty massive change to the system as it currently exists.
+  * Another reason not to do it is philosophical. Even if a client computes the correct hash, it may not be wise for them
+    to assume that e.g. they know the balance of the user if there are fields in the blockchain that they don't understand.
+    Some changes like `masked_token_id` fundamentally change the meaning of `TxOut` and clients need to update to interpret
+    `TxOut` correctly.
 
 # Prior art
 [prior-art]: #prior-art
@@ -197,15 +217,18 @@ Many of these issues were anticipated when we designed `mc-crypto-digestible`, a
 makes it easy to do protobuf-style schema evolution in rust without changing the hashes of old structures.
 (The interested reader may refer to the README of that crate.)
 However, `mc-crypto-digestible` does not help old clients compute hashes of new structures (because they
-ignore fields they don't know about, and don't pass them to `mc-crypto-digestible). 
+ignore fields they don't know about, and don't pass them to `mc-crypto-digestible`). 
+
+The [documentation for Libra Canonical Serialization](https://docs.rs/libra-canonical-serialization/latest/libra_canonical_serialization/#background)
+touches on these issues and the motivation as well.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
 * Is there an elegant way to trigger the encrypted-memos version bump?
   It would be nice not to have to do these two changes simultaneously.
-* Should we attempt `0007-Protocol-version-statement-type` before attempting this.
-* Should we split this MCIP into a "process" part and an "implementation" part.
+* Should we attempt `0007-Protocol-version-statement-type` before attempting this?
+* Should we split this MCIP into a "process" part and an "implementation" part?
   
 # Future possibilities
 [future-possibilities]: #future-possibilities
@@ -217,12 +240,8 @@ which is usually undesirable.
 
 It may be possible to specify that a different set of fields in `TxOut` is hashed for purpose
 of computing merkle proofs of membership. For instance, some fields like the encrypted memo
-and the encrypted fog hint do not play a rule in transaction validation when a `TxOut` is spent.
+and the encrypted fog hint do not play a role in transaction validation when a `TxOut` is spent.
 This would also lead to efficiency gains because the memo and the fog hint are large,
-and if fog-ledger doesn't have to send them back when buliding merkle proofs and mixins for the
-clients, that saves the client bandwidth and avoids sending them data they wouldn't need anymore.
-
-It may be possible that they original plan for rolling out `0003-encrypted-memo` would work if
-we can omit the memo from the hash that is used to build the merkle proofs of membership. (Removing
-the encrypted fog hint from this hash would be a breaking change, but not adding the memos to that
-hash would not be a breaking change.) This requires more thought and discussion.
+and if `fog-ledger` doesn't have to send them back when buliding merkle proofs and mixins for the
+clients, that saves the client bandwidth and avoids sending them data they wouldn't need anymore,
+and it also may make it easier to build the oblivious merkle proof service.
