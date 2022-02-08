@@ -204,9 +204,9 @@ changes and the confidential token ids change. Another alternative may be to imp
 
 This proposal relates to several earlier MCIP proposals:
 
-* 0007-Protocol-version-statement-type
-* 0008-SCP-based-hard-forks
-* 0009-Dual-rule-blocks
+* [0007-Protocol-version-statement-type](https://github.com/mobilecoinfoundation/mcips/pull/0007)
+* [0008-SCP-based-hard-forks](https://github.com/mobilecoinfoundation/mcips/pull/0008)
+* [0009-Dual-rule-blocks](https://github.com/mobilecoinfoundation/mcips/pull/0009)
 
 In particular, `0007-protocol-version-statement-type` proposes a way that node operators
 could trigger `block_version` to increase by voting for this and reaching consensus on it using SCP itself.
