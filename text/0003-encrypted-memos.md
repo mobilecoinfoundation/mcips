@@ -3,7 +3,7 @@
 - RFC PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
 - MobileCoin Epic: None
 
-*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in [MCIP #24](). The changed byte tables are reflected there. 
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there. 
 
 # Summary
 [summary]: #summary
