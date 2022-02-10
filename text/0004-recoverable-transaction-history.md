@@ -3,7 +3,7 @@
 - RFC PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
 - MobileCoin Epic: None
 
-This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The byte tables have been updated to reflect this change.
+This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there.
 
 # Summary
 [summary]: #summary
@@ -124,6 +124,7 @@ To fully support recoverable transaction history, clients should use 0x0100 or 0
 outputs that they send to another party, and 0x0200 Destination memos on all change outputs, which are all sent to the change
 subaddress. Change outputs should be sent *even* in the case that the change value is zero, in order that there will be a destination memo.
 
+This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are available [here](0024-encrypted-memos.md#This is an update to #4).
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -150,14 +151,13 @@ Three new memo types are specified:
 
 ## 0x0100 Authenticated Sender Memo
 
-The 64-byte memo data is laid out as follows:
+The 44-byte memo data is laid out as follows:
 
 | Byte range | Item |
 | ---------- | ---- |
 | 0 - 16     | Sender's Address Hash |
 | 16 - 28    | Unused bytes          |
 | 28 - 44    | HMAC                  |
-| 44 - 64    | Unused bytes          |
 
 The HMAC is computed using HMAC-SHA512. 
 (HMAC refers to [RFC 2104 HMAC](https://datatracker.ietf.org/doc/html/rfc2104).)
@@ -186,7 +186,7 @@ then they should not associate this payment with a sender.
 
 ## 0x0101 Authenticated Sender With Payment Request Id Memo
 
-The 64-byte memo data is laid out as follows:
+The 44-byte memo data is laid out as follows:
 
 | Byte range | Item |
 | ---------- | ---- |
@@ -194,7 +194,6 @@ The 64-byte memo data is laid out as follows:
 | 16 - 24    | Big-endian bytes of 8-byte payment request id number |
 | 24 - 28    | Unused bytes          |
 | 28 - 44    | HMAC                  |
-| 44 - 64    | Unused bytes          |
 
 The HMAC is computed in the same way as for 0x0100 Authenticated Sender Memo.
 
@@ -218,7 +217,7 @@ number, even if we haven't validated the memo by confirming the HMAC.
 
 ## 0x0200 Destination Memo
 
-The 64-byte memo data is laid out as follows:
+The 44-byte memo data is laid out as follows:
 
 | Byte range | Item |
 | ---------- | ---- |
@@ -226,7 +225,7 @@ The 64-byte memo data is laid out as follows:
 | 16 - 17    | The number of recipients, as an unsigned 8-bit number |
 | 17 - 24    | Big-endian bytes of fee amount, as an unsigned 56-bit number |
 | 24 - 32    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
-| 32 - 64    | Unused bytes                  |
+| 32 - 44    | Unused bytes                  |
 
 Here, the "total outlay" means the total amount that this transaction is deducting
 from the Sender's balance. It is the sum of the value of all non-change outputs,

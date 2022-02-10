@@ -28,14 +28,43 @@ This provides more space in the memo beyond those used for recoverable transacti
 The [e_memo field](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0003-encrypted-memos.md#reference-level-explanation
 ) is an encrypted memo field on every MobileCoin TxOut.
 
-The e_memo field will be exactly 66 bytes long. Exactly 66 bytes of plaintext are selected when the TxOut is constructed and then encrypted.
+## This is an update to the values from #3:
 
-A 66-byte memo_payload consists of:
+The `e_memo` field, when present, is exactly 66 bytes long. Exactly 66 bytes of plaintext are selected when the TxOut is constructed, and then encrypted.
+
+Encryption is performed using AES with a secret key derived from the TxOut shared secret.
+
+A 48-byte memo-okm value is defined as:
+
+```
+memo_okm = 
+	hkdf-sha512("mc-memo-okm",  tx_out_shared_secret_bytes).expand("", 48)
+```
+
+Here okm means "output key material", see RFC5869 HKDF. (Specifically: The input key material to hkdf is the canonical bytes of the `tx_out_shared_secret`. The salt is the string “mc-memo-okm”. The info-string is empty, when expanding to a 48 byte secret with hkdf.) (SHA512 refers here to the 512-bit variant of SHA-2 hashing standard.)
+
+The first 32 bytes are interpreted as an AES key, and remaining 16 bytes as an AES nonce.
+
+```
+memo_aes_key = memo_okm[0..32]
+memo_aes_nonce = memo_okm[32..48]
+```
+
+A 66-byte `memo_payload` consists of:
+
 
 | Byte range | Item |
 | ---------- | ---- |
 | 0 - 2      | `memo_type` |
 | 2 - 66     | `memo_data` |
+
+The memo payload data can only be interpreted given the memo payload type.
+
+A 66-byte encrypted-memo is computed by AES-256 in counter mode:
+
+```
+e_memo = AES256Ctr(memo_payload, memo_aes_key, memo_aes_nonce)
+```
 
 The fog-view enclave uses an Oblivious Map to privately map from fog-search-keys (16 byte outputs from a KexRng) to ETxOutRecords. The hashmap divides each bucket into as many KeySize + ValueSize pairs it can, which are consecutive ranges of bytes with no padding at all. These sizes are fixed at compile-time for the enclave.
 
@@ -58,6 +87,50 @@ This chart illustrates the breakpoints and what the points of maximum memory uti
 
 While maintaining 46 byte memos, we would be slightly above the threshold for 9. Therefore we are leaving 26 bytes on the table if we continue to use 46 byte memos. By increasing memo size to 66, we would still be 6 bytes below the threshold for 8, even with additional 6 bytes being used for Tokens. This is consistent with previous policy to leave a small fudge factor in case there is something we overlooked or another need that arises.
 
+
+## This is an update to #4
+### 0x0100 Authenticated Sender Memo
+
+The 64-byte memo data is laid out as follows:
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Sender's Address Hash |
+| 16 - 48    | Unused bytes          |
+| 48 - 64    | HMAC                  |
+
+The HMAC is computed using HMAC-SHA512. 
+(HMAC refers to [RFC 2104 HMAC](https://datatracker.ietf.org/doc/html/rfc2104).)
+(SHA512 refers to the 512 bit variant of [SHA-2](https://en.wikipedia.org/wiki/SHA-2).)
+
+### 0x0101 Authenticated Sender With Payment Request Id Memo
+
+The 64-byte memo data is laid out as follows:
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Sender's Address Hash |
+| 16 - 24    | Big-endian bytes of 8-byte payment request id number |
+| 24 - 48    | Unused bytes          |
+| 48 - 64    | HMAC                  |
+
+The HMAC is computed in the same way as for 0x0100 Authenticated Sender Memo.
+
+## 0x0200 Destination Memo
+
+The 64-byte memo data is laid out as follows:
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Recipient's Address Hash |
+| 16 - 17    | The number of recipients, as an unsigned 8-bit number |
+| 17 - 24    | Big-endian bytes of fee amount, as an unsigned 56-bit number |
+| 24 - 32    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
+| 32 - 64    | Unused bytes                  |
+
+Here, the "total outlay" means the total amount that this transaction is deducting
+from the Sender's balance. It is the sum of the value of all non-change outputs,
+and the fee.
 
 # Drawbacks
 [drawbacks]: #drawbacks
