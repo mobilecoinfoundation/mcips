@@ -88,7 +88,7 @@ This is a minimal change that aligns and standardizes our number of items per bu
 # Prior art
 [prior-art]: #prior-art
 
-This is an expansion of the existing Encrypted Memo's proposal in line with [anticipated future work](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0003-encrypted-memos.md#future-possibilities), and specifically referencing to the [alternative larger memo size proposal](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0003-encrypted-memos.md#alt-use-a-longer-memo-size). 
+This is an expansion of the existing Encrypted Memo's proposal in line with [anticipated future work](0003-encrypted-memos.md#future-possibilities), and specifically referencing to the [alternative larger memo size proposal](0003-encrypted-memos.md#alt-use-a-longer-memo-size). 
 
 In terms of other memo fields being resized, I was not able to find examples that have resized their memos since implementation, but there have been proposals for stellar to [increase the memo size](https://galactictalk.org/d/433-stellar-should-have-a-big-memo-or-data).
 
