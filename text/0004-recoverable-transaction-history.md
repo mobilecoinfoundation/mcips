@@ -3,7 +3,7 @@
 - RFC PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
 - MobileCoin Epic: None
 
-*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there.
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in [MCIP #24](). The changed byte tables are reflected there.
 
 # Summary
 [summary]: #summary
@@ -124,7 +124,7 @@ To fully support recoverable transaction history, clients should use 0x0100 or 0
 outputs that they send to another party, and 0x0200 Destination memos on all change outputs, which are all sent to the change
 subaddress. Change outputs should be sent *even* in the case that the change value is zero, in order that there will be a destination memo.
 
-*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are available [here](0024-increase-memo-field-size.md#this-is-an-update-to-4).
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in [MCIP #24](). The changed byte tables are available [here](0024-increase-memo-field-size.md#this-is-an-update-to-4).
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
