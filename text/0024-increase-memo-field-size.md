@@ -1,6 +1,6 @@
 - Feature Name: (`Recalculate appropriate memo size`)
 - Start Date: (2022-02-02)
-- MCIPS PR: [mobilecoinfoundation/mcips#0024](https://github.com/mobilecoinfoundation/mcips/pull/0024)
+- MCIPS PR: [mobilecoinfoundation/mcips#24](https://github.com/mobilecoinfoundation/mcips/pull/24)
 - MobileCoin Epic: Encrypted Memos
 
 # Summary
