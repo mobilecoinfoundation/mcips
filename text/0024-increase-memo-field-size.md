@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-The size of the memo currently is 46 bytes, and we would like to increase the size of the memo to 66 bytes, and standardizing items per bucket at 8.
+The size of the memo currently is 46 bytes, and we would like to increase the size of the memo to 66 bytes, and standardizing items per bucket in the Oblivious Map used by the fog-view enclave at 8.
 
 # Motivation
 [motivation]: #motivation
