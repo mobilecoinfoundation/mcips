@@ -3,7 +3,7 @@
 - RFC PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
 - MobileCoin Epic: None
 
-This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there. 
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there. 
 
 # Summary
 [summary]: #summary
@@ -73,6 +73,8 @@ After an interim period, a release will be made that makes memos mandatory.
 
 The release that makes memos mandatory will result in a new MRENCLAVE value for consensus, but not a new
 `BLOCK_VERSION` as it is not a breaking change to the ledger format.
+
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are available [here](0024-increase-memo-field-size.md#this-is-an-update-to-the-values-from-3).
 
 The `e_memo` field, when present, is exactly 46 bytes long. Exactly 46 bytes of plaintext are selected when the TxOut is constructed, and then encrypted.
 
