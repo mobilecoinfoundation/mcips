@@ -18,7 +18,7 @@ We determined that 66 bytes was the largest we could make the memo with minimal 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-This is an expansion of the memo data filed from the [encrypted memo feature](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0003-encrypted-memos.md#alt-use-a-longer-memo-size)
+This is an expansion of the memo data filed from the [encrypted memo feature](0003-encrypted-memos.md#alt-use-a-longer-memo-size)
 
 This provides more space in the memo beyond those used for recoverable transaction history so additional details can be added to the memo.
 
