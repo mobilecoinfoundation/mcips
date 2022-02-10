@@ -147,6 +147,9 @@ This adds complexity to the transaction validation code, which now must support 
 
 This adds complexity to the transaction building code, which also must support multiple versions of the transactions.
 
+This adds complexity to off-line transaction building workflows, which must target a block version. (However these workflows
+currently work by moving a copy of the ledger to the offline machine, which will carry the block version.)
+
 This MCIP proposes ad-hoc mechanisms to trigger increases to the block version.
 
 This MCIP proposes that `0003-encrypted-memos` requires a bump to block version, but does not propose a mechanism to trigger
@@ -156,21 +159,43 @@ changes and the confidential token ids change. Another alternative may be to imp
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-* For encrypted memos, we had earlier proposed that there would be a period of time when both transactions with memos
-  and without memos would be accepted, and eventually only transactions with memos would be accepted. However,
-  further thought shows that this may lead to breakage. For example, if a new client sends a TxOut with a memo to
-  an old client, and the old client attempts to spend that TxOut, their transaction may be rejected because their
-  proof of membership is invalid (they ignore the memos when they compute the hashes, but consensus does not.)
-  Even the fog clients, which get merkle proofs of membership from fog-ledger, may fail to build valid transactions,
-  because when they deserialize the protobufs from fog ledger, they strip out the memos (since they don't know about them),
-  which causes the hashes not to match the data submitted to consensus.
+* An alternative upgrade narrative for encrypted memos looks something like this:
+  * First, a client update is released so that clients can read memos, but do not write them. (Upgrade readers before writers.)
+  * After `X` days all clients can read memos. Deploy an enclave which allows memos to be written, but does not require it.
+    (Clients in the first step have to trust this enclave.)
+  * Release clients that write memos. Gradually all the clients update, and for a while there is a mix of behaviors.
+  * After `X` days all clients are writing memos. We can update the enclave to require memos.
+    (Clients in the second step have to trust this enclave.)
+  
+  This would work for memos, but it requires two `X` day cycles rather than one, because every client is either
+  memo-writing or not memo-writing. Another way it could work is, clients look at the `MRENCLAVE` they get when they
+  attest to decide whether to write memos or not. But this creates a lot of complexity around configuring the clients
+  correctly (for dev networks, testnet, and mainnet), and it impacts off-line wallet workflows because currently they
+  can build transactions without having this attestation measurement.
+  
+  For more complex changes like confidential token ids, it's not clear that this would work. Outputs from the new transactions
+  would not be valid to use in the old transactions, because the new outputs have masked token id, and so some sort of proof
+  is required to show the enclave that all the token ids are matching apporpriately.
+  
+  Clients that receive such
+  outputs have to switch to writing the new style transactions, but they also can't switch to doing this before an enclave
+  is deployed that is willing to accept those transactions. In the period of time where there is a mix of behaviors, the clients
+  that didn't update yet are broken.
+  
+  The difference between this case and the memos case is that even though in terms of protobuf schema, the confidential token ids
+  change is additive, in terms of semantics, it isn't -- we are moving from a world where we know in the clear that every output
+  has token id MOB (the only token), to a world where no one knows the token id of any output. That is, the network is trying to
+  forget / conceal some information that wasn't previously. Outputs that have memos can just drop into the transaction math
+  without changes, but outputs that have masked token id cannot, because their semantic has changed and we have less information
+  about the output than before.
 
-* Since it seems that in general, any additive change to a TxOut which could change its hash can cause clients to break,
-  no "rolling release" of upgrades to the transactions can work, because if new clients and old clients are coexisting,
-  then new TxOut's and old clients are coexisting, and that leads to the breakage.
+* If we wish to evolve the protocol in ways like this, where new outputs would not be spendable
+  using the old transaction proofs, then the "rolling release" of upgrades to the transactions cannot always work, because it
+  implies that for a period of time, new clients and old clients are coexisting, and so new TxOut's and old clients are coexisting,
+  and that leads to the breakage in some scenarios.
 
-* If such a "rolling release" strategy cannot work, then we must instead do releases where something "triggers" the new
-  behavior. There must be a source of truth for this trigger, and the logical place for this is in the blockchain.
+* If such a "rolling release" strategy cannot work, then we must instead do something where all the clients cut over at once
+  to the new behavior. There must be a source of truth for this cutover, and the logical place for this is in the blockchain.
   The `block_version` value seems a perfectly suitable thing to use for this purpose.
 
 * An alternative may be to use feature flags instead of a version number, so that the software supports turning on
@@ -198,6 +223,14 @@ changes and the confidential token ids change. Another alternative may be to imp
     to assume that e.g. they know the balance of the user if there are fields in the blockchain that they don't understand.
     Some changes like `masked_token_id` fundamentally change the meaning of `TxOut` and clients need to update to interpret
     `TxOut` correctly.
+  * It seems that this would resolve issues like adding memos, but it's not clear that this would let us navigate changes
+    to the transaction math like confidential token ids. Even if old clients can correctly hash new objects, it doesn't
+    necessarily mean that they can spend new TxOut's successfully using the old math, if we make significant enough changes.
+
+* A benefit of using `block_version` to trigger clients to cut over to new behavior is, we can deliver new features to all
+  clients in one `X` day cycle rather than two `X` day cycles. And this doesn't create the same level of complexity in the
+  system as, the clients' behavior being different depending on what `MRENCLAVE` they find during attestation. Using a hard
+  cut-over like this means we never have to consider the possibility of a client spending new TxOut's using old math.
 
 # Prior art
 [prior-art]: #prior-art
