@@ -70,7 +70,7 @@ The fog-view enclave uses an Oblivious Map to privately map from fog-search-keys
 
 As seen in the [original proposal](0003-encrypted-memos.md#alt-use-a-longer-memo-size) for encrypted memos, the number of items that we can fit into a bucket is `2048 / (16 + 1 + sizeof(ETxOutRecord))` rounded down to the nearest integer.
 
-With our current 46 byte memos, and an anticipated additional 6 byte Token field, we measure that the size of the `ETxOutRecord` is 213 bytes.
+With our current 46 byte memos, and an anticipated additional 6 byte Token field, we measure that the size of the `ETxOutRecord` is 213 bytes. We intend to increase this to 233 bytes.
 
 This chart illustrates the breakpoints and what the points of maximum memory utilization are:
 
