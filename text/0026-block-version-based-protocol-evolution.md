@@ -85,7 +85,7 @@ When new fields are added to the blockchain, e.g. to the `TxOut` object, the fol
     be governed by the consensus of the node operators.
 
 We also propose a `block_version` increment for the `0003-encrypted-memos` MCIP, and propose
-a `block_version` increment for the (nascent) `0023-confidential-token-ids` MCIP.
+a `block_version` increment for the (nascent) `0025-confidential-token-ids` MCIP.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -104,7 +104,7 @@ should both be `block_version` aware and support multiple block versions when an
 * The block version of a block can never be less than the `block_version` of its parent.
 * We propose that the encrypted memo field from `0003-encrypted-memos` MCIP should be associated to a bump to `block_version = 2`.
   That is, consensus will reject `Tx` that contain any `TxOut` that have memos until `block_version = 2`.
-* We propose that the `masked_token_id` field from the  `0023-confidential-token-ids` MCIP should be associated to a bump to `block_version = 3`.
+* We propose that the `masked_token_id` field from the  `0025-confidential-token-ids` MCIP should be associated to a bump to `block_version = 3`.
   That is, consensus will reject `Tx` that contain any `TxOut` that have this field until `block_version = 3`.
 * We propose that `block_version = 3` may be triggered by the acceptance of the first minting transaction to the blockchain.
 * We do not at this point have a concrete proposal for how to trigger `block_version = 2`.
@@ -251,7 +251,7 @@ The `0008-SCP-based-hard-forks` proposal would also normalize the process around
 
 The `0009-Dual-rule-blocks` proposal envisions that nodes may accept both "new" transactions and "old" transactions simultaneously
 for a period of time. However, as we have seen in this proposal, this will lead to breakage of old clients in some
-situations, for both the `0023-confidential-token-ids` changes and the `0003-encrypted-memos` changes.
+situations, for both the `0025-confidential-token-ids` changes and the `0003-encrypted-memos` changes.
 This proposal can be seen as modifying `0009-Dual-rule-blocks` to avoid this breakage.
 
 Many of these issues were anticipated when we designed `mc-crypto-digestible`, a hashing framework which
