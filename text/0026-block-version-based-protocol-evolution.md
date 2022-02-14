@@ -244,7 +244,7 @@ This proposal relates to several earlier MCIP proposals:
 In particular, `0007-protocol-version-statement-type` proposes a way that node operators
 could trigger `block_version` to increase by voting for this and reaching consensus on it using SCP itself.
 
-This proposal would resolve some of the drawbacks in this proposal around ad-hoc mechanisms, and may strengthen this proposal.
+That proposal would resolve some of the drawbacks in this proposal around ad-hoc mechanisms, and may strengthen this proposal.
 The main concern would be the risk and complexity around adding new ballot types to SCP as envisioned in the proposal.
 
 The `0008-SCP-based-hard-forks` proposal would also normalize the process around triggering increases to the `block_version`.
