@@ -1,7 +1,6 @@
 - Feature Name: Encrypted Memos
 - Start Date: (2021-06-18)
 - MCIP PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
-- MobileCoin Epic: None
 
 # Summary
 [summary]: #summary

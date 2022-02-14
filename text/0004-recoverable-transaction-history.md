@@ -1,7 +1,6 @@
 - Feature Name: Recoverable Transaction History
 - Start Date: (2021-06-18)
 - MCIP PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
-- MobileCoin Epic: None
 
 # Summary
 [summary]: #summary
