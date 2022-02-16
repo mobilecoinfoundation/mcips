@@ -3,6 +3,7 @@
 - MCIP PR: [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4)
 - MobileCoin Epic: None
 
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24.  That [MCIP lists the changed byte tables](0024-increase-memo-field-size.md#this-is-an-update-to-4).
 # Summary
 [summary]: #summary
 
@@ -13,7 +14,7 @@ description of memos and memo types.)
 
 When a sender sends money to a recipient, the "sender memo" is attached to the TxOut that the
 recipient recieves, and permits them to identify the sender. The "destination memo" is attached
-to the change TxOut that the sender recieves, and records details of the recipient and the amount sent.
+to the change TxOut that the sender receives, and records details of the recipient and the amount sent.
 
 In a mobile chat application, the use of these memos in payments permits the app to recover transaction
 history given only the private keys of the user, by fetching all of the user's TxOut's from Fog and then
@@ -122,6 +123,7 @@ To fully support recoverable transaction history, clients should use 0x0100 or 0
 outputs that they send to another party, and 0x0200 Destination memos on all change outputs, which are all sent to the change
 subaddress. Change outputs should be sent *even* in the case that the change value is zero, in order that there will be a destination memo.
 
+*Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are available [here](0024-increase-memo-field-size.md#this-is-an-update-to-4).
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
