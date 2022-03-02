@@ -1,7 +1,7 @@
 - Feature Name: Encrypted Memos
 - Start Date: (2021-06-18)
 - MCIP PR: [mobilecoinfoundation/mcips#3](https://github.com/mobilecoinfoundation/mcips/pull/3)
-- MobileCoin Epic: None
+- Implementation PR: [mobilecoinfoundation/mobilecoin#814](https://github.com/mobilecoinfoundation/mobilecoin/pull/814)
 
 *Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24. The changed byte tables are reflected there. 
 
