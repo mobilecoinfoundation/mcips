@@ -126,7 +126,7 @@ merged block path is similar, with a prefix directory `merged-$N` where `N > 1`
 is the bucket size, and the index is that of the starting block (also a multiple
 of `N`).
 
-`ledger-distribution` will default to merging into buckets of 10, 100 and 1000 blocks.
+`ledger-distribution` will default to merging into buckets of 100, 1000 and 10000 blocks.
 
 For example:
 * merged blocks with `N=10` and starting index `0` will be at
