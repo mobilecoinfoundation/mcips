@@ -117,7 +117,7 @@ For example:
   `$BASE/1a/2b/3c/4e/5a/6b/7c/1a2b3c4e5a6b7c8d.pb`
 
 See
-[`block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=block_num_to_s3block_path)
+[`block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=fn.block_num_to_s3block_path)
 for an implementation of this logic.
 
 ### Merged Blocks
@@ -135,7 +135,7 @@ For example:
   at `$BASE/merged-1000/00/03/8d/7e/a4/c6/80/00038d7ea4c68000.pb`
 
 See
-[`merged_block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=merged_block_num_to_s3block_path)
+[`merged_block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=fn.merged_block_num_to_s3block_path)
 for an implementation of this logic.
 
 # Drawbacks
