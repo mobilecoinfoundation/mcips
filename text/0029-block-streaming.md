@@ -75,6 +75,8 @@ message BlockWithQuorumSet {
     blockchain.ArchiveBlock block = 1;
     /// QuorumSet when the block was externalized.
     QuorumSet quorum_set = 2;
+    /// Attestation Verification report.
+    external.VerificationReport report = 3;
 }
 
 message SubscribeResponse {
@@ -99,7 +101,7 @@ message ArchiveBlocksUrlResponse {
 }
 
 service ArchiveBlocks {
-    rpc GetBaseUrl(ArchiveBlocksUrlRequest) returns (ArchiveBlocksUrlResponse)
+    rpc GetBaseUrl(ArchiveBlocksUrlRequest) returns (ArchiveBlocksUrlResponse);
 }
 ```
 
