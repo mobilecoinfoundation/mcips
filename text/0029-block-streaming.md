@@ -1,7 +1,7 @@
 * Feature Name: `block_streaming`
 * Start Date: 2022-03-01
-* MCIP PR: https://github.com/mobilecoinfoundation/mcips/pull/29
-* Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/1433
+* MCIP PR: [mobilecoinfoundation/mcips #29](https://github.com/mobilecoinfoundation/mcips/pull/29)
+* Tracking Issue: [mobilecoin #1433](https://github.com/mobilecoinfoundation/mobilecoin/issues/1433)
 
 # Summary
 [summary]: #summary
@@ -121,9 +121,10 @@ See
 for an implementation of this logic.
 
 ### Merged Blocks
-We also support merged blocks to reduce file operations. The merged block path
-is similar, with a prefix directory `merged-$N` where `N > 1` is the bucket
-size, and the index is that of the starting block (also a multiple of `N`).
+We also support merged blocks to reduce the number of file operations. The
+merged block path is similar, with a prefix directory `merged-$N` where `N > 1`
+is the bucket size, and the index is that of the starting block (also a multiple
+of `N`).
 
 `ledger-distribution` will default to merging into buckets of 10, 100 and 1000 blocks.
 
