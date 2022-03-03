@@ -32,9 +32,12 @@ another second downloading from S3.
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-This is a backend implementation change that should be transparent to everyone else.
+This is a backend implementation change that should be transparent to everyone
+else.
 
-When a node starts up, it will subscribe to updates from its peer consensus nodes, and request (or be configured with) the base URL for fetching archived blocks, and fetch those in parallel.
+When a node starts up, it will subscribe to updates from its peer consensus
+nodes, and request (or be configured with) the base URL for fetching archived
+blocks, and fetch those in parallel.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -65,6 +68,7 @@ This is the entrypoint for subscribing to block updates, leveraging
 
 ### Streaming API
 The Streaming API will look like the following:
+
 ```proto3
 message SubscribeRequest {
     /// Block index to start from.
@@ -92,6 +96,7 @@ service ConsensusUpdates {
 
 ### Backfill API
 The Backfill API will look like the following:
+
 ```proto3
 message ArchiveBlocksUrlRequest {
     // May include hints for geographic proximity and/or caching.
@@ -110,7 +115,7 @@ service ArchiveBlocks {
 
 ### Single Blocks
 The block-specific path is a function of the block index. The file name is the
-hexadecimal representation of the index, ~~padded~~ to 16 hexadecimal characters.
+hexadecimal representation of the index, padded to 16 hexadecimal characters.
 The index-as-file-name is repeated in the directory path.
 
 For example:
@@ -129,7 +134,8 @@ merged block path is similar, with a prefix directory `merged-$N` where `N > 1`
 is the bucket size, and the index is that of the starting block (also a multiple
 of `N`).
 
-`ledger-distribution` will default to merging into buckets of 100, 1000 and 10000 blocks.
+`ledger-distribution` will default to merging into buckets of 100, 1000 and
+10000 blocks.
 
 For example:
 * merged blocks with `N=10` and starting index `0` will be at
@@ -156,7 +162,8 @@ matches the existing system.
 
 The main constraints for the fanout mechanism are performance, maintaining
 decentralization (i.e. not introducing a centralized service), and interfacing
-across nodes run by separate operators. Given that, we have opted for a custom API.
+across nodes run by separate operators. Given that, we have opted for a custom
+API.
 
 We shall start with one publisher per consensus node, for maximum flexibility.
 These nodes can be merged/shared per operator cluster, without loss of
@@ -207,7 +214,8 @@ Quoting [Confluent](https://www.confluent.io/what-is-apache-kafka):
 > messaging queue to a full-fledged event streaming platform.
 
 Pros:
-+ Kafka is an established message bus, with a fair bit of established experience hosting and operating instances, including many cloud-hosted options.
+* Kafka is an established message bus, with a fair bit of established experience
+  hosting and operating instances, including many cloud-hosted options.
   * Cloud providers include
     [Confluent Cloud](https://www.confluent.io/confluent-cloud/),
     [Amazon Managed Streaming](https://aws.amazon.com/msk/),
