@@ -15,8 +15,9 @@ mechanism, rather than repeatedly polling S3 for new blocks.
 [motivation]: #motivation
 
 About 40% of the end-to-end transaction time is spent writing to and reading
-from S3. This can be optimized using a dedicated publish/subscribe mechanism to
-distribute updates across nodes.
+from S3. This can be optimized using a dedicated
+[publish/subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)
+mechanism to distribute updates across nodes.
 
 <details>
 <summary>Details on the 40% figure</summary>
@@ -173,7 +174,9 @@ simply not designed
 # Prior art
 [prior-art]: #prior-art
 
-None found.
+* [Streamr Network is a decentralized pub/sub network](https://medium.com/streamrblog/building-the-missing-protocol-of-todays-internet-stack-a-decentralized-pub-sub-network-for-ad1f5972f3ca)
+* [Ethereum has Whisper](https://eth.wiki/concepts/whisper/whisper)
+* [IPFS also has a pubsub implementation](https://blog.ipfs.io/25-pubsub/)
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
