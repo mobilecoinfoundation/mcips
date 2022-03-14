@@ -26,13 +26,15 @@ However, this imposes fairly strict size requirements on the data that can be se
 
 Outside of the memo field, we have a notion of "receipts" and "confirmation numbers" which a sender
 can use to identify themselves to a recipient. These are hashes of the TxOut shared secret, which
-are similarly deniable, and convince the recipient that whoever sent them this number must have access
-to secrets involved in the construction of the TxOut.
+convince the recipient that whoever sent them this number must have access to secrets involved in the
+construction of the TxOut. These receipts have a "deniability" property also shared by signal messages.
+This arises because they are based on the TxOut shared secret, which can be formed by the sender OR the recipient.
 
-However, these numbers are not useful for convincing a third-party who is not a party to the transaction,
-because only the recipient is able to validate these numbers. The recipient could give their private keys
-away to a third party, but this entails giving up their privacy. There is currently no form of receipt that
-can be validated by anyone, just from the blockchain, without such measures.
+However, these confirmation numbers are not useful for convincing a third-party who is not a party to the transaction
+that a particular person sent the transaction, because only the transaction recipient is able to validate these numbers.
+The recipient could give their private keys away to a third party, but this entails giving up their privacy. Even then,
+because of the deniability property, this still only convinces the third party that one of two people sent the Tx.
+There is currently no form of receipt that can be validated by anyone, just from the blockchain.
 
 This is desirable by some app project developers, who would like to store encrypted metadata per TxOut,
 but off-chain. For example, they might like to have a database of encrypted metadata, keyed on TxOut's sent
@@ -77,6 +79,17 @@ We propose to
 
 # Prior art
 [prior-art]: #prior-art
+
+To recap on the deniability property:
+
+* Deniable authentication means that, when the sender "signs" a message, the signature is made by a key exchange with the recipient.
+  * This means that both the sender AND the recipient are technically capable of producing the signature.
+  * The recipient who sees the signature, and knows they didn't produce the signature, concludes the sender must have sent it.
+  * However, the recipient cannot convince another person that they did not forge the signature.
+  * As a result, if the recipient shows the message to a third party (to embarrass the sender), the sender can deny having written
+    the message, and claim that the recipient made the whole thing up.
+* A [good intro](https://www.praetorian.com/blog/an-opinionated-series-on-why-signal-protocol-is-well-designed-deniability/)
+* A (technical) Signal blog post on the topic: https://signal.org/blog/simplifying-otr-deniability/
 
 This proposal touches on some earlier MCIPS:
 
