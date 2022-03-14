@@ -107,6 +107,7 @@ This proposal touches on some earlier MCIPS:
 * [0018-Janus-attack-mitigation](https://github.com/mobilecoinfoundation/mcips/pull/0018)
 
 Outside of MobileCoin, there are many blockchain projects that want to store chain-related data off-chain.
+This is often motivated by scaling considerations.
 
 Popular strategies include:
 * Embed hash of the stored data into the transaction
