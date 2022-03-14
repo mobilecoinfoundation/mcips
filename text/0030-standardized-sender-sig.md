@@ -29,9 +29,10 @@ can use to identify themselves to a recipient. These are hashes of the TxOut sha
 are similarly deniable, and convince the recipient that whoever sent them this number must have access
 to secrets involved in the construction of the TxOut.
 
-However, these numbers are useless for convincing a third-party who is not a party to the transaction,
-because only the recipient is able to validate these numbers. There is currently no form of receipt that
-can be validated by anyone, just from the blockchain.
+However, these numbers are not useful for convincing a third-party who is not a party to the transaction,
+because only the recipient is able to validate these numbers. The recipient could give their private keys
+away to a third party, but this entails giving up their privacy. There is currently no form of receipt that
+can be validated by anyone, just from the blockchain, without such measures.
 
 This is desirable by some app project developers, who would like to store encrypted metadata per TxOut,
 but off-chain. For example, they might like to have a database of encrypted metadata, keyed on TxOut's sent
