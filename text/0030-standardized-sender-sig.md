@@ -119,7 +119,7 @@ We do not believe right now that there is a simpler way to create this signature
 as the signer does not know the root of the `public_key` or `target_key` of `TxOut`'s
 relative to the ristretto basepoint. The signer does know the root relative to some of
 the public subaddress keys of the recipient, but such a signature cannot be verified
-by someone who does not know who the recipient.
+by someone who does not know who the recipient is.
 
 The modification from MCIP #18 seems to be the simplest change we can make that makes
 a signature like this possible, and that modification already has good motivations.
