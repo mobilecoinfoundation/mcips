@@ -31,7 +31,7 @@ to secrets involved in the construction of the TxOut.
 
 However, these numbers are useless for convincing a third-party who is not a party to the transaction,
 because only the recipient is able to validate these numbers. There is currently no form of receipt that
-can be validated just from the blockchain.
+can be validated by anyone, just from the blockchain.
 
 This is desirable by some app project developers, who would like to store encrypted metadata per TxOut,
 but off-chain. For example, they might like to have a database of encrypted metadata, keyed on TxOut's sent
