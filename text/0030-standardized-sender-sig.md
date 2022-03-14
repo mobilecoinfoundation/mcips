@@ -72,11 +72,18 @@ We propose to
   * Also, implement code for a "Janus test" which enables clients to detect the
     Janus attack, as described in MCIP #18.
 * Standardize a Schnorrkel-based signature using Ristretto curve points, made using the tx private key,
-  and validated using the ephemeral key in the fog hint. This entails:
-  * Make the transaction builder either optionally return the tx private key when `add_output` is called,
-    or, you may optionally pass it a blob to be signed, and it produces the signature and then deletes the
-    private key. That creates a constraint that the blob must be available to sign at the time of constructing
-    the TxOut, which may or may not be acceptable.
+  and validated using the ephemeral key in the fog hint. This entails (one of):
+  * Make the transaction builder take a blob to be signed when `add_output` is called.
+    `add_output` produces the signature as an additoinal return value.
+  * Make the transaction builder return a "signing context" when `add_output` is called.
+    This contains the tx private key and can be used to later sign any number of blobs.
+    This object zeroizes the tx private key when it goes out of scope.
+    * The idea is, perhaps some of the data that needs to be signed needs to be obtained
+      from an endpoint, but the app would rather not wait for that call to return before
+      submitting the transaction. This way, the app could build and submit a transaction
+      in parallel with obtaining some of the data to be signed, and pipeline calls,
+      potentially reducing end to end transaction times. Since it's just a thought experiment,
+      we don't know if it would matter in a real app.
 * Standardize validation code that validates a blob and its signature against a TxOut.
 
 # Prior art
