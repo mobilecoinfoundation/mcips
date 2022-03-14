@@ -33,8 +33,9 @@ This arises because they are based on the TxOut shared secret, which can be form
 
 However, these confirmation numbers are not useful for convincing a third-party who is not a party to the transaction
 that a particular person sent the transaction, because only the transaction recipient is able to validate these numbers.
-The recipient could give their private keys away to a third party, but this entails giving up their privacy. Even then,
-because of the deniability property, this still only convinces the third party that one of two people sent the Tx.
+Even if the recipient gives away their private keys to a third party, this still doesn't work, because the confirmation
+numbers have the deniability property, and the recipient could say that anyone had sent them the confirmation number.
+(The hmac appearing in the memos in MCIP #4 couldn't have been created by anyone, but could have been created by the recipient.)
 There is currently no form of receipt that can be validated by anyone, just from the blockchain.
 
 This is desirable by some app project developers, who would like to store encrypted metadata per TxOut,
