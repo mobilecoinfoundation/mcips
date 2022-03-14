@@ -27,8 +27,9 @@ However, this imposes fairly strict size requirements on the data that can be se
 Outside of the memo field, we have a notion of "receipts" and "confirmation numbers" which a sender
 can use to identify themselves to a recipient. These are hashes of the TxOut shared secret, which
 convince the recipient that whoever sent them this number must have access to secrets involved in the
-construction of the TxOut. These receipts have a "deniability" property also shared by signal messages.
+construction of the TxOut. These confirmation numbers have a "deniability" property also shared by signal messages.
 This arises because they are based on the TxOut shared secret, which can be formed by the sender OR the recipient.
+(For more discussion, see the prior art section.)
 
 However, these confirmation numbers are not useful for convincing a third-party who is not a party to the transaction
 that a particular person sent the transaction, because only the transaction recipient is able to validate these numbers.
@@ -47,6 +48,7 @@ We can simply use the Schnorrkel-based signature with Ristretto curve points tha
 
 This might also be useful because it makes the notion of receipts somewhat more robust -- arbitrary metadata
 can be signed by the sender, and this form of signature will not have the deniability property.
+This happens because it is a traditional digital signature, based on a key that only the sender has.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
