@@ -16,7 +16,7 @@ The MobileCoin ledger protocol currently supports one token type, MOB. We would 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A Transaction Output (TXO) has a confidential TokenType enum field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
+A Transaction Output (TXO) has a confidential TokenType bytes field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
 
 Each TokenType has an explicit minimum fee specified by node operators, and included in the attestation handshake, ensuring that all nodes in the network are configured with the same fee minimums and TokenType sets. New TokenTypes can be added only with unanimous agreement from all node operators. 
 
@@ -29,7 +29,7 @@ Clients must choose how to expose multiple asset types to their users. There may
 
 ### Masked Token ID Field in the TXO
 
-A `TokenType` is added which specifies a `u32 token_id`. The `token_id` for each TXO represents the Token Type of that TXO, with the first `TokenType` being `MOB = token_id(0)`. New TokenTypes increase the `token_id` monotonically. For example, the `TokenType` struct may be something like,
+A `TokenType` is added which specifies a `u32 token_id`. We maintain a list of `KnownTokenId` in both the external proto definition, as well as in the transaction core crate. The `token_id` for each TXO represents the Token Type of that TXO, with the first `TokenType` being `MOB = token_id(0)`. New TokenTypes increase the `token_id` monotonically. For example, the `TokenType` struct may be something like,
 
 ```
 struct TokenType {
@@ -46,7 +46,7 @@ struct TokenType {
 }
 ```
 
-The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/master/transaction/core/src/amount/mod.rs#L28) in each TXO, and functions similar to `masked_value`. The protocol representation of the TXO uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
+The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cb10d41d404c552cab19de0163992923a878ed5e/transaction/core/src/amount/mod.rs#L46) in each TXO, and functions similar to `masked_value`. The protocol representation of the TXO uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
 
 - To compute the 4 byte `masked_token_id` from the `token_id`, we hash the TXO shared secret, with a prefix, XORed with the `token_id`, and take the little endian representation of those bytes.
 
@@ -60,9 +60,31 @@ The `masked_token_id` field is added to the [`Amount`](https://github.com/mobile
     unmasked_token_id = masked_token_id ^ Blake2b(token_id_tag | shared_secret)
     ```
 
-### Proof of Opening: Proof of Knowledge of Uniform Token ID in the Transaction
+### Amount
 
-We would like to be able to prove that all transaction inputs and outputs are using the same `token_ids`. We do this using a non-interactive, zero knowledge Proof of Opening that the sender has the capability to unwrap the sum of output commitments in the transaction, in conjunction with the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator.
+Previously, an `amount` of picomob in a TxOut is represented by a Pedersen commitment to that number, as well as a `masked_value`, which is created by XORing the number of picomob with a pseudorandom mask (derived by hashing a shared secret). The purpose of the `masked_value` is that when the recipient receives a TxOut, they can unmask this value, then reconstruct the Pedersen commitment from the number, to confirm successful recovery of the value.
+
+After this change:
+
+A `masked_token_id` is added, which, similarly to `masked_value`, provides a way for the recipient to learn the `token_id` (and then subsequently confirm it). The Pedersen commitment to the value now is made using a basepoint `H_i` which depends on the `token_id`. (The basepoint for the blinding factor is the same as before regardless of the `token_id`.)
+
+Thus, the recipient can attempt to scan a TxOut by first constructing the shared secret, then unmasking the `masked_amount` and `masked_token_id`, and then reconstructing the Pedersen commitment. If this reconstruction is successful, then the recipient knows the `amount` and the `token_id`, similarly as before the support for a confidential`token_id`.
+
+### Pedersen Generators
+
+The requirements for the Pedersen generators are:
+
+* The generator used for MOB is the same as before, so `H_0` is a known value.
+* The set of all generators used for token ids should be cryptographically "orthogonal", meaning that, it should be intractable for anyone to find a linear relationship between them.
+* The function mapping a `token_id`, `i`, to the generator `H_i` must be implemented in constant-time.
+
+The established value for `H_0` in mobilecoin is to take the `RISTRETTO_BASEPOINT` bytes, hash them using Blake2b, and then hash this to the ristretto curve using the elligator map exposed by curve25519-dalek.
+
+We propose to compute `H_i` by converting `i` to little endian bytes, and XOR'ing these bytes over the first four bytes of the `RISTRETTO_BASEPOINT` bytes before hashing them with Blake2b, because this is a simple way to meet these requirements.
+
+### Proof that a Uniform Token ID is in the Transaction
+
+We would like to be able to prove that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator.
 
 - To prove each TXO's commitment to the `amount` value, we use a Pedersen commitment, consisting of a group generator (`H_i`) raised to the value of the `amount`, with a blinding factor to prevent brute-forcing the full range of values (`2^64`). We compute the blinding factor as the blinding group generator raised to a hash of the shared secret for the TXO.
 
@@ -219,21 +241,7 @@ Because untrusted never sees the `fee` or `token_id` in the clear, the attacker 
 
 As this is a substantial change to the ledger format and transaction protocol, we need to be thoughtful about what rollout looks like for this change to land with minimal impact on existing clients and maximum backward compatibility.
 
-The rollout proposal is the following:
-
-1. The enclaves are released containing the validation change to support Proof of Opening verification and the `masked_token_id` field in the ledger format for TXOs, starting a 90 day grace period timer.
-2. Clients update to:
-    - at a minimum:
-        - construct transactions with the Proof of Opening and the `masked_token_id` in output TXOs, not allowing any new outputs to use the default empty bytes array for the `masked_token_id` field.
-        - default to `token_id = 0` when processing TXOs without a `masked_token_id` field
-        - obtain the `minimum_fee` for the default token (MOB)
-    - optionally expose multiple asset types by:
-        - obtain the `minimum fee` for all assets
-        - support constructing transactions with arbitrary `token_id`
-        - display balance for some set of `token_ids`
-3. The consensus validator nodes are deployed and allow for both new style and old style transactions to be constructed, validated, and externalized to the ledger for some grace period. However, no new outputs can be spent in old-style transactions, and new outputs must have an explicit `token_id` even if it's an old-style transaction
-4. After some event, such as a particularly specified minting transaction for a new asset type, the validators no longer allow new outputs to be spent in old-style transactions, and all new transactions must contain the Proof of Opening.
-5. From this time forward, new asset types may be minted without an enclave upgrade.
+The upgrade plan is described in full in [MCIP #26](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0026-block-version-based-protocol-evolution.md).
 
 # Drawbacks
 [drawbacks]: #drawbacks
