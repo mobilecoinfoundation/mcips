@@ -87,7 +87,7 @@ For example, an implementation to obtain a generator for `token_id = i` could lo
     B_blinding = RISTRETTO_BASEPOINT
     ```
 
-After this change, `range_proofs` and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Why?]
+After this change, `range_proofs`, `rct_bulletproofs`, and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Why?]
 
 ### Validation
 
@@ -137,23 +137,6 @@ The non-interactive zero knowledge Proof of Opening protocol is the following: (
     
 This protocol is non-interactive because the prover anticipates the verifier's `e` value, so requires no interaction from the verifier.
 
-Thus, the Proof of Knowledge could be represented, for example, with:
-
-```
-struct ProofOfKnowledge {
-
-    /// Prover value established from hashes of commitment and blinding factor secrets
-    CompressedRistretto d,
-    
-    /// Prover value from the token_id response to the verifier's commitment-derived challenge
-    CurveScalar u,
-    
-    /// Prover value from the blinding_factor response to the verifier's commitment-derived challenge
-    CurveScalar v,
-}
-```
-
-- Implementation note: The proof of knowledge should be constructed at [this line](https://github.com/mobilecoinfoundation/mobilecoin/blob/a9db0bc7bcac9bac1c1232b194003d02bccaf283/transaction/core/src/ring_signature/rct_bulletproofs.rs#L304) in the sign function.
 
 Then, the Transaction Validator need perform the following validation check, after calculating the sum of the outputs (in order to verify the sum of the inputs matches the sum of the outputs, and thus that no value was created or destroyed), at [this line](https://github.com/mobilecoinfoundation/mobilecoin/blob/a9db0bc7bcac9bac1c1232b194003d02bccaf283/transaction/core/src/ring_signature/rct_bulletproofs.rs#L170):
 
@@ -172,11 +155,11 @@ A simple proposal is that the enclave discontinue fee aggregation, so that the n
 
 Note that the untrusted portion of the node software knows how many transactions are in each block, and this is not considered statistically relevant information with respect to confidentiality. In other words, the current fee aggregation behavior is not meant as a confidentiality measure, purely as a space-saving measure.
 
-### Fee Ratio and Transaction Sorting
+### Fee Priority and Transaction Sorting
 
 Currently the [WellFormedTxContext](https://github.com/mobilecoinfoundation/mobilecoin/blob/a092039a4a5cc7f5e3e16eeadd0b2bc3a12667ae/consensus/enclave/api/src/lib.rs#L50) contains the fee, which must be used by untrusted to [sort transactions](https://github.com/mobilecoinfoundation/mobilecoin/blob/a092039a4a5cc7f5e3e16eeadd0b2bc3a12667ae/consensus/enclave/api/src/lib.rs#L131) when [combining transactions](https://github.com/mobilecoinfoundation/mobilecoin/blob/a092039a4a5cc7f5e3e16eeadd0b2bc3a12667ae/consensus/service/src/tx_manager/untrusted_interfaces.rs#L40) for consideration by the enclave, prioritizing higher fees for inclusion in the block during periods of network congestion. In order to keep the `token_id` confidential, we must provide a mechanism for untrusted to accurately sort transactions before asking the enclave to do work on the transactions, without revealing the `token_id`, and at the same time, allowing for different asset types to express differing minimum fee requirements.
 
-To derive a sorting order without revealing the transaction type, the `fee` in the WellFormedTxContext becomes a `fee_ratio`, which is calculated based on the ratio between the minimum fees configured by the node operator on startup. For example, the network operators may have configured the following fees:
+To derive a sorting order without revealing the transaction type, the `fee` in the `WellFormedTxContext` derives a `priority`, which is calculated based on some ratio between the minimum fees configured by the node operator on startup. For example, the network operators may have configured the following minimum fees:
 
 ```
 {
@@ -188,7 +171,7 @@ To derive a sorting order without revealing the transaction type, the `fee` in t
 
 The ratio between the fees for the `token_ids` is the following, using the least common multiple of the fees:
 
-`token_id` | fee | `fee_ratio` multiplier
+`token_id` | `fee` | `priority` multiplier
 --- | --- | ---
 000 | 1 | 6
 111 | 2 | 3
@@ -209,7 +192,7 @@ Then, imagine that a block contains the following set of transactions with the g
 
 The sort order would be:
 
-`transaction_id` | `token_id` | `fee_ratio` multiplier | original fee | `fee_ratio` result
+`transaction_id` | `token_id` | `priority` multiplier | original `fee` | `priority` result
 --- | --- | --- | --- | ---
 transaction_2 | 000 | 6 | 1.5 | 9
 transaction_5 | 888 | 2 | 4 | 8
@@ -217,14 +200,14 @@ transaction_1 | 000 | 6 | 1 | 6
 transaction_3 | 111 | 3 | 2 | 6
 transaction_4 | 888 | 2 | 3 | 6
 
-Note how the two transactions paying more than their minimum fee are sorted to the top, in proportion to how much they are paying above the minimum fee, while all minimum fee transactions have an equal chance of beeing sorted because their `fee_ratio` is equal.
+Note how the two transactions paying more than their minimum fee are sorted to the top, in proportion to how much they are paying above the minimum fee, while all minimum fee transactions have an equal chance of beeing sorted because their `priority` is equal.
+
+For users who are adjusting the fees of their submitted transactions to increase the likelihood of their transaction being accepted during times of congestion, they can observe the `priority` multiplier for their `token_id`, and the recently accepted `priority` values, and determine what fee value is appropriate to increase the chances of acceptance.
 
 ### Performance Impact: Size & Space Analysis
 
 - Each TxOut has 6 new bytes allocated in the Amount object for the `masked_token_id` (4 bytes for the value, 2 bytes for Protobuf overhead)
-- The RingCT bulletproof signature increases by at least 96 bytes to contain the Proof of Opening (plus Protobuf overhead).
-- Each block now contains a number of fee outputs scaling linearly with the number of transactions in a block, as opposed to a single fee output aggregated from multiple transactions in a block.
-    - In practice, most clients currently output 2 TxOuts, one for the recipient and one for change, unless performing a `split_TxOut` operation. Output growth on chain is currently dominated by the number of outputs in a transaction, and since blocks typically clear fast enough that there is only one transaction in a block for which to aggregate the fee, this should not have a deleterious effect on the space capacity of the chain, especially given that up to [16 outputs are permitted for every transaction](https://github.com/mobilecoinfoundation/mobilecoin/blob/e74d4c821cb213290975d6d5a9390778661cebfe/transaction/core/src/constants.rs#L17).
+- Each block now contains a number of fee outputs scaling linearly with the total number of supported `token_ids`. This way we can continue to aggregate fees, but not reveal how many token types were included in the block. For blocks with fewer transactions than `token_ids`, the number of fee outputs is `min(num_token_ids, num_transactions_in_block)`
 
 ### Confidentiality Analysis
 
@@ -268,7 +251,7 @@ This is a substantial change to the protocol, and a breaking change for clients.
 # Prior art
 [prior-art]: #prior-art
 
-- This proposal contains a non-novel commitment scheme as specified in [Zero Knowledge Proofs and Commitment Schemes, Page 27](https://www.cs.purdue.edu/homes/ninghui/courses/555_Spring12/handouts/555_Spring12_topic23.pdf) and uses properties of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF) for the Proof of Opening
+- [Spats](https://github.com/AaronFeickert/spats) is an extension to the [Spark](https://eprint.iacr.org/2021/1173) transaction protocol to support confidential assets
 - [Andrew Poelstra describes Confidential Assets](https://blog.blockstream.com/en-blockstream-releases-elements-confidential-assets/) for Blockstream, along with [this whitepaper](https://blockstream.com/bitcoin17-final41.pdf)
 
 # Unresolved questions
