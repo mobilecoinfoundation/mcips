@@ -82,21 +82,21 @@ We propose to compute `H_i` by converting `i` to little endian bytes, and XOR'in
 
 For example, an implementation to obtain a generator for `token_id = i` could look like:
 
-    ```
-    B = RistrettoPoint::from_hash(Blake2b(HASH_TO_POINT_DOMAIN_TAG | RISTRETTO_BASEPOINT ^ token_id))
-    B_blinding = RISTRETTO_BASEPOINT
-    ```
+```
+B = RistrettoPoint::from_hash(Blake2b(HASH_TO_POINT_DOMAIN_TAG | RISTRETTO_BASEPOINT ^ token_id))
+B_blinding = RISTRETTO_BASEPOINT
+```
 
-After this change, `range_proofs`, `rct_bulletproofs`, and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Explanation?]
+After this change, `range_proofs`, `rct_bulletproofs`, and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. `H_i` is revealed to the verifier, who must show that the sum of inputs does not overflow, or `sum(outputs) = a * G + b * H_i` for some TxOut-specific values of `a` and `b`. 
 
 ### Commitments
 
 To prove each TxOut's commitment to the `amount` value, we use a Pedersen commitment, consisting of a group generator (`H_i`) raised to the value of the `amount`, with a blinding factor to prevent brute-forcing the full range of values (`2^64`). We compute the blinding factor as the blinding group generator raised to a hash of the shared secret for the TxOut.
 
-    ```
-    blinding_factor = Blake2B(blinding_tag | shared_secret)
-    commitment = H_i * Scalar::from(amount) + G * blinding_factor
-    ```
+```
+blinding_factor = Blake2B(blinding_tag | shared_secret)
+commitment = H_i * Scalar::from(amount) + G * blinding_factor
+```
 
 - Note, the group generators for `token_ids` are computed using hashing to a curve so that they are "orthogonal" for computable adversaries, meaning there is no discernable, nontrivial linear relationship between base points. See our [transaction core group generators reference](https://github.com/mobilecoinfoundation/mobilecoin/blob/master/transaction/core/src/ring_signature/mod.rs#L29). 
     - Note also, the blinding factor base point does not need to be unique per `token_id`, so we use the same blinding factor base point for all `token_ids`.
