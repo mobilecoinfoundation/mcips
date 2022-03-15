@@ -11,16 +11,16 @@ Enable new token types to be added to the protocol and transacted on chain witho
 # Motivation
 [motivation]: #motivation
 
-The MobileCoin ledger protocol currently supports one token type, MOB. We would like to allow the addition of assets to the ledger without revealing which assets were involved in any transaction. The transaction confidentiality and integrity guarantees should be the same for the MobileCoin blockchain no matter how many token types are supported. Namely, the sender, the recipient, and the amount should remain private to all except the participants in the transaction, and no double spending or unauthorized minting should be possible. In addition, we now specify that the asset type should remain private to all except the participants in the transaction.
+The MobileCoin ledger protocol currently supports one token type, MOB. We would like to allow the addition of assets to the ledger without revealing which assets were involved in any transaction. The transaction confidentiality and integrity guarantees should be the same for the MobileCoin blockchain no matter how many token types are supported. Namely, the sender, the recipient, and the amount should remain private to all except the participants in the transaction, and no double spending or unauthorized minting should be possible. In addition, we now specify that the token type should remain private to all except the participants in the transaction.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A Transaction Output (TxOut) has a confidential TokenType bytes field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
+A Transaction Output (TxOut) has a confidential `token_id` bytes field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single `token_id`. Some tokens may have additional functionality, such as minting and burning, which require verification of the `token_id` as part of the authorization of the action.
 
-Each TokenType has an explicit minimum fee specified by node operators, and included in the attestation handshake, ensuring that all nodes in the network are configured with the same fee minimums and TokenType sets. New TokenTypes can be added only with unanimous agreement from all node operators. 
+Each `token_id` has an explicit minimum fee specified by node operators, and included in the attestation handshake, ensuring that all nodes in the network are configured with the same fee minimums and `token_id` sets. New `token_ids` can be added only with unanimous agreement from all node operators.
 
-A transaction specifies the TokenType for the entire transaction, and includes a "Proof of Opening" that all `token_ids` in the inputs and outputs are the same. This prevents spending one TokenType as a member of another TokenType. The TransactionBuilder now takes a `token_id` as an argument in its initializer. The TokenType is set in the clear on the TxPrefix for a transaction, which is only accessed in the enclave, after the payload is delivered via an encrypted, attested channel. This is similar to the TxInputs, and thus has a similar threat model for confidentiality. See [Confidentiality Analysis](#confidentiality-analysis) for an assessment of risk.
+A transaction specifies the `token_id` for the entire transaction, with a cryptographic guarantee that all inputs and outputs are of the same `token_id`. This prevents spending one `token_id` as a member of another `token_id`. The TransactionBuilder now takes a `token_id` as an argument in its initializer. The `token_id` is set in the clear on the `TxPrefix` for a transaction, which is only accessed in the enclave, after the payload is delivered via an encrypted, attested channel. This is similar to the `TxInputs`, and thus has a similar threat model for confidentiality. See [Confidentiality Analysis](#confidentiality-analysis) for an assessment of risk.
 
 Clients must choose how to expose multiple asset types to their users. There may be clients who wish to only expose a subset of asset types, or clients who wish to provide balances and transactionality in all asset types. 
 
@@ -29,7 +29,7 @@ Clients must choose how to expose multiple asset types to their users. There may
 
 ### Masked Token ID Field in the TxOut
 
-For each token type that is added, we specify a `u32 token_id`. We maintain a list of `KnownTokenIds` in both the external proto definition, as well as in the transaction core crate. The first `TokenType` is `MOB = token_id(0)`, with the assumption that an unspecified `token_id` defaults to 0, for backward cmopatibility. New `token_ids` increase monotonically. For example, the `KnownTokenId` enum in the external proto may be something like,
+For each token type that is added, we specify a `u32 token_id`. We maintain a list of `KnownTokenIds` in both the external proto definition, as well as in the transaction core crate. The first token type is `MOB = token_id(0)`, with the assumption that an unspecified `token_id` defaults to 0, for backward cmopatibility. New `token_ids` increase monotonically. For example, the `KnownTokenId` enum in the external proto may be something like,
 
 ```
 enum KnownTokenId {
@@ -48,9 +48,9 @@ After this change:
 
 A `masked_token_id` is added, which, similarly to `masked_value`, provides a way for the recipient to learn the `token_id` (and then subsequently confirm it). The Pedersen commitment to the value now is made using a basepoint `H_i` which depends on the `token_id`. (The basepoint for the blinding factor is the same as before regardless of the `token_id`.)
 
-Thus, the recipient can attempt to scan a TxOut by first constructing the shared secret, then unmasking the `masked_amount` and `masked_token_id`, and then reconstructing the Pedersen commitment. If this reconstruction is successful, then the recipient knows the `amount` and the `token_id`, similarly as before the support for a confidential`token_id`.
+Thus, the recipient can attempt to scan a TxOut by first constructing the shared secret, then unmasking the `masked_amount` and `masked_token_id`, and then reconstructing the Pedersen commitment. If this reconstruction is successful, then the recipient knows the `amount` and the `token_id`, similarly as before the support for a confidential `token_id`.
 
-The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cb10d41d404c552cab19de0163992923a878ed5e/transaction/core/src/amount/mod.rs#L46) in each TxOut, and functions similar to `masked_value`. The protocol representation of the TxOut uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
+The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cb10d41d404c552cab19de0163992923a878ed5e/transaction/core/src/amount/mod.rs#L46) in each TxOut. The protocol representation of the TxOut uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
 
 * To compute the 4 byte `masked_token_id` from the `token_id`, we hash the TxOut shared secret, with a prefix, XORed with the `token_id`, and take the little endian representation of those bytes.
 
@@ -70,9 +70,9 @@ Previously, we used the same curve base point for all Pedersen generators to Amo
 
 The requirements for the Pedersen generators are:
 
-* The generator used for MOB is the same as before, so `H_0` is a known value.
+* The generator used for `MOB = token_id(0)` is the same as before, so `H_0` is a known value.
 
-* The set of all generators used for token ids should be cryptographically "orthogonal", meaning that, it should be intractable for anyone to find a linear relationship between them.
+* The set of all generators used for `token_ids` should be cryptographically "orthogonal", meaning that, it should be intractable for anyone to find a linear relationship between them.
 
 * The function mapping a `token_id`, `i`, to the generator `H_i` must be implemented in constant-time.
 
@@ -87,9 +87,9 @@ For example, an implementation to obtain a generator for `token_id = i` could lo
     B_blinding = RISTRETTO_BASEPOINT
     ```
 
-After this change, `range_proofs`, `rct_bulletproofs`, and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Why?]
+After this change, `range_proofs`, `rct_bulletproofs`, and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Explanation?]
 
-### Validation
+### Commitments
 
 To prove each TxOut's commitment to the `amount` value, we use a Pedersen commitment, consisting of a group generator (`H_i`) raised to the value of the `amount`, with a blinding factor to prevent brute-forcing the full range of values (`2^64`). We compute the blinding factor as the blinding group generator raised to a hash of the shared secret for the TxOut.
 
@@ -98,60 +98,14 @@ To prove each TxOut's commitment to the `amount` value, we use a Pedersen commit
     commitment = H_i * Scalar::from(amount) + G * blinding_factor
     ```
 
-    - Note, the group generators for Token Types are computed using hashing to a curve so that they are "orthogonal" for computable adversaries, meaning there is no discernable, nontrivial linear relationship between base points. See our [transaction core group generators reference](https://github.com/mobilecoinfoundation/mobilecoin/blob/master/transaction/core/src/ring_signature/mod.rs#L29). 
-    - Note also, the blinding factor base point does not need to be unique per TokenType, so we use the same blinding factor base point for all TokenTypes.
-    - Note finally, the Proof of Opening requires all commitments in a transaction were generated using the same group generator, base point `H_i`. If the commitments in input and/or output TxOuts in a transaction are constructed with different group generators, and the sender is able to unwrap the sum as specified in the protocol below, it implies that the sender knows a nontrivial linear relationship among the `H_i`, which contradicts the assumption that the `H_i` are orthogonal. 
-
-The non-interactive zero knowledge Proof of Opening protocol is the following: (See [Zero Knowledge Proofs and Commitment Schemes, Page 27](https://www.cs.purdue.edu/homes/ninghui/courses/555_Spring12/handouts/555_Spring12_topic23.pdf))
-
-
-1. The prover establishes a value, `d`, calculated by hashing their secret values from the commitment (the `token_id` and the `blinding_factor`). Implementation note, we may use [Merlin](https://docs.rs/merlin/latest/merlin/) rather than Blake2B.
-
-    ```
-    y = Blake2B(proof_tag_t | token_id)
-    s = Blake2B(proof_tag_b | blinding_factor)
-    d = G * y + H * s
-    ```
-
-2. The non-interactive verifier chooses challenge, `e`, by hashing the commitment and the value `d` from the previous step.
-
-    ```
-    e = Blake2B(proof_tag_e | commitment | d)
-    ```
-
-3. The prover computes the following, and includes these values in the Proof of Opening:
-
-    ```
-    u = y + e * token_id
-    v = s + e * blinding_factor
-    ```
-
-4. The verifier of the Proof of Opening must verify:
-
-    ```
-    G * u + H * v = d + commitment * e
-    ```
-
-    - This property follows a similar property of the [Schnorr Proof of Knowledge protocol](https://en.wikipedia.org/wiki/Proof_of_knowledge#Schnorr_protocol)
-
-    
-This protocol is non-interactive because the prover anticipates the verifier's `e` value, so requires no interaction from the verifier.
-
-
-Then, the Transaction Validator need perform the following validation check, after calculating the sum of the outputs (in order to verify the sum of the inputs matches the sum of the outputs, and thus that no value was created or destroyed), at [this line](https://github.com/mobilecoinfoundation/mobilecoin/blob/a9db0bc7bcac9bac1c1232b194003d02bccaf283/transaction/core/src/ring_signature/rct_bulletproofs.rs#L170):
-
-```
-verify(G, H, commitment, proof_of_knowledge) {
-    e = Blake2B(proof_tag_e | commitment | proof_of_knowledge.d)
-    proof_of_knowledge.d + (commitment * e) == G * proof_of_knowledge.u + H * proof_of_knowledge.v
-}
-```
+- Note, the group generators for `token_ids` are computed using hashing to a curve so that they are "orthogonal" for computable adversaries, meaning there is no discernable, nontrivial linear relationship between base points. See our [transaction core group generators reference](https://github.com/mobilecoinfoundation/mobilecoin/blob/master/transaction/core/src/ring_signature/mod.rs#L29). 
+    - Note also, the blinding factor base point does not need to be unique per `token_id`, so we use the same blinding factor base point for all `token_ids`.
 
 ### Fee Outputs
 
-Currently, the enclave aggregates the fees for multiple transactions in a block, in order to mint a single fee output for the block and conserve space. To support multiple confidential TokenTypes, when minting fee outputs, the enclave must create multiple fee outputs if multiple TokenTypes were used in the block. A consideration here is that we would like for an observer not to discern whether a block contains transactions of multiple asset types by statistically analyzing the number of outputs to derive information about the number of fee outputs. 
+Currently, the enclave aggregates the fees for multiple transactions in a block, in order to mint a single fee output for the block and conserve space. To support multiple confidential `token_ids`, when minting fee outputs, the enclave must create multiple fee outputs if multiple `token_ids` were used in the block. A consideration here is that we would like for an observer not to discern whether a block contains transactions of multiple asset types by statistically analyzing the number of outputs to derive information about the number of fee outputs. 
 
-A simple proposal is that the enclave discontinue fee aggregation, so that the number of fee outputs scale linearly with the number of transactions in a block (not output TxOuts). For example, a block with 3 transactions includes 3 fee outputs. Because each transaction can mint up to 16 output TxOuts, there may be a variable number of outputs in the block. 
+A simple proposal is that each block now contains a number of fee outputs scaling linearly with the total number of supported `token_ids`. This way we can continue to aggregate fees, but not reveal how many token types were included in the block. For blocks with fewer transactions than `token_ids`, the number of fee outputs is `min(num_token_ids, num_transactions_in_block)`
 
 Note that the untrusted portion of the node software knows how many transactions are in each block, and this is not considered statistically relevant information with respect to confidentiality. In other words, the current fee aggregation behavior is not meant as a confidentiality measure, purely as a space-saving measure.
 
@@ -207,7 +161,7 @@ For users who are adjusting the fees of their submitted transactions to increase
 ### Performance Impact: Size & Space Analysis
 
 - Each TxOut has 6 new bytes allocated in the Amount object for the `masked_token_id` (4 bytes for the value, 2 bytes for Protobuf overhead)
-- Each block now contains a number of fee outputs scaling linearly with the total number of supported `token_ids`. This way we can continue to aggregate fees, but not reveal how many token types were included in the block. For blocks with fewer transactions than `token_ids`, the number of fee outputs is `min(num_token_ids, num_transactions_in_block)`
+- Each block now contains a number of fee outputs capped by `min(num_token_ids, num_transactions_in_block)`
 
 ### Confidentiality Analysis
 
@@ -223,7 +177,7 @@ Now that the Tx is validated as "well-formed," sorted and combined for a ballot 
 
 The TxManager in untrusted for each node maintains a cache of encrypted txs and tx contexts that its enclave has found to be well-formed. Once the consensus protocol is complete, the untrusted TxManager calls [form_block]() which prompts the [enclave to `form_block`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cfa51d26ae943a9055698bb209c2fe06fa7a7cac/consensus/enclave/impl/src/lib.rs#L421) using the full transaction contents.
 
-Because untrusted never sees the `fee` or `token_id` in the clear, the attacker would need to sustain an enclave exploit, such as a side channel attack, that would allow them to access data while the enclave is processing to discern the TokenType of a transaction. With this information, the attacker could, for the duration of the exploit, determine which asset type each transaction was composed of, and could also construct a transaction graph for statistical analysis of the inputs, which are also only visible in the TxPrefix, but not persisted to the chain. Once the integrity of SGX was restored, the attacker would no longer be able to obtain information about the transaction inputs or TokenType, and forward secrecy is preserved. Further, by being thoughtful about the memory access of the `token_id`, and using constant time operations, we can mitigate the data leakage even in the event of a side channel exploit.
+Because untrusted never sees the `fee` or `token_id` in the clear, the attacker would need to sustain an enclave exploit, such as a side channel attack, that would allow them to access data while the enclave is processing to discern the `token_id` of a transaction. With this information, the attacker could, for the duration of the exploit, determine which asset type each transaction was composed of, and could also construct a transaction graph for statistical analysis of the inputs, which are also only visible in the TxPrefix, but not persisted to the chain. Once the integrity of SGX was restored, the attacker would no longer be able to obtain information about the transaction inputs or `token_id`, and forward secrecy is preserved. Further, by being thoughtful about the memory access of the `token_id`, and using constant time operations, we can mitigate the data leakage even in the event of a side channel exploit.
 
 ### Upgrade Plan
 
@@ -237,9 +191,8 @@ The upgrade plan is described in full in [MCIP #26](https://github.com/mobilecoi
 This is a substantial change to the protocol, and a breaking change for clients. Other drawbacks include:
 
 - Increasing complexity of TxOuts and transaction construction & validation
-- Increasing the transaction validation footprint in the enclave to include Proof of Opening
 - Increasing the amount of data on the ledger
-- `masked_token_id` bytes must be plumbed everywhere, in Fog and clients, but no more serious changes are needed in Fog. Note that if the TokenType was not confidential, Fog Ledger would need a much larger change in order to properly select rings
+- `masked_token_id` bytes must be plumbed everywhere, in Fog and clients, but no more serious changes are needed in Fog. Note that if the `token_id` was not confidential, Fog Ledger would need a much larger change in order to properly select rings
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
