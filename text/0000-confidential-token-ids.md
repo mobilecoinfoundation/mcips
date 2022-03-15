@@ -199,6 +199,7 @@ This is a substantial change to the protocol, and a breaking change for clients.
 
 - We could use `u16` for the `token_ids` rather than `u32` to save space, but we would like to anticipate the possibility of more than 65,000 asset types. 
 - We could use Merlin rather than Blake2B
+- We could only accept fees in one asset type, to prevent complication of client logic and enclave management of multiple fee aggregations
 - We could use non-confidential token types, but this has two downsides: it breaks the ledger into multiple sets which could be statistically analyzed for `token_id`, and it requires much more logic around post processing the ledger for fog. With the proposal here, fog remains oblivious to `token_id` and need not complicate how it selects rings, for example.
 
 # Prior art
