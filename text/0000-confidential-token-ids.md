@@ -16,7 +16,7 @@ The MobileCoin ledger protocol currently supports one token type, MOB. We would 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A Transaction Output (TXO) has a confidential TokenType bytes field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
+A Transaction Output (TxOut) has a confidential TokenType bytes field (`masked_token_id`). Transactions with inputs and outputs, including a fee output, must be composed of a single TokenType. Some tokens may have additional functionality, such as minting and burning, which require verification of the TokenType as part of the authorization of the action.
 
 Each TokenType has an explicit minimum fee specified by node operators, and included in the attestation handshake, ensuring that all nodes in the network are configured with the same fee minimums and TokenType sets. New TokenTypes can be added only with unanimous agreement from all node operators. 
 
@@ -27,38 +27,18 @@ Clients must choose how to expose multiple asset types to their users. There may
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-### Masked Token ID Field in the TXO
+### Masked Token ID Field in the TxOut
 
-A `TokenType` is added which specifies a `u32 token_id`. We maintain a list of `KnownTokenId` in both the external proto definition, as well as in the transaction core crate. The `token_id` for each TXO represents the Token Type of that TXO, with the first `TokenType` being `MOB = token_id(0)`. New TokenTypes increase the `token_id` monotonically. For example, the `TokenType` struct may be something like,
+For each token type that is added, we specify a `u32 token_id`. We maintain a list of `KnownTokenIds` in both the external proto definition, as well as in the transaction core crate. The first `TokenType` is `MOB = token_id(0)`, with the assumption that an unspecified `token_id` defaults to 0, for backward cmopatibility. New `token_ids` increase monotonically. For example, the `KnownTokenId` enum in the external proto may be something like,
 
 ```
-struct TokenType {
+enum KnownTokenId {
 
-    \\\ Token Name, such as MOB
-    string token_name,
-    
-    \\\ Token ID to be represented confidentially in each TXO
-    u32 token_id,
-    
-    \\\ Curve base point, unique for each TokenType, from which the TXO's commitment is 
-    \\\ generated with the value of the `amount` in the TXO
-    RistrettoPoint H_i
+    \\\ Token Name = token_id
+    MOB = 0;
+
 }
 ```
-
-The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cb10d41d404c552cab19de0163992923a878ed5e/transaction/core/src/amount/mod.rs#L46) in each TXO, and functions similar to `masked_value`. The protocol representation of the TXO uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
-
-- To compute the 4 byte `masked_token_id` from the `token_id`, we hash the TXO shared secret, with a prefix, XORed with the `token_id`, and take the little endian representation of those bytes.
-
-    ```
-    masked_token_id = (token_id ^ Blake2B(token_id_tag | shared_secret)).to_le()
-    ```
-
-- To recover the `token_id` from the `masked_token_id`, we reverse the process (if the bytes field is length = 4, otherwise `token_id = 0`).
-
-    ```
-    unmasked_token_id = masked_token_id ^ Blake2b(token_id_tag | shared_secret)
-    ```
 
 ### Amount
 
@@ -70,23 +50,48 @@ A `masked_token_id` is added, which, similarly to `masked_value`, provides a way
 
 Thus, the recipient can attempt to scan a TxOut by first constructing the shared secret, then unmasking the `masked_amount` and `masked_token_id`, and then reconstructing the Pedersen commitment. If this reconstruction is successful, then the recipient knows the `amount` and the `token_id`, similarly as before the support for a confidential`token_id`.
 
+The `masked_token_id` field is added to the [`Amount`](https://github.com/mobilecoinfoundation/mobilecoin/blob/cb10d41d404c552cab19de0163992923a878ed5e/transaction/core/src/amount/mod.rs#L46) in each TxOut, and functions similar to `masked_value`. The protocol representation of the TxOut uses Protobuf, which enables backward compatability in this way: if the field is not populated (Protobuf bytes field of length 0), the default `token_id` is 0. Otherwise, the field is a Protobuf bytes field of length 4. Please see the [Upgrade Plan](#upgrade-plan) for more discussion on rolling out this change with consideration for backward compatibility.
+
+* To compute the 4 byte `masked_token_id` from the `token_id`, we hash the TxOut shared secret, with a prefix, XORed with the `token_id`, and take the little endian representation of those bytes.
+
+    ```
+    masked_token_id = (token_id ^ Blake2B(AMOUNT_TOKEN_ID_DOMAIN_TAG | shared_secret)).to_le()
+    ```
+
+* To recover the `token_id` from the `masked_token_id`, we reverse the process (if the bytes field is length = 4, otherwise `token_id = 0`).
+
+    ```
+    unmasked_token_id = masked_token_id ^ Blake2b(AMOUNT_TOKEN_ID_DOMAIN_TAG | shared_secret)
+    ```
+
 ### Pedersen Generators
+
+Previously, we used the same curve base point for all Pedersen generators to Amounts. After this change, we will need a curve base point, unique for each `token_id`, from which the TxOut's commitment is generated with the value of the `token_id` in the TxOut.
 
 The requirements for the Pedersen generators are:
 
 * The generator used for MOB is the same as before, so `H_0` is a known value.
+
 * The set of all generators used for token ids should be cryptographically "orthogonal", meaning that, it should be intractable for anyone to find a linear relationship between them.
+
 * The function mapping a `token_id`, `i`, to the generator `H_i` must be implemented in constant-time.
 
 The established value for `H_0` in mobilecoin is to take the `RISTRETTO_BASEPOINT` bytes, hash them using Blake2b, and then hash this to the ristretto curve using the elligator map exposed by curve25519-dalek.
 
 We propose to compute `H_i` by converting `i` to little endian bytes, and XOR'ing these bytes over the first four bytes of the `RISTRETTO_BASEPOINT` bytes before hashing them with Blake2b, because this is a simple way to meet these requirements.
 
-### Proof that a Uniform Token ID is in the Transaction
+For example, an implementation to obtain a generator for `token_id = i` could look like:
 
-We would like to be able to prove that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator.
+    ```
+    B = RistrettoPoint::from_hash(Blake2b(HASH_TO_POINT_DOMAIN_TAG | RISTRETTO_BASEPOINT ^ token_id))
+    B_blinding = RISTRETTO_BASEPOINT
+    ```
 
-- To prove each TXO's commitment to the `amount` value, we use a Pedersen commitment, consisting of a group generator (`H_i`) raised to the value of the `amount`, with a blinding factor to prevent brute-forcing the full range of values (`2^64`). We compute the blinding factor as the blinding group generator raised to a hash of the shared secret for the TXO.
+After this change, `range_proofs` and `ring_signature/mlsags` will be relative to a Pedersen generator, and it is not possible to construct a range proof relative to another generator if those generators are orthogonal. Thus, it is guaranteed that all transaction inputs and outputs are using the same `token_ids`. This is implied by the homomorphic encryption property of [Pedersen Commitments](https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF), namely that addition on the commitments preserves the additive relationship of the pre-committed values, as long as they are using the same group generator. [TODO: Why?]
+
+### Validation
+
+To prove each TxOut's commitment to the `amount` value, we use a Pedersen commitment, consisting of a group generator (`H_i`) raised to the value of the `amount`, with a blinding factor to prevent brute-forcing the full range of values (`2^64`). We compute the blinding factor as the blinding group generator raised to a hash of the shared secret for the TxOut.
 
     ```
     blinding_factor = Blake2B(blinding_tag | shared_secret)
@@ -95,7 +100,7 @@ We would like to be able to prove that all transaction inputs and outputs are us
 
     - Note, the group generators for Token Types are computed using hashing to a curve so that they are "orthogonal" for computable adversaries, meaning there is no discernable, nontrivial linear relationship between base points. See our [transaction core group generators reference](https://github.com/mobilecoinfoundation/mobilecoin/blob/master/transaction/core/src/ring_signature/mod.rs#L29). 
     - Note also, the blinding factor base point does not need to be unique per TokenType, so we use the same blinding factor base point for all TokenTypes.
-    - Note finally, the Proof of Opening requires all commitments in a transaction were generated using the same group generator, base point `H_i`. If the commitments in input and/or output TXOs in a transaction are constructed with different group generators, and the sender is able to unwrap the sum as specified in the protocol below, it implies that the sender knows a nontrivial linear relationship among the `H_i`, which contradicts the assumption that the `H_i` are orthogonal. 
+    - Note finally, the Proof of Opening requires all commitments in a transaction were generated using the same group generator, base point `H_i`. If the commitments in input and/or output TxOuts in a transaction are constructed with different group generators, and the sender is able to unwrap the sum as specified in the protocol below, it implies that the sender knows a nontrivial linear relationship among the `H_i`, which contradicts the assumption that the `H_i` are orthogonal. 
 
 The non-interactive zero knowledge Proof of Opening protocol is the following: (See [Zero Knowledge Proofs and Commitment Schemes, Page 27](https://www.cs.purdue.edu/homes/ninghui/courses/555_Spring12/handouts/555_Spring12_topic23.pdf))
 
@@ -163,7 +168,7 @@ verify(G, H, commitment, proof_of_knowledge) {
 
 Currently, the enclave aggregates the fees for multiple transactions in a block, in order to mint a single fee output for the block and conserve space. To support multiple confidential TokenTypes, when minting fee outputs, the enclave must create multiple fee outputs if multiple TokenTypes were used in the block. A consideration here is that we would like for an observer not to discern whether a block contains transactions of multiple asset types by statistically analyzing the number of outputs to derive information about the number of fee outputs. 
 
-A simple proposal is that the enclave discontinue fee aggregation, so that the number of fee outputs scale linearly with the number of transactions in a block (not output TXOs). For example, a block with 3 transactions includes 3 fee outputs. Because each transaction can mint up to 16 output TXOs, there may be a variable number of outputs in the block. 
+A simple proposal is that the enclave discontinue fee aggregation, so that the number of fee outputs scale linearly with the number of transactions in a block (not output TxOuts). For example, a block with 3 transactions includes 3 fee outputs. Because each transaction can mint up to 16 output TxOuts, there may be a variable number of outputs in the block. 
 
 Note that the untrusted portion of the node software knows how many transactions are in each block, and this is not considered statistically relevant information with respect to confidentiality. In other words, the current fee aggregation behavior is not meant as a confidentiality measure, purely as a space-saving measure.
 
@@ -216,14 +221,14 @@ Note how the two transactions paying more than their minimum fee are sorted to t
 
 ### Performance Impact: Size & Space Analysis
 
-- Each TXO has 6 new bytes allocated in the Amount object for the `masked_token_id` (4 bytes for the value, 2 bytes for Protobuf overhead)
+- Each TxOut has 6 new bytes allocated in the Amount object for the `masked_token_id` (4 bytes for the value, 2 bytes for Protobuf overhead)
 - The RingCT bulletproof signature increases by at least 96 bytes to contain the Proof of Opening (plus Protobuf overhead).
 - Each block now contains a number of fee outputs scaling linearly with the number of transactions in a block, as opposed to a single fee output aggregated from multiple transactions in a block.
-    - In practice, most clients currently output 2 TXOs, one for the recipient and one for change, unless performing a `split_txo` operation. Output growth on chain is currently dominated by the number of outputs in a transaction, and since blocks typically clear fast enough that there is only one transaction in a block for which to aggregate the fee, this should not have a deleterious effect on the space capacity of the chain, especially given that up to [16 outputs are permitted for every transaction](https://github.com/mobilecoinfoundation/mobilecoin/blob/e74d4c821cb213290975d6d5a9390778661cebfe/transaction/core/src/constants.rs#L17).
+    - In practice, most clients currently output 2 TxOuts, one for the recipient and one for change, unless performing a `split_TxOut` operation. Output growth on chain is currently dominated by the number of outputs in a transaction, and since blocks typically clear fast enough that there is only one transaction in a block for which to aggregate the fee, this should not have a deleterious effect on the space capacity of the chain, especially given that up to [16 outputs are permitted for every transaction](https://github.com/mobilecoinfoundation/mobilecoin/blob/e74d4c821cb213290975d6d5a9390778661cebfe/transaction/core/src/constants.rs#L17).
 
 ### Confidentiality Analysis
 
-The [TxPrefix](https://github.com/mobilecoinfoundation/mobilecoin/blob/a9db0bc7bcac9bac1c1232b194003d02bccaf283/transaction/core/src/tx.rs#L149) contains the `token_id` and the `fee` in the clear. We, and any users of the protocol, need to clearly understand the footprint of this data, and the ways in which an attacker may try to discern the `token_id` of TXOs.
+The [TxPrefix](https://github.com/mobilecoinfoundation/mobilecoin/blob/a9db0bc7bcac9bac1c1232b194003d02bccaf283/transaction/core/src/tx.rs#L149) contains the `token_id` and the `fee` in the clear. We, and any users of the protocol, need to clearly understand the footprint of this data, and the ways in which an attacker may try to discern the `token_id` of TxOuts.
 
 The [TxPrefix](https://github.com/mobilecoinfoundation/mobilecoin/blob/edbc0162cbd647b6605fe817a8753508ca4515a2/transaction/core/src/tx.rs#L149) is included in the [Tx](https://github.com/mobilecoinfoundation/mobilecoin/blob/edbc0162cbd647b6605fe817a8753508ca4515a2/transaction/core/src/tx.rs#L103) that is delivered directly to the enclave through an attested channel at the [client\_tx_propose](https://github.com/mobilecoinfoundation/mobilecoin/blob/2d5190e60f6820cebcd585c19d16cecf9ba4d89b/consensus/enclave/impl/src/lib.rs#L299) endpoint. By attested, this means that the client would not deliver this payload unless the enclave's signed measurement matched the client's expectations.
 
@@ -248,7 +253,7 @@ The upgrade plan is described in full in [MCIP #26](https://github.com/mobilecoi
 
 This is a substantial change to the protocol, and a breaking change for clients. Other drawbacks include:
 
-- Increasing complexity of TXOs and transaction construction & validation
+- Increasing complexity of TxOuts and transaction construction & validation
 - Increasing the transaction validation footprint in the enclave to include Proof of Opening
 - Increasing the amount of data on the ledger
 - `masked_token_id` bytes must be plumbed everywhere, in Fog and clients, but no more serious changes are needed in Fog. Note that if the TokenType was not confidential, Fog Ledger would need a much larger change in order to properly select rings
