@@ -1,7 +1,26 @@
 * Feature Name: `block_streaming`
 * Start Date: 2022-03-01
-* MCIP PR: [mobilecoinfoundation/mcips #29](https://github.com/mobilecoinfoundation/mcips/pull/29)
-* Tracking Issue: [mobilecoin #1433](https://github.com/mobilecoinfoundation/mobilecoin/issues/1433)
+* MCIP PR:
+  [mcips #29](https://github.com/mobilecoinfoundation/mcips/pull/29)
+* Tracking Issue:
+  [mobilecoin #1433](https://github.com/mobilecoinfoundation/mobilecoin/issues/1433)
+
+
+## Contents
+- [Summary](#summary)
+- [Motivation](#motivation)
+- [Guide-level explanation](#guide-level-explanation)
+- [Reference-level explanation](#reference-level-explanation)
+  - [Streaming API](#streaming-api)
+    - [Fanout network layout](#fanout-network-layout)
+  - [Backfill API](#backfill-api)
+    - [Paths for archived blocks](#paths-for-archived-blocks)
+- [Drawbacks](#drawbacks)
+- [Rationale and alternatives](#rationale-and-alternatives)
+- [Prior art](#prior-art)
+- [Unresolved questions](#unresolved-questions)
+- [Future possibilities](#future-possibilities)
+  - [Publish/Subscribe mechanisms](#publishsubscribe-mechanisms)
 
 # Summary
 [summary]: #summary
@@ -29,6 +48,9 @@ another second downloading from S3.
 ![trace screenshot](../images/29-trace.png)
 </details>
 
+By using purpose-built pub/sub block streaming, we will no longer need to poll
+S3 on regular intervals, and the block download times will greatly decrease.
+
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
@@ -47,12 +69,17 @@ There are two mechanisms for getting blocks from consensus nodes:
 2. A backfill/discovery API specifying where to find archived blocks.
 
 Each consensus node's ledger is distributed via a local "side-car" process,
-`ledger-distribution`, to an associated directory in the `mobilecoin.chain` S3
-bucket.
+`ledger-distribution`, to an associated directory in S3
+(`ledger.mainnet.mobilecoin.com` bucket for MainNet, `mobilecoin.chain` bucket
+for TestNet).
 
-The other nodes then download these blocks from S3, usually via `mobilecoind` or
-`fog`, using the `LedgerSyncService` or directly invoking a
-`TransactionsFetcher`.
+The other nodes then download these blocks from S3, usually via the
+[`ledger-sync` crate](https://github.com/mobilecoinfoundation/mobilecoin/tree/master/ledger/sync).
+Some other services, such as Fog, use
+[`mobilecoind`](https://github.com/mobilecoinfoundation/mobilecoin/tree/master/mobilecoind)
+to sync blocks, and wallets such as
+[`full-service`](https://github.com/mobilecoinofficial/full-service) also
+implement the syncing functionality.
 
 This MCIP expands the distribution to also publish to a message bus, and expands
 the `TransactionsFetcher` idiom to support receiving updates from this message
@@ -61,12 +88,10 @@ bus.
 When a node needs to get blocks and has not received them via the message bus,
 it will fall back to fetching the node from S3, matching existing behaviour.
 
-## Public Entrypoint API
-
+## Streaming API
 This is the entrypoint for subscribing to block updates, leveraging
 [server streaming gRPC](https://grpc.io/docs/what-is-grpc/core-concepts/#server-streaming-rpc).
 
-### Streaming API
 The Streaming API will look like the following:
 
 ```proto3
@@ -94,7 +119,51 @@ service ConsensusUpdates {
 }
 ```
 
-### Backfill API
+### Fanout network layout
+This MCIP intentionally avoids prescribing a particular layout for the fanout
+network, in part because various operators have unique constraints, but also
+because it is affected by other implementation decisions that are yet to be
+determined, and can be changed without affecting the rest of this proposal.
+
+With that said, we outline some possible approaches below.
+
+#### Serve from consensus node
+Add the `ConsensusUpdates` gRPC server to the consensus node binary.
+
+Pros:
+* Simple setup.
+
+Cons:
+* Mixes [concerns](https://en.wikipedia.org/wiki/Separation_of_concerns).
+* The consensus node is now serving additional gRPC traffic, which may very well
+  make the node easier to overload, potentially leading to a DDoS.
+* Negates the benefit of having a separate `ledger-distribution` binary.
+
+#### Message bus per cluster
+Set up a message bus per cluster of nodes (e.g. a data center or availability
+zone), similar to how one might have a shared cache instance.
+
+Pros:
+* Maintains decentralization.
+* Matches network topology.
+* May unlocks scaling benefits of dedicated brokers for the fanout network.
+
+Cons:
+* One more service to host and operate.
+
+#### Shared message bus
+Extending the previous option, we could offer a shared bus hosted by the
+MobileCoin Foundation.
+
+Pros:
+* Lower burden on other node operators.
+* Potentially lower barrier to entry for operating a consensus node.
+
+Cons:
+* Introduces a centralized service.
+* Additional load and cost for MCF, with an unclear growth profile.
+
+## Backfill API
 The Backfill API will look like the following:
 
 ```proto3
@@ -113,7 +182,7 @@ service ArchiveBlocks {
 
 ### Paths for archived blocks
 
-### Single Blocks
+#### Single Blocks
 The block-specific path is a function of the block index. The file name is the
 hexadecimal representation of the index, padded to 16 hexadecimal characters.
 The index-as-file-name is repeated in the directory path.
@@ -128,7 +197,7 @@ See
 [`block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=fn.block_num_to_s3block_path)
 for an implementation of this logic.
 
-### Merged Blocks
+#### Merged Blocks
 We also support merged blocks to reduce the number of file operations. The
 merged block path is similar, with a prefix directory `merged-$N` where `N > 1`
 is the bucket size, and the index is that of the starting block (also a multiple
@@ -146,6 +215,7 @@ For example:
 See
 [`merged_block_num_to_s3block_path`](https://github.com/mobilecoinfoundation/mobilecoin/search?q=fn.merged_block_num_to_s3block_path)
 for an implementation of this logic.
+
 
 # Drawbacks
 [drawbacks]: #drawbacks
@@ -198,15 +268,14 @@ While this MCIP focuses on distributing blocks from consensus nodes, the same
 concepts can be useful for Fog and other subsystems.
 
 ## Publish/Subscribe mechanisms
-[publish-subscribe-mechanisms]: #publish-subscribe-mechanisms
+[publish-subscribe-mechanisms]: #publishsubscribe-mechanisms
 
 This section outlines some possible implementations backing the public API.
 
-### Kafka
+#### Kafka
+[Apache Kafka](https://kafka.apache.org/) is a mature offering. Quoting
+[Confluent](https://www.confluent.io/what-is-apache-kafka):
 
-[Apache Kafka](https://kafka.apache.org/) is a mature offering.
-
-Quoting [Confluent](https://www.confluent.io/what-is-apache-kafka):
 > Apache Kafka is a community distributed event streaming platform capable of
 > handling trillions of events a day. Initially conceived as a messaging queue,
 > Kafka is based on an abstraction of a distributed commit log. Since being
@@ -228,8 +297,28 @@ Cons:
 - Having one Kafka broker per consensus node could negate the benefits of using
   Kafka
 
-### Google Cloud Pub/Sub
+#### Amazon Simple Notification Service
+[Amazon has a relevant offering](https://aws.amazon.com/sns):
 
+> Amazon Simple Notification Service (Amazon SNS) is a fully managed messaging
+> service for both application-to-application (A2A) and application-to-person
+> (A2P) communication.
+>
+> The A2A pub/sub functionality provides topics for high-throughput, push-based,
+> many-to-many messaging between distributed systems, microservices, and
+> event-driven serverless applications. Using Amazon SNS topics, your publisher
+> systems can fanout messages to a large number of subscriber systems, including
+> Amazon SQS queues, AWS Lambda functions, HTTPS endpoints, and Amazon Kinesis
+> Data Firehose, for parallel processing. The A2P functionality enables you to
+> send messages to users at scale via SMS, mobile push, and email.
+
+Pros:
+* Horizontally scalable managed messaging offering.
+
+Cons:
+* Risks vendor lock-in.
+
+#### Google Cloud Pub/Sub
 [Google Cloud also offers a Pub/Sub solution](https://cloud.google.com/pubsub/)
 
 Pros:
