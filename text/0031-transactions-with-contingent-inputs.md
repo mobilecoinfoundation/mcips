@@ -110,7 +110,7 @@ If a simpler or better way of doing swaps is discovered and this is used only ra
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-> - Why is this design the best in the space of possible designs?
+## Why is this design the best in the space of possible designs?
 
 We can measure the complexity of a swap protocol by considering the number of rounds of interactions
 between the participants and the number of on-chain events. In this proposal, these are both 1,
@@ -136,27 +136,37 @@ and are deleted.
 Finally, this design is good because compared to smart contracts, it is a relatively small, incremental change to
 implement given where we are today, and would meet the goal of enabling secure atomic swaps on-chain.
 
-> - What other designs have been considered and what is the rationale for not choosing them?
+## What other designs have been considered and what is the rationale for not choosing them?
 
 The main alternative for on-chain swaps is to use a smart-contract based system.
 Indeed, for most forms of decentralized finance, the first step is escrowing your funds into a smart contract that you trust.
 
 This has some immediate consequences:
-* The user is exposed to smart contract risk, the risk that there is a bug in the code that will allow an attacker to sieze the escrowed funds irreversibly.
+* The user is exposed to smart contract risk, the risk that there is a bug in the code that will allow an attacker to seize the escrowed funds irreversibly.
 * The user has to pay a fee and wait for a transaction to clear, just to support the escrow operation.
 * There is a permanent record of the escrow operation.
 * The smart contract has to know enough about you to send the funds back to you.
 
 It also requires waiting for the design and implementation of a smart contracting system which has adequate privacy safeguards.
 
+One criticism of the AMM / liquidity pool approach is that, smart-contract based AMMs generally impose fees which are comparable
+to those imposed by centralized exchanges, which are paid to the liquidity providers. The contracts are thus in some sense operated
+by and for the liquidity providers. Because anyone can create a smart contract and a liquidity pool, there is competition that drives
+fees down, but pools with less liquidity are less efficient and result in higher price impact for large trades. This means that the
+biggest pools tend to win out, even if they have large fees. Additionally, when capital gets fragmented across many liquidity pools,
+it cannot be used as efficiently. Many protocols have worked on either finding ways to fuse their pools and make more efficient use of
+capital (see Aave for instance). Additionally, there has been a rise of "Defi Aggregators" like 1inch and dxdy that search across numerous
+Defi systems for the best possible trade. A market-place of limit orders (represented by `SignedContingentInput`'s), where many
+liquidity providers can participate, could perhaps be simpler and more efficient.
+
 In the Ethereum blockchain, it is possible to submit a bundle of multiple transactions that are guaranteed to all execute atomically.
-This mechanism could conceiveably be used to execute a swap, although to our knowledge it is never done that way, because there is not now a good way to
-collaboratively build and sign a pair of transactions trustlessly, such that neither party can reneg and submit the transaction built by the other.
+This mechanism could conceiveably be used to execute a swap, although to our knowledge it is never done this way because there is not
+a trustless mechanism to build such transactions. (However, see also Airswap).
 
 MobileCoin could conceivably implement a linked transaction concept like this, but it would be complicated, and the main use for it is actually smart contracts,
 which we don't have right now. For peer-to-peer swaps, we think that such a design would lead to significantly more complexity than `SignedContingentInputs`.
 
-> - What is the impact of not doing this?
+## What is the impact of not doing this?
 
 The impact of not doing this will likely be that, if MobileCoin creates additional tokens per MCIP #25,
 users will only be able to trade them on centralized exchanges, since there is no smart contract
@@ -167,9 +177,10 @@ existing proposals for how users can perform on-chain swaps securely.
 # Prior art
 [prior-art]: #prior-art
 
+- [Uniswap](https://docs.uniswap.org/protocol/introduction): An introduction to the Uniswap protocol
 - [Air Swap](https://about.airswap.io/): A decentralized peer-to-peer swap network based on Ethereum
-- [Monero Atomic Swaps](https://www.getmonero.org/2021/08/20/atomic-swaps.html): Protocols for swapping Monero and Bitcoin
-- [What is an automated marker maker?](https://www.coindesk.com/learn/2021/08/20/what-is-an-automated-market-maker/): Coindesk article introducing AMMs
+- [Bitcoin Monero Cross-chain Atomic Swaps](https://eprint.iacr.org/2020/1126): A proposal using hashed time-locked contracts and bitcoin scripting language
+- [What is an automated marker maker?](https://www.coindesk.com/learn/2021/08/20/what-is-an-automated-market-maker/): Coindesk article describing AMMs
 - [MEV](https://ethereum.org/en/developers/docs/mev/): A definition and discussion of MEV, particularly in connection to Ethereum
 - [Aleo records](https://developer.aleo.org/aleo/concepts/records/): Mentioned for reference to the "birth program" and "death program" concepts.
 
