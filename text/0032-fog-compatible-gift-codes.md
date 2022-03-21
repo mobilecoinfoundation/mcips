@@ -15,9 +15,11 @@ compared to the existing mechanism.
 # Motivation
 [motivation]: #motivation
 
-Full service supports a "gift codes" feature. The idea of a gift code is that you can give money to
+Full service supports a "gift codes" feature. (Called "Tranfer code" [in sources](https://github.com/mobilecoinfoundation/mobilecoin/blob/7077b418fab65e05a05e4fca1d272e3dddd2e392/api/proto/printable.proto#L28).)
+
+The idea of a gift code is that you can give money to
 someone without knowing their public address before hand, creating a payload that can be handed to
-anyone, which then funds their account.
+anyone, which then funds their account. This could be used for gift cards for example.
 
 The existing mechanism for gift codes is as follows:
 * The person who creates a gift code, creates an entirely new set of account keys, and funds these account keys with an on-chain transaction.
@@ -39,6 +41,34 @@ check of the temporary account, since the outputs were not indexed by Fog.
 This could be worked around, by making the person who creates the temporary account create it as a Fog account.
 However, there could be several deployments of Fog, and this basically means that the creator of the gift code needs to know
 what software the recipient is using, which is counter to the goal of the feature.
+
+In later versions of transfer payloads, the `TxOut` public key was included.
+
+```
+/// Message encoding a private key and a UTXO, for the purpose of
+/// giving someone access to an output. This would most likely be
+/// used for gift cards.
+message TransferPayload {
+    /// [Deprecated] The root entropy, allowing the recipient to spend the money.
+    /// This has been replaced by a BIP39 entropy.
+    bytes root_entropy = 1 [deprecated=true];
+
+    /// The public key of the UTXO to spend. This is an optimization, meaning
+    /// the recipient does not need to scan the entire ledger.
+    external.CompressedRistretto tx_out_public_key = 2;
+
+    /// Any additional text explaining the gift
+    string memo = 3;
+
+    /// BIP39 entropy, allowing the recipient to spend the money.
+    /// When deriving an AccountKey from this entropy, account_index is always 0.
+    bytes bip39_entropy = 4;
+}
+```
+
+It is possible to use the untrusted fog ledger endpoint to lookup `TxOut` by their public key,
+but this is not private, and the fog operator can see which `TxOut` you looked up. This puts the
+gift codes outside the normal threat-model for Fog transfers.
 
 We propose to fix this in a quite simple way:
 
@@ -139,7 +169,9 @@ Clients will then be able to go from a `TxOutGiftCode` to an `InputCredentials` 
 
 In our opinion, there is no reason why we should not do this, and this version of gift codes is superior to the existing version.
 The existing version is very complicated and forces all the clients to view-key scan the ledger with a new set of keys in order
-to process a gift code. It is much simpler to just give away ownership of an existing `TxOut`.
+to process a gift code. The "fixed" version that returns the `TxOut` public key avoids the view key scanning issue, but it still
+isn't really compatible with Fog's privacy model. It is much simpler to just give away ownership of an existing `TxOut`, and
+give the fog recipient a global `TxOut` index.
 
 This also makes creating gift codes instantaneous and not require on-chain events and fees.
 
