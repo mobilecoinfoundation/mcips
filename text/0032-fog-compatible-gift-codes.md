@@ -127,8 +127,8 @@ https://github.com/mobilecoinfoundation/mobilecoin/blob/924abcff4937fced12cdd951
 
 We propose either to
 * Modify `InputCredentials` so that it includes the `shared_secret` instead of the `view_private_key`.
-  Since clients usually compute the shared as soon as they receive an input, this may actually be more efficient
-  and prevent computing elliptic curve operations again unnecessarily.
+  Since clients usually compute the `shared_secret` as soon as they receive an input as a by-product of view-key matching,
+  this may actually be more efficient and prevent computing elliptic curve operations again unnecessarily.
 * Modify `InputCredentials` so that it holds either the `shared_secret` OR the `view_private_key`, for backwards
   compatibility.
 
