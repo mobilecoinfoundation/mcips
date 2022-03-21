@@ -41,8 +41,10 @@ However, there could be several deployments of Fog, and this basically means tha
 what software the recipient is using, which is counter to the goal of the feature.
 
 We propose to fix this in a quite simple way:
+
 Instead of transfering private keys to an entire account, we just transfer ownership of a specific `TxOut`.
-We give them private keys and secrets connected to this `TxOut`, but which don't reveal anything about our account private 
+We give them private keys and secrets connected to this `TxOut`, but which don't reveal anything about our account private keys.
+
 * To enable someone to spend a TxOut, we just have to give them the `onetime_private_key` of the `TxOut`.
 * To enable someone to see the unblinded amount of the TxOut, we just have to give them the `shared_secret` of the `TxOut`.
 * To enable someone to find the TxOut in the ledger (even a Fog user), we just have to tell them the global index in the blockchain.
