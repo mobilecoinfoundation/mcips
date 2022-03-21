@@ -25,7 +25,7 @@ a transaction using my transaction fragment and submit it.
 
 There is no way that they can spend my 5 MOB without producing the desired output for me, so my funds
 are safe, and moreover, never leave my custody during this process until the moment the trade is final.
-It costs me nothing to produce a transaction fragment and does not require an on-chain event -- there is only one actual on chain transaction
+It costs me nothing to produce a transaction fragment and does not require an on-chain event -- there is only one actual on-chain transaction
 to settle the swap, which happens with the speed and privacy of MobileCoin.
 
 The broader significance is the following:
@@ -153,11 +153,12 @@ One criticism of the AMM / liquidity pool approach is that, smart-contract based
 to those imposed by centralized exchanges, which are paid to the liquidity providers. The contracts are thus in some sense operated
 by and for the liquidity providers. Because anyone can create a smart contract and a liquidity pool, there is competition that drives
 fees down, but pools with less liquidity are less efficient and result in higher price impact for large trades. This means that the
-biggest pools tend to win out, even if they have large fees. Additionally, when capital gets fragmented across many liquidity pools,
+biggest pools tend to win out, even if they have larger fees. Additionally, when capital gets fragmented across many liquidity pools,
 it cannot be used as efficiently. Many protocols have worked on either finding ways to fuse their pools and make more efficient use of
-capital (see Aave for instance). Additionally, there has been a rise of "Defi Aggregators" like 1inch and dxdy that search across numerous
-Defi systems for the best possible trade. A market-place of limit orders (represented by `SignedContingentInput`'s), where many
-liquidity providers can participate, could perhaps be simpler and more efficient.
+capital (see Aave v3 for instance). Additionally, there has been a rise of "Defi Aggregators" like 1inch that search across numerous
+Defi systems for the best possible trade. A marketplace of limit orders (represented by `SignedContingentInput`'s), where many
+liquidity providers can participate, could perhaps be simpler and more efficient. (However, this is only one possible architecture for
+a swapping service based on `SignedContingentInput`'s.)
 
 In the Ethereum blockchain, it is possible to submit a bundle of multiple transactions that are guaranteed to all execute atomically.
 This mechanism could conceiveably be used to execute a swap, although to our knowledge it is never done this way because there is not
@@ -182,6 +183,10 @@ existing proposals for how users can perform on-chain swaps securely.
 - [Bitcoin Monero Cross-chain Atomic Swaps](https://eprint.iacr.org/2020/1126): A proposal using hashed time-locked contracts and bitcoin scripting language
 - [What is an automated marker maker?](https://www.coindesk.com/learn/2021/08/20/what-is-an-automated-market-maker/): Coindesk article describing AMMs
 - [MEV](https://ethereum.org/en/developers/docs/mev/): A definition and discussion of MEV, particularly in connection to Ethereum
+- [Aave](https://docs.aave.com/portal/): A decentralized lending protocol
+- [Aave v3 Whitepaper](https://github.com/aave/aave-v3-core/blob/master/techpaper/Aave_V3_Technical_Paper.pdf): A description of the changes they made in Aave V3, including to try to improve capital efficiency
+- [1inch](https://1inch.io/): A defi aggregator which searches hundreds of DEX's
+- [dxdy](https://dydx.exchange/): A decentralized exchange using STARKware technology to perform roll-ups onto the Ethereum main chain
 - [Aleo records](https://developer.aleo.org/aleo/concepts/records/): Mentioned for reference to the "birth program" and "death program" concepts.
 
 # Unresolved questions
@@ -190,7 +195,7 @@ existing proposals for how users can perform on-chain swaps securely.
 For Automated Market Makers like Uniswap, the end user experience is going to a website, and (typically) using a browser wallet to build and submit a transaction to the smart contract.
 
 For swaps based on contingent inputs, one possible experience is that the service generates a signed contingent input for you, and you build a transaction with it and submit it to the network.
-However, it could also be that the user builds a signed contingent input and submits it to the service.
+However, it could also be that the user builds a signed contingent input and submits it to the service, where it enters an order book and is filled by someone else.
 
 We think there are numerous ways that this primitive could be used to build a swapping service and a myriad of tradeoffs, and we prefer to scope this MCIP just to specifying the signed contingent input primitive.
 
