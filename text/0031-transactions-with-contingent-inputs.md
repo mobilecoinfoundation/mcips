@@ -40,7 +40,8 @@ Many research papers have been written on cross-chain atomic swaps, particularly
 to permit swapping bitcoin in a "trustless" way for other assets, using hash time locked contracts. These protocols are often quite complex,
 requiring each party to "commit" their funds first, then trigger the swap, and have contingencies for each party to recover their committed funds
 if the counter party renegs. These protocols may require several rounds of interaction, and require several on-chain transactions, incurring fees and
-increasing the total delay for the swap to be finished.
+increasing the total delay for the swap to be finished. (Because of this complexity, alternatives have been sought such as "wrapped Bitcoin" which is an
+ERC20 representation of locked bitcoin which can be used more easily on the Ethereum network.)
 
 This proposal is considerably simpler -- the rounds of interaction are a minimum, requiring only one side to send a transaction fragment to another.
 No one is required to "escrow" their funds into a smart contract or temporary address. A party who desires to swap can broadcast their transaction fragment
@@ -118,6 +119,11 @@ We can measure the complexity of a swap protocol by considering the number of ro
 between the participants and the number of on-chain events. In this proposal, these are both 1,
 which is optimal.
 
+Because there are fewer independent steps, there are fewer failure modes for the swap -- places where
+one party can conduct part of the protocol and then change their mind, which then require failsafe mechanisms
+to help the other party recover their escrowed funds. For comparison see "Bitcoin Monero Cross-chain Atomic Swaps"
+and "Lightning Network Overview".
+
 Privacy is also a key consideration. In this proposal, the first party sends only a `SignedContingentInput`,
 so the second party does not learn their public address, only what they propose to trade and for how much.
 The first party does not learn anything about the second participant except that they executed the trade.
@@ -159,12 +165,12 @@ biggest pools tend to win out, even if they have larger fees. Additionally, when
 it cannot be used as efficiently. Many protocols have worked on either finding ways to fuse their pools and make more efficient use of
 capital (see Aave v3 for instance). Additionally, there has been a rise of "Defi Aggregators" like 1inch that search across numerous
 Defi systems for the best possible trade. A marketplace of limit orders (represented by `SignedContingentInput`'s), where many
-liquidity providers can participate, much like Airswap, could perhaps be simpler and more efficient.
+liquidity providers can participate, much like AirSwap, could perhaps be simpler and more efficient.
 (However, this is only one possible architecture for a swapping service based on `SignedContingentInput`'s.)
 
 In the Ethereum blockchain, it is possible to submit a bundle of multiple transactions that are guaranteed to all execute atomically.
 This mechanism could conceiveably be used to execute a swap, although to our knowledge it is never done this way because there is not
-a trustless mechanism to build such transactions. (However, see also Airswap).
+a trustless mechanism to build such transactions. (However, see also AirSwap).
 
 MobileCoin could conceivably implement a linked transaction concept like this, but it would be complicated, and the main use for it is actually smart contracts,
 which we don't have right now. For peer-to-peer swaps, we think that such a design would lead to significantly more complexity than `SignedContingentInputs`.
@@ -181,15 +187,16 @@ existing proposals for how users can perform on-chain swaps securely.
 [prior-art]: #prior-art
 
 - [Uniswap](https://docs.uniswap.org/protocol/introduction): An introduction to the Uniswap protocol
-- [AirSwap](https://about.airswap.io/): A decentralized peer-to-peer swap network
-- [Bitcoin Monero Cross-chain Atomic Swaps](https://eprint.iacr.org/2020/1126): A proposal using hashed time-locked contracts and bitcoin scripting language
 - [What is an automated marker maker?](https://www.coindesk.com/learn/2021/08/20/what-is-an-automated-market-maker/): Coindesk article describing AMMs
+- [Bitcoin Monero Cross-chain Atomic Swaps](https://eprint.iacr.org/2020/1126): A proposal using hashed time-locked contracts and bitcoin scripting language
+- [AirSwap](https://about.airswap.io/): A decentralized peer-to-peer swap network
 - [MEV](https://ethereum.org/en/developers/docs/mev/): A definition and discussion of MEV, particularly in connection to Ethereum
 - [Aave](https://docs.aave.com/portal/): A decentralized lending protocol
 - [Aave v3 Whitepaper](https://github.com/aave/aave-v3-core/blob/master/techpaper/Aave_V3_Technical_Paper.pdf): A description of the changes they made in Aave V3, including to try to improve capital efficiency
 - [1inch](https://1inch.io/): A defi aggregator which searches hundreds of DEX's
 - [dxdy](https://dydx.exchange/): A decentralized exchange using STARKware technology to perform roll-ups onto the Ethereum main chain
 - [Aleo records](https://developer.aleo.org/aleo/concepts/records/): Mentioned for reference to the "birth program" and "death program" concepts.
+- ["How the Lightning Network Actually Works"](https://www.youtube.com/watch?v=yKdK-7AtAMQ): A nice youtube video describing all the steps of creating a lightning network channel and settling payments.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
@@ -198,6 +205,7 @@ For Automated Market Makers like Uniswap, the end user experience is going to a 
 
 For swaps based on contingent inputs, one possible experience is that the service generates a signed contingent input for you, and you build a transaction with it and submit it to the network.
 However, it could also be that the user builds a signed contingent input and submits it to the service (like Airswap), where it enters an order book and is filled by someone else.
+Potentially, SGX could be leveraged somehow, so that the service can prove to the user that they won't be front-run when they submit a trade order.
 
 We think there are numerous ways that this primitive could be used to build a swapping service and a myriad of tradeoffs, and we prefer to scope this MCIP just to specifying the signed contingent input primitive.
 
