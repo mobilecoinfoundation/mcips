@@ -102,7 +102,165 @@ to perform the swap with their counterparty atomically in a normal transaction.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-TODO more detail
+To support mixed transactions, the `Tx` format is extended as follows.
+
+The `SignatureRctBulletProofs` object has two new fields, indicating token ids of outputs and pseudo output commitments.
+
+```
+message SignatureRctBulletproofs {
+    repeated RingMLSAG ring_signatures = 1;
+    repeated CompressedRistretto pseudo_output_commitments = 2;
+    bytes range_proofs = 3;
+    repeated fixed32 pseudo_output_commitment_token_ids = 4;
+    repeated fixed32 output_token_ids = 5;
+}
+```
+
+The `pseudo_output_commitment_token_ids` list must be the same length as `pseudo_output_commitments`,
+and `output_token_ids` must be the same length as `outputs` in the `TxPrefix`, or the transaction is invalid.
+(Alternatively, for backwards compatibility we could allow that if these lists are empty then they are filled with zeros.)
+
+In the `TxPrefix`, the `token_id` field is renamed to `fee_token_id`, and it only represents the token id of
+the fee output now.
+
+```
+// A transaction that a client submits to consensus
+message TxPrefix {
+    // Transaction inputs.
+    repeated TxIn inputs = 1;
+
+    // Transaction outputs.
+    repeated TxOut outputs = 2;
+
+    // Fee paid to the foundation for this transaction
+    uint64 fee = 3;
+
+    // The block index at which this transaction is no longer valid.
+    uint64 tombstone_block = 4;
+
+    // Token id for this transaction
+    fixed32 fee_token_id = 5;
+}
+```
+
+When checking range-proofs of outputs and pseudo-outputs, we must use the generator indicated by `pseudo_output_commitment_token_ids`
+and `output_token_ids`, rather than the `token_id` in the `TxPrefix`.
+
+To support contingent inputs, we introduce the following objects:
+
+A `ContingentInputRules` object is a protobuf with the following schema:
+
+```
+message ContingentInputRules {
+    // Outputs that must appear in the transaction for a transaction using this input to be valid
+    repeated external.TxOut required_outputs = 1;
+    // A maximum tombstone block value for the transaction. If zero, it means no maximum is enforced.
+    fixed64 max_tombstone_block = 2;
+}
+```
+
+It may be hashed in a standard way using the `mc-crypto-digestible` hashing scheme (like everything else).
+
+This `required_outputs` are there to allow the main use-case of agreeing to a swap.
+The `max_tombstone_block` is there both, to allow that some of the required outputs can be fog outputs (since fog imposes tombstone block limits),
+and to allow that the party who builds and signs a `SignedContingentInput` can establish a "time to live" on the swap request.
+
+The `TxIn` object is modified, adding an Optional `ContingentInputRules` member.
+
+```
+message TxIn {
+    // "Ring" of inputs, one of which is actually being spent.
+    repeated TxOut ring = 1;
+
+    // Proof that each TxOut in `ring` is in the ledger.
+    repeated TxOutMembershipProof proofs = 2;
+    
+    // Any rules which must be satisfied by the Tx that contains this TxIn
+    ContingentInputRules contingent_input_rules = 3;
+}
+```
+
+Since the `TxIn` objects are under the `TxPrefix`, which gets hashed to form the `message` for the overall ringct
+signature, at this point the `ContingentInputRules` are "under the signature" for every MLSAG.
+
+https://github.com/mobilecoinfoundation/mobilecoin/blob/694fd2de00443338e6dfc63359c6178840cf7e52/transaction/core/src/validation/validate.rs#L310
+
+https://github.com/mobilecoinfoundation/mobilecoin/blob/694fd2de00443338e6dfc63359c6178840cf7e52/transaction/core/src/ring_signature/rct_bulletproofs.rs#L370
+
+However, this is not compatible with our desired use-case, where one user, who doesn't know the `TxPrefix` signs one of the MLSAGs,
+and another user fills in the rest of the transaction and signs the other MLSAGs.
+
+Therefore we propose that when signing `RingMLSAG`'s, there are two different cases, one for the situation where there are `ContingentInputRules`,
+and the other for the case where there are not `ContingentInputRules`.
+* When there are no `ContingentInputRules` on the input, the message to the MLSAG is the `extended_message_digest` the same as before: https://github.com/mobilecoinfoundation/mobilecoin/blob/694fd2de00443338e6dfc63359c6178840cf7e52/transaction/core/src/ring_signature/rct_bulletproofs.rs#L209
+* When there are contingent input rules present on the input, the message signed by the the MLSAG just consists of the digest of the `TxIn` but always omitting the `TxOutMembershipProof`, and including any `ContingentInputRules`.
+
+(The `TxOutMembershipProof` should not be signed because consensus may enforce that membership proofs have similar root membership elements. There is no problem to allow the final submitter of the
+transaction to update the root membership elements of these proofs.)
+
+This creates the possibility that the extended message digest is never signed -- if every `TxIn` has contingent input rules, then none of them will actually sign over the `extended_message_digest`,
+and if there are additional outputs in the `Tx` besides those appearing in the rules, no one will have signed over them, and no one will have signed over the fee. This would cause these parts of the
+transaction to become malleable -- if the process of proposing the Tx to consensus, a man in the middle were able to intercept it, they could tamper with these parts of the transaction, in a way that
+isn't possible for transactions currently.
+
+Since transactions are submitted over attested channels to the consensus enclave, there is already quite a lot of protection against tampering with in-flight transactions.
+However, another simple way to mitigate this is that a client can ensure that at least one input to the `Tx` does not have contingent input rules, and so signs the whole `TxPrefix`.
+
+Another possibility we considered is that inputs and outputs in a `TxPrefix` can be ordered together, and the MLSAG for an input always signs over everything that appears before it, but not over what appears later.
+However, this has a drawback, which is that if two people separately generate `SignedContingentInput`'s, then both inputs cannot be used in the same transaction.
+This is also a breaking change, while the actual proposal above allows for backwards compatibility.
+
+Finally, we describe the `SignedContingentInput` object.
+
+The idea here is that:
+* A signed contingent input contains enough data that `TransactionBuilder::add_signed_contingent_input(...)` can be implemented and building the transaction can succeed.
+* No information besides that is transmitted. In particular, the one-time private key for the signed input is not needed, the true ring input not need be known, and the public address
+  to which the output is destined need not be known either.
+
+However, in order for the recipient to prove that the transaction is balanced, they must be able to know the amounts and blinding factors for the outputs and pseudo outputs.
+
+An unmasked amount represents all of the unmasked data underlying a commitment to an amount, and allows to reconstruct an amount in a `TxOut` faithfully and spend it in a transaction.
+It is also enough to build a range proof.
+
+```
+message UnmaskedAmount {
+    // The value of this amount, in the smallest representable unit
+    fixed64 value = 1;
+    // The token id of this amount
+    fixed32 token_id = 2;
+    // The blinding factor used in the Pedersen commitment for this amount
+    CompressedRistretto blinding_factor = 3;
+}
+```
+
+The signed contingent input represents essentially a request to trade this for that, with sufficient information to execute
+the trade, but no unnecessary additional information.
+
+```
+message SignedContingentInput {
+    // The input which is signed. Note that the membership proofs may be omitted, and built by the final Tx submitter instead.
+    TxIn input = 1;
+    // A signature over the ring inputs. Note that this includes the `KeyImage` of the true output,
+    // and can be used to determine if this SignedContingentInput is still spendable.
+    RingMLSAG ring_signature = 2;
+    // The unmasked information underlying the pseudo output from this ring
+    UmaskedAmount unmasked_pseudo_output = 3;
+    // The unmasked information underlying any required output from the ContingentInputRules.
+    repeated UnmaskedAmount unmasked_required_outputs = 4;
+}
+```
+
+A `SignedContingentInput` can be validated by:
+* Checking that each `unmasked_required_output` corresponds to the commitment in the `required_outputs` field of `ContingentInputRules` in the `TxIn`. (and that there are the same number of each)
+* Building the `pseudo_output` from the `unmasked_pseudo_output`, and confirming that the `ring_signature` actually signs it, when the message is the hash of `input`.
+
+A `SignedContingentInput` is still spendable if the key image appearing in `ring_signature` has not appeared in the ledger yet.
+
+The `TransactionBuilder` can now accept `SignedContingentInput`'s, and stores them in a list. It can check them for validity when they are provided.
+The user of the `TransactionBuilder` may be expected to provide up-to-date / consistent merkle proofs for the inputs.
+
+In `mc-transaction-core`, the sign function for `SignatureRctBulletproofs` can be modified so that it takes a list of `SignedContingentInput`'s.
+These MLSAGs, inputs, pseudo-outputs and `required_output`'s are incorporated directly into the transaction, and the `unmasked_amount` are used to build range proofs, and then are discarded.
 
 # Drawbacks
 [drawbacks]: #drawbacks
