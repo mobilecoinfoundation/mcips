@@ -10,7 +10,7 @@ After MCIP [#25](https://github.com/mobilecoinfoundation/mcips/pull/0025),
 evolve the transaction format with two new features:
 
 * Multi-asset transfers: A single Tx can now contain inputs and outputs of multiple different types. Each input and output must be annotated with its type,
-to enable range proof validation. As long as the Tx is balanced across all types, it is valid. The transaction fee can be paid in with any of the token types that are used.
+to enable range proof validation. As long as the Tx is balanced across all types, it is valid. The transaction fee can be paid with any of the token types that are used.
 * Contingent inputs: A "contingent input" is a transaction input which has been signed by the owner, for which there are additional rules which must be satisfied
   by a transaction which uses it, for that transaction to be valid. In particular, a contingent input can specify that a particular output must also appear in the
   transaction, in order for the transaction to be valid.
