@@ -164,6 +164,9 @@ We propose either to
 
 Clients will then be able to go from a `TxOutGiftCode` to an `InputCredentials` very easily.
 
+We could put this schema as an option in `PrintableWrapper`, or deprecate the fields of the old `TransferPayload` that
+aren't needed and merge this one into that.
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
