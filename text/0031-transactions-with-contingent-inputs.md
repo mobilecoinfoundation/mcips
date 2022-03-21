@@ -204,7 +204,7 @@ existing proposals for how users can perform on-chain swaps securely.
 For Automated Market Makers like Uniswap, the end user experience is going to a website, and (typically) using a browser wallet to build and submit a transaction to the smart contract.
 
 For swaps based on contingent inputs, one possible experience is that the service generates a signed contingent input for you, and you build a transaction with it and submit it to the network.
-However, it could also be that the user builds a signed contingent input and submits it to the service (like Airswap), where it enters an order book and is filled by someone else.
+However, it could also be that the user builds a signed contingent input and submits it to the service (like AirSwap), where it enters an order book and is filled by someone else.
 Potentially, SGX could be leveraged somehow, so that the service can prove to the user that they won't be front-run when they submit a trade order.
 
 We think there are numerous ways that this primitive could be used to build a swapping service and a myriad of tradeoffs, and we prefer to scope this MCIP just to specifying the signed contingent input primitive.
