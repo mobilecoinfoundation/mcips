@@ -69,7 +69,7 @@ which ensures that the transaction is valid.
 
 This feature contains two discrete steps:
 * Allowing mixed transactions. This requires that individual outputs and pseudo-outputs in a transaction can be labeled with token ids.
-  (The MCIP #25 token id, added to the tx prefix, is now interpretted as the fee token id.)
+  (The MCIP #25 token id, added to the tx prefix, is now interpreted as the fee token id.)
   When validating range proofs, each individual output and pseudo-output has its range proof checked relative to its specified token id.
   No other changes are required to support mixed transactions.
 * Allowing contingent inputs in a transaction. A contingent input is a `TxIn` together with an additional `ContingentInputRules` object.
