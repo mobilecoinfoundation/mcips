@@ -15,7 +15,7 @@ compared to the existing mechanism.
 # Motivation
 [motivation]: #motivation
 
-Full service supports a "gift codes" feature. (Called "Tranfer code" [in sources](https://github.com/mobilecoinfoundation/mobilecoin/blob/7077b418fab65e05a05e4fca1d272e3dddd2e392/api/proto/printable.proto#L28).)
+Full service supports a "gift codes" feature. (Called "Transfer code" [in sources](https://github.com/mobilecoinfoundation/mobilecoin/blob/7077b418fab65e05a05e4fca1d272e3dddd2e392/api/proto/printable.proto#L28).)
 
 The idea of a gift code is that you can give money to
 someone without knowing their public address before hand, creating a payload that can be handed to
