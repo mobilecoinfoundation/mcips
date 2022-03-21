@@ -45,10 +45,12 @@ increasing the total delay for the swap to be finished.
 This proposal is considerably simpler -- the rounds of interaction are a minimum, requiring only one side to send a transaction fragment to another.
 No one is required to "escrow" their funds into a smart contract or temporary address. A party who desires to swap can broadcast their transaction fragment
 to many potential counterparties. Because the Ring MLSAG contains the key image of the spent input, everyone is able to check if the transaction fragment is
-still valid, and the initiating party can cancel the swap proposal by simply spending input to themselves in a separate transaction, burning its key image and preventing any of the
-broadcasted transaction fragments from being used in a valid transaction.
+still valid, and the initiating party can cancel the swap proposal by simply spending the input to themselves in a separate transaction, burning its key image
+and preventing any of the broadcasted transaction fragments from being used in a valid transaction.
 
 A feature like this could potentially be used to build a fast, clean asset-swap experience in a mobile app, without relying on smart contracting functionality.
+Note that, much like with current app experiences, there is no "pending" state for a swap, it either happens atomically or it doesn't before the tombstone block,
+and so the app becomes responsible for tracking pending swaps just as with pending transfers.
 
 More generally, it may be interesting to explore ways that users can collaboratively sign transactions securely. This is one way that we can experiment with this,
 and could potentially be extended in the future.
@@ -157,8 +159,8 @@ biggest pools tend to win out, even if they have larger fees. Additionally, when
 it cannot be used as efficiently. Many protocols have worked on either finding ways to fuse their pools and make more efficient use of
 capital (see Aave v3 for instance). Additionally, there has been a rise of "Defi Aggregators" like 1inch that search across numerous
 Defi systems for the best possible trade. A marketplace of limit orders (represented by `SignedContingentInput`'s), where many
-liquidity providers can participate, could perhaps be simpler and more efficient. (However, this is only one possible architecture for
-a swapping service based on `SignedContingentInput`'s.)
+liquidity providers can participate, much like Airswap, could perhaps be simpler and more efficient.
+(However, this is only one possible architecture for a swapping service based on `SignedContingentInput`'s.)
 
 In the Ethereum blockchain, it is possible to submit a bundle of multiple transactions that are guaranteed to all execute atomically.
 This mechanism could conceiveably be used to execute a swap, although to our knowledge it is never done this way because there is not
@@ -179,7 +181,7 @@ existing proposals for how users can perform on-chain swaps securely.
 [prior-art]: #prior-art
 
 - [Uniswap](https://docs.uniswap.org/protocol/introduction): An introduction to the Uniswap protocol
-- [Air Swap](https://about.airswap.io/): A decentralized peer-to-peer swap network based on Ethereum
+- [AirSwap](https://about.airswap.io/): A decentralized peer-to-peer swap network
 - [Bitcoin Monero Cross-chain Atomic Swaps](https://eprint.iacr.org/2020/1126): A proposal using hashed time-locked contracts and bitcoin scripting language
 - [What is an automated marker maker?](https://www.coindesk.com/learn/2021/08/20/what-is-an-automated-market-maker/): Coindesk article describing AMMs
 - [MEV](https://ethereum.org/en/developers/docs/mev/): A definition and discussion of MEV, particularly in connection to Ethereum
@@ -195,7 +197,7 @@ existing proposals for how users can perform on-chain swaps securely.
 For Automated Market Makers like Uniswap, the end user experience is going to a website, and (typically) using a browser wallet to build and submit a transaction to the smart contract.
 
 For swaps based on contingent inputs, one possible experience is that the service generates a signed contingent input for you, and you build a transaction with it and submit it to the network.
-However, it could also be that the user builds a signed contingent input and submits it to the service, where it enters an order book and is filled by someone else.
+However, it could also be that the user builds a signed contingent input and submits it to the service (like Airswap), where it enters an order book and is filled by someone else.
 
 We think there are numerous ways that this primitive could be used to build a swapping service and a myriad of tradeoffs, and we prefer to scope this MCIP just to specifying the signed contingent input primitive.
 
