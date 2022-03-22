@@ -1,6 +1,6 @@
 - Feature Name: Transactions with Contingent Inputs
 - Start Date: Mar 21, 2022
-- MCIP PR: [mobilecoinfoundation/mcips#0027](https://github.com/mobilecoinfoundation/mcips/pull/0031)
+- MCIP PR: [mobilecoinfoundation/mcips#0031](https://github.com/mobilecoinfoundation/mcips/pull/0031)
 - Tracking Issue: None
 
 # Summary
