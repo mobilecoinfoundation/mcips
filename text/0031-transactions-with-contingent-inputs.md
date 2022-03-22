@@ -39,9 +39,11 @@ functionality, which is very complex. It is also quite difficult to create AMM's
 Many research papers have been written on cross-chain atomic swaps, particularly, describing protocols using Bitcoin's scripting language
 to permit swapping bitcoin in a "trustless" way for other assets, using hash time locked contracts. These protocols are often quite complex,
 requiring each party to "commit" their funds first, then trigger the swap, and have contingencies for each party to recover their committed funds
-if the counter party renegs. These protocols may require several rounds of interaction, and require several on-chain transactions, incurring fees and
+if the counterparty renegs. These protocols may require several rounds of interaction, and require several on-chain transactions, incurring fees and
 increasing the total delay for the swap to be finished. (Because of this complexity, alternatives have been sought such as "wrapped Bitcoin" which is an
-ERC20 representation of locked bitcoin which can be used more easily on the Ethereum network.)
+ERC20 representation of locked bitcoin which can be used more easily on the Ethereum network.) Another comment here is that in these multistep protocols,
+if the counterparty stops participating, you can still recover your funds, but you still pay two transaction fees to recover them from the escrow, and you
+didn't manage to complete your swap. You can try again with a different counterparty, but if this happens repeatedly you will lose money to fees.
 
 This proposal is considerably simpler -- the rounds of interaction are a minimum, requiring only one side to send a transaction fragment to another.
 No one is required to "escrow" their funds into a smart contract or temporary address. A party who desires to swap can broadcast their transaction fragment
@@ -340,6 +342,21 @@ users will only be able to trade them on centralized exchanges, since there is n
 mechanism in MobileCoin yet and such a mechanism cannot be expected to happen for quite a while, due to
 the size and complexity of the design and implementation task. To our knowledge there are not any other
 existing proposals for how users can perform on-chain swaps securely.
+
+Another benefit of doing this is that, it provides another answer to the concerns that motivate allowing
+users to pay transaction fees with tokens other than MOB. In blockchains such as Ethereum, Ether is the only
+token that can be used to pay gas fees, so even if you have alot of other valuable tokens, if you don't have
+any Ether you are stuck. You may be able to buy some from centralized exchange using fiat currency to get unstuck,
+or borrow from a friend. In layer two networks, they may not be directly listed on any exchange, and the simplest
+thing to do may be to get the gas token from a faucet somewhere. This is a negative user experience, and one way
+to resolve it is to allow paying fees in other tokens (as in MCIP #25).
+
+This mechanism provides another way for the user to get out of this state, since creating a `SignedContingentInput`
+does not require an on-chain event and so does not require gas. They could e.g. create a `SignedContingentInput` that
+spends one of their `TxOut`'s, pays them back some MOB to pay for gas fees, and also change from their original input.
+Then they could send this to a counterparty, who would pay the gas fees when they fulfill the order. In effect they can
+swap even if they don't have any gas balance, unlike in Ethereum network.
+This could justify simplifying MCIP #25 by only allowing MOB as gas.
 
 # Prior art
 [prior-art]: #prior-art
