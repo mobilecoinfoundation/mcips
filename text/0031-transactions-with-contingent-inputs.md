@@ -42,8 +42,10 @@ requiring each party to "commit" their funds first, then trigger the swap, and h
 if the counterparty renegs. These protocols may require several rounds of interaction, and require several on-chain transactions, incurring fees and
 increasing the total delay for the swap to be finished. (Because of this complexity, alternatives have been sought such as "wrapped Bitcoin" which is an
 ERC20 representation of locked bitcoin which can be used more easily on the Ethereum network.) Another comment here is that in these multistep protocols,
-if the counterparty stops participating, you can still recover your funds, but you still pay two transaction fees to recover them from the escrow, and you
+if the counterparty stops participating, you can still recover your funds, but you still pay a transaction fees to recover them from the escrow, and you
 didn't manage to complete your swap. You can try again with a different counterparty, but if this happens repeatedly you will lose money to fees.
+If there are a lot of bad actors in the network, then this could happen often, and it may be very difficult for the network to prevent this from happening
+when the underlying mechanism is a multistep protocol.
 
 This proposal is considerably simpler -- the rounds of interaction are a minimum, requiring only one side to send a transaction fragment to another.
 No one is required to "escrow" their funds into a smart contract or temporary address. A party who desires to swap can broadcast their transaction fragment
