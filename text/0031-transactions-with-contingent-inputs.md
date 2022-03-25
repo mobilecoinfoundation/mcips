@@ -391,4 +391,4 @@ We think there are numerous ways that this primitive could be used to build a sw
 
 The `SignedContingentInput` mechanism could be extended in the future to support other as yet unforseen
 use-cases. For example, conceivably a `SignedContingentInput` could have a rule that only allows it to be spent
-if a smart contract agrees. This is inspired in part by Aleo's "death program" concept.
+if a script or a smart contract agrees. This is inspired in part by Aleo's "death program" concept.
