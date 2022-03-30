@@ -1,7 +1,7 @@
 - Feature Name: Fog-Compatible-Gift-Codes
 - Start Date: Mar 21
 - MCIP PR: [mobilecoinfoundation/mcips#0032](https://github.com/mobilecoinfoundation/mcips/pull/0032)
-- Tracking Issue: None
+- Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/1735
 
 # Summary
 [summary]: #summary
