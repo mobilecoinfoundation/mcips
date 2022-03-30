@@ -3,6 +3,8 @@
 - MCIP PR: [mobilecoinfoundation/mcips#0026](https://github.com/mobilecoinfoundation/mcips/pull/0026)
 - MobileCoin Epic: None
 
+Note: The block version numbers in this MCIP were updated by MCIP #33.
+
 # Summary
 [summary]: #summary
 
@@ -114,9 +116,9 @@ Summary of block versions:
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Block Version | New Field                 | Description                                                                                                                                                  |
 | ------------- | ---------                 | -----------                                                                                                                                                  |
-| 1             |    -                      | Status quo                                                                                                                                                   |
-| 2             | `TxOut::e_memo`           | This is the first block version at which `e_memo` field will be accepted, and it will be required going forwards. This represents the changes in [MCIP #3](https://github.com/mobilecoinfoundation/mcips/pull/0003).    |
-| 3             | `Amount::masked_token_id` | This is the first block version at which `masked_token_id` will be accepted, and it will be required going forward. This represents the changes in [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/0025). |
+| 0             |    -                      | Status quo                                                                                                                                                   |
+| 1             | `TxOut::e_memo`           | This is the first block version at which `e_memo` field will be accepted, and it will be required going forwards. This represents the changes in [MCIP #3](https://github.com/mobilecoinfoundation/mcips/pull/0003).    |
+| 2             | `Amount::masked_token_id` | This is the first block version at which `masked_token_id` will be accepted, and it will be required going forward. This represents the changes in [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/0025). |
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 We'll attempt to describe code changes that would be needed in mobilecoin software to implement this:
@@ -208,8 +210,8 @@ changes and the confidential token ids change. Another alternative may be to imp
   Since in real-life, features will turn on in some scheduled order, it will simplify the code if the code assumes the
   order the features will turn on. We may be able to simplify the code though by adding predicates like
   ```
-  fn feature_memos_is_supported(block_version: u32) -> bool { block_version >= 2 }
-  fn feature_masked_token_id_is_supported(block_version: u32) -> bool { block_version >= 3 }
+  fn feature_memos_is_supported(block_version: u32) -> bool { block_version >= 1 }
+  fn feature_masked_token_id_is_supported(block_version: u32) -> bool { block_version >= 2 }
   ```
   and using these in the transaction validation and construction routines, which will get us most of the benefits
   of a feature-flag based system from an engineering point of view.
