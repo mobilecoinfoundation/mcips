@@ -1,6 +1,6 @@
 - Feature Name: sorted_transaction_outputs
 - Start Date: 2022-04-04
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#34](https://github.com/mobilecoinfoundation/mcips/pull/34)
 - Tracking Issue: original PR: https://github.com/mobilecoinfoundation/mobilecoin/pull/561
 
 # Summary
