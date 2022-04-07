@@ -45,5 +45,5 @@ builder to be used for sorting the transaction outputs.
 # Drawbacks
 [drawbacks]: #drawbacks
 
-There are no drawbacks.
+Any third-party software which was not previously sorting outputs will need to be updated. We are not aware of any such software, however.
 
