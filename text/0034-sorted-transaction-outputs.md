@@ -41,6 +41,31 @@ With block version >= 3 the validator will also check whether the transaction ou
 
 When library is compiled with `test-only` feature flag, there is a possibility to provide a custom trait for the transaction
 builder to be used for sorting the transaction outputs.
+```rust
+// create a custom implementation of the Ordering trait
+pub struct InverseTxOutputsOrdering;
+
+impl TxOutputsOrdering for InverseTxOutputsOrdering {
+    fn cmp(a: &CompressedRistrettoPublic, b: &CompressedRistrettoPublic) -> Ordering {
+        b.cmp(a)
+    }
+}
+
+// create the transaction builder
+let mut transaction_builder = TransactionBuilder::new(
+        block_version,
+        sender_amount.token_id,
+        MockFogResolver::default(),
+        EmptyMemoBuilder::default(),
+    );
+
+
+...
+
+// use the custom Ordering implementation to generate wrongly sorted outputs
+// when building the transaction
+transaction_builder.build_with_sorter::<R, InverseTxOutputsOrdering>(rng).unwrap()
+```
 
 # Drawbacks
 [drawbacks]: #drawbacks
