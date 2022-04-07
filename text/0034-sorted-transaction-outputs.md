@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-For blocks with a version >= 3, all the transaction's outputs will be sorted by the public key value.
+For blocks with a version >= 3, all the transaction's outputs MUST be sorted by the public key value.
 
 # Motivation
 [motivation]: #motivation
