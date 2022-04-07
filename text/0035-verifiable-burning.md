@@ -28,7 +28,7 @@ However, in applications, we generally want burning to be transparent and audita
 so that anyone can easily verify when and how much funds were burned in this way.
 
 This purpose is served if the view private key of the burn address is known to everyone,
-so that they can view key scan to see the provably burned funds (and read the MCIP #3 memos
+so that they can view key scan to see the provably burned funds (and read the [MCIP #3](https://github.com/mobilecoinfoundation/mcips/pull/0003) memos
 on the burned funds, which may also be useful.)
 
 Therefore, we construct and standardize a burn address such that the view private key
@@ -56,9 +56,9 @@ pub const BURN_ADDRESS_VIEW_PRIVATE: Scalar = Scalar::from_bits([1u8; 32]);
 ```
 
 The bit pattern `[1u8; 32]` was chosen arbitrarily. It is the next simplest bit pattern to write in code after `[0u8; 32]`.
-We did not choose to make this scalar zero, because, zero is the ``funniest number in cryptography'' and sometimes leads to degeneracies.
+We did not choose to make this scalar zero, because, zero is the "funniest number in cryptography" and sometimes leads to degeneracies.
 
-The `burn_address_spend_public` key is a ristretto curve point, intended to be a ``nothing up my sleeve'' number,
+The `burn_address_spend_public` key is a ristretto curve point, intended to be a "nothing up my sleeve" number,
 created transparently by hashing to curve.
 
 In all previous instances where MobileCoin has required such a curve point, we achieve this by fixing a string constant
@@ -102,21 +102,29 @@ None that we are aware of.
 We believe that this proposal is the simplest approach that could possibly work.
 
 An alternative which was proposed initially did not derive view public by the product of
-view private and spend public. However, this corresponds to an ``old-style'' public address
+view private and spend public. However, this corresponds to an "old-style" public address
 and not a subaddress. Currently the MobileCoin transaction builder only supports subaddresses,
 and we would have to bring back support for sending to the old-style addresses if we wanted
-to support such a burn address. Making the burn address a subaddress avoids all of that work
-and maintenance burden.
+to support sending to such a burn address and having view key scanning work. Making the burn address
+a subaddress avoids all of that work and maintenance burden.
 
 To see that the proposal indeed works, we have to verify that there is no way to spend the burned funds.
 
-This means that, it should be infeasible to learn the subaddress spend private key corresponding to the burn address.
+Intuitively, we should believe this claim, because the only information we have about the burn address is basically
+its "view key" in the terminology of CryptoNote. That is, we have the public address, and the view private key. If
+this data alone can be used to spend the funds, that indicates a design flaw in the transaction protocol. However,
+it is conceivable (in fact, likely) that for *almost all* view keys, the view key is not enough for the attacker
+to figure out how to spend the funds, but for a small number of pathological view keys, it is enough.
+In the rest of this section we will demonstrate that the burn address we picked is not pathological in this way.
+
+In order to spend the burned funds, an attacker needs to be able to obtain the subaddress spend private key corresponding
+to the burn address. Therefore, our goal is to show that it is infeasible to learn that subaddress spend private key.
 (This condition also implies that the account spend private key is infeasible to learn, since that key could be used
 to derive the subaddress spend private key.)
 
 The subaddress spend private key is the root of the subaddress spend public key, relative to the Ristretto basepoint.
-So this means, solving the discrete logarithm problem for subaddress spend public key, given the additional information
-available in about the burn address.
+So this means, solving the discrete logarithm problem for the subaddress spend public key, given the additional information
+available about the burn address.
 
 The security argument has two steps:
 * First, we claim that the subaddress spend public key is pseudorandom. If there is an algorithm which, given the burn address
@@ -124,7 +132,9 @@ The security argument has two steps:
   high probability when the construction is modified so that the spend public key is chosen uniformly at random.
   
   This claim can be justified by thinking of `Blake2b` as a random oracle. (There are other less powerful assumptions that we
-  could make here, but in the interest of brevity we will omit discussion.) Another way to think about it is that we are claiming
+  could make here, but in the interest of brevity we will omit discussion.)
+  
+  Another way to think about it is that we are claiming
   that the spend public key we constructed is a ``nothing up my sleeve number'' and there is no way that it could have been
   manipulated to have non-random properties. (This assumption is also used to construct Pedersen generators for MobileCoin amount commitments.)
 * Second, if there is an algorithm `A` which given a random curve point, the scalar `[1u8; 32]`, and the product of that random
@@ -132,6 +142,8 @@ The security argument has two steps:
   discrete log, since for any curve point, we can efficiently multiply it by `[1u8; 32]`, and then we would be able to use
   `A` as a black box to solve discrete log with high probability for random inputs. This directly contradicts the hardness assumption
   for discrete log in curve25519.
+
+Thus, we have shown by reduction to discrete log that it is intractable to find the subaddress spend key for these funds.
 
 This security argument also shows why it isn't important for the view private key to be chosen by hashing.
 
