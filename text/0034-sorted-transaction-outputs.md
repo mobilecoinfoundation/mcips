@@ -12,7 +12,7 @@ For blocks with a version >= 3, all the transaction's outputs MUST be sorted by 
 [motivation]: #motivation
 
 The main idea behind this feature is to prevent establishing the order of outputs that were added to the 
-transaction, thus making hard or impossible to identify the source.
+transaction, thus making it hard or impossible to identify the source.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
