@@ -39,7 +39,7 @@ Before block version 3, the transaction validator was checking on the following 
 
 With block version >= 3 the validator will also check whether the transaction outputs are sorted. 
 
-When library is compiled with `test-only` feature flag, there is a possibility to provide a custom trait for the transaction
+When the library is compiled with the `test-only` feature flag, there is a possibility to provide a custom trait for the transaction
 builder to be used for sorting the transaction outputs.
 ```rust
 // create a custom implementation of the Ordering trait
