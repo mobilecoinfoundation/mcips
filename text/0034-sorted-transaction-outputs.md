@@ -23,7 +23,7 @@ It will return a transaction validation error if not.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-Before block version 3, the transaction validator was checking on the following checks
+Before block version 3, the transaction validator was checking:
 * number of inputs
 * number of outputs
 * ring sizes
