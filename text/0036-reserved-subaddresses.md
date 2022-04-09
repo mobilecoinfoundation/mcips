@@ -1,7 +1,7 @@
 - Feature Name: Reserved Subaddresses
 - Start Date: (2022-04-10)
 - MCIP PR: [mobilecoinfoundation/mcips#36](https://github.com/mobilecoinfoundation/mcips/pull/36)
-- Tracking Issue: TODO
+- Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/1787
 
 [summary]: #summary
 
