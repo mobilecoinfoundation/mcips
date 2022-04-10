@@ -14,6 +14,9 @@ the state of the gift code using on-chain data. Additionally, this mechanism is 
 simpler since it doesn't require creating a temporary account, and instead gives ownership of a `TxOut`
 directly.
 
+We propose that TxOut's which are sent as gift codes, should be paid first to the reserved
+`GIFT_CODE_SUBADDRESS_INDEX`, which is equal to `u64::MAX - 1` (per MCIP #36).
+
 # Motivation
 [motivation]: #motivation
 
@@ -195,6 +198,10 @@ We could then make this schema a new option to `PrintableWrapper`.
 For the older transfer payload, we can either deprecate it, or, we could introduce a `global_index` field which can replace the
 `tx_out_public_key` and deprecate the use of the `tx_out_public_key` field.
 
+When an app finds a TxOut belonging to the `GIFT_CODE_SUBADDRESS`, it can infer that this belongs to an in-flight gift code.
+When this TxOut is spent, the app can infer that the gift code was redeemed, or canceled. The app may cancel a gift code by
+paying it back to the primary subaddress.
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
@@ -230,7 +237,10 @@ None that we are aware of.
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-None at this time.
+There should probably be RTH memos that can be used to remember who you sent a gift code to,
+and help you remember that you canceled a gift code.
+
+We should make such memos in this MCIP or a later MCIP.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
