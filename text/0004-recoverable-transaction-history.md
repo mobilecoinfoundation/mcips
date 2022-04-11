@@ -4,7 +4,7 @@
 - Implementation: [mobilecoinfoundation/mobilecoin#814](https://github.com/mobilecoinfoundation/mobilecoin/pull/814)
 
 *Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24.  That [MCIP lists the changed byte tables](0024-increase-memo-field-size.md#this-is-an-update-to-4).
-*Note:* This MCIP initially set the change subaddress index to `1`. This was updated in [MCIP #36](https://github.com/mobilecoinfoundation/mcips/pull/36) to `u64::MAX`.
+*Note:* This MCIP initially set the change subaddress index to `1`. This was updated in [MCIP #36](https://github.com/mobilecoinfoundation/mcips/pull/36) to `u64::MAX - 1`.
 
 # Summary
 [summary]: #summary

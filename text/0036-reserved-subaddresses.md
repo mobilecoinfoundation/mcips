@@ -7,10 +7,14 @@
 
 Subaddress indices are unsigned 64-bit numbers.
 
-The indices with high bit set are reserved for "special purposes".
+The indices with high bit set are reserved for "special purposes", and should
+not be assigned to individual contacts by desktop wallets that are using subaddresses this way.
+
+`u64::MAX` will be reserved for an "invalid / none" value.
 
 [mobilecoinfoundation/mcips#4](https://github.com/mobilecoinfoundation/mcips/pull/4) will be updated,
-changing the change subaddress from `1` to `u64::MAX`.
+changing the change subaddress from `1` to `u64::MAX - 1`.
+
 Subsequent reserved indices will count down from there.
 
 # Motivation
@@ -38,12 +42,14 @@ into a desktop wallet.
 
 Subaddress indices with the high bit set are reserved for special purposes.
 
-Examples:
-* The "change subaddress" from [MCIP #4](https://github.com/mobilecoinfoundation/mcips/pull/4)
-* The "gift code subaddress" from [MCIP #32](https://github.com/mobilecoinfoundation/mcips/pull/32)
-
 These will be assigned numbers counting down from `u64::MAX`. This avoids collisions
 with subaddresses already assigned by the desktop wallet.
+
+| Subaddress index | Purpose         |
+| ---------------- | --------------- |
+| `u64::MAX`       | Invalid / None      |
+| `u64::MAX - 1`   | Change subaddress [MCIP #4](https://github.com/mobilecoinfoundation/mcips/pull/4)      |
+| `u64::MAX - 2`   | Gift code subaddress [MCIP #32](https://github.com/mobilecoinfoundation/mcips/pull/32) |
 
 # Drawbacks
 [drawbacks]: #drawbacks
