@@ -23,7 +23,7 @@ history given only the private keys of the user, by fetching all of the user's T
 decoding and validating the memos.
 
 Some additional ancillary parts of the proposal:
-- Change subaddress is standardized to subaddress index `u64::MAX`.
+- Change subaddress is standardized to subaddress index `u64::MAX - 1`.
 - Clients should always produce a change output even if the change is zero, in order to have a place to put
   the destination memo.
 - A standard 16-byte hash of a public address is specified, which may be useful elsewhere.
