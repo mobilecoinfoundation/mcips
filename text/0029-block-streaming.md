@@ -146,7 +146,7 @@ zone), similar to how one might have a shared cache instance.
 Pros:
 * Maintains decentralization.
 * Matches network topology.
-* May unlocks scaling benefits of dedicated brokers for the fanout network.
+* May unlock scaling benefits of dedicated brokers for the fanout network.
 
 Cons:
 * One more service to host and operate.
