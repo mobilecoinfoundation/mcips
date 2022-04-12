@@ -5,7 +5,7 @@
 
 [summary]: #summary
 
-Subaddress indices are unsigned 64-bit numbers.
+Subaddress indices are unsigned 64-bit integers.
 
 The indices with high bit set are reserved for "special purposes", and should
 not be assigned to individual contacts by desktop wallets that are using subaddresses this way.
