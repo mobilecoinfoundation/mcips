@@ -57,6 +57,35 @@ with subaddresses already assigned by the desktop wallet.
 This is reserving a lot of subaddresses. However, if later it turns out we need to
 give most of them back, that should be fine.
 
+It turns out that the full-service desktop wallet is already sending change to a change subaddress,
+but only in certain configurations, and it is using subaddress index 1 for this.
+This proposal will require full-service to start using `u64::MAX - 1` after block version 1,
+and can have backwards compatibility support for subaddress index 1 in blocks before that version.
+
+# Rationale and alternatives
+[rationale-and-alternatives]: #rationale-and-alternatives
+
+An alternative would have been to use change subaddress index 1 for all clients, and not use `u64::MAX - 1`.
+
+However, this has a major drawback for anyone using `mobilecoind` today, which is that they have been using
+subaddress index 1 with contacts. So they have already handed that subaddress out to their contacts, and they
+have no practical ability to change it now that they've given it away. If they are an exchange, customers may
+still deposit money to that address.
+
+Additionally, the change subaddress index plays a critical role in RTH memo validation in MCIP #4.
+It is regarded as a secret -- anyone who knows your change subaddress is able to send you destination memos
+that your clients will treat as valid. If you are an exchange and someone knows your change subaddress, then
+they can potentially forge bad destination memos and defraud you.
+
+Therefore, it is safer to use `u64::MAX - 1`, a subaddress index that has never been used by any client before,
+as the change subaddress index, and to migrate full-service to use this before RTH memos exist in the wild.
+
+*Specifically, full-service, and any either client, should NEVER treat a destination memos as valid if it comes
+on the subaddress of index 1.*
+
+Since this means that we cannot standardize on `1` as the change subaddress index, `u64::MAX - 1` is the best
+remaining option.
+
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
