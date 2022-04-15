@@ -4,6 +4,8 @@
 - Implementation: [mobilecoinfoundation/mobilecoin#814](https://github.com/mobilecoinfoundation/mobilecoin/pull/814)
 
 *Note:* This MCIP describes a memo which has had its size adjusted from 46 to 66 in MCIP #24.  That [MCIP lists the changed byte tables](0024-increase-memo-field-size.md#this-is-an-update-to-4).
+*Note:* This MCIP initially set the change subaddress index to `1`. This was updated in [MCIP #36](https://github.com/mobilecoinfoundation/mcips/pull/36) to `u64::MAX - 1`.
+
 # Summary
 [summary]: #summary
 
@@ -21,7 +23,7 @@ history given only the private keys of the user, by fetching all of the user's T
 decoding and validating the memos.
 
 Some additional ancillary parts of the proposal:
-- Change subaddress is standardized to subaddress index 1.
+- Change subaddress is standardized to subaddress index `u64::MAX - 1`.
 - Clients should always produce a change output even if the change is zero, in order to have a place to put
   the destination memo.
 - A standard 16-byte hash of a public address is specified, which may be useful elsewhere.
@@ -115,7 +117,7 @@ that went to the change subaddress.
 ## Change subaddress
 
 The "change subaddress" is a new standard subaddress, like the default subaddress. It should be used when sending change outputs.
-It is specified to be subaddress index 1.
+It is specified to be subaddress index `u64::MAX-1`.
 
 The change subaddress should be kept secret, so that only authentic 0x0200 Destination memos will pass validation.
 
