@@ -252,4 +252,4 @@ a new subaddress per contact.
 
 Since we want for users to be able to export their account from mobile apps and load them in desktop apps and have things work cleanly,
 it may be a good idea to reserve a specific range of subaddresses for mobile, so that when a desktop app loads account history it doesn't
-get confused by the way mobile has been usign the subaddresses.
+get confused by the way mobile has been using the subaddresses.
