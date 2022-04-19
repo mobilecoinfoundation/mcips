@@ -11,6 +11,7 @@
 - [Motivation](#motivation)
 - [Guide-level explanation](#guide-level-explanation)
 - [Reference-level explanation](#reference-level-explanation)
+  - [Extending Blockchain Protobufs](#extending-blockchain-protobufs)
   - [Streaming API](#streaming-api)
     - [Fanout network layout](#fanout-network-layout)
   - [Backfill API](#backfill-api)
@@ -64,7 +65,7 @@ blocks, and fetch those in parallel.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-There are two mechanisms for getting blocks from consensus nodes:
+There will be two mechanisms for getting blocks from consensus nodes:
 1. A streaming API for getting the latest blocks, and
 2. A backfill/discovery API specifying where to find archived blocks.
 
@@ -88,6 +89,52 @@ bus.
 When a node needs to get blocks and has not received them via the message bus,
 it will fall back to fetching the node from S3, matching existing behaviour.
 
+## Extending Blockchain Protobufs
+We will add a `BlockMetadata` message to the `blockchain.ArchiveBlockV1` protobuf, as follows:
+
+```proto3
+message BlockMetadata {
+    /// The Block ID.
+    BlockID id = 1;
+
+    /// Quorum set configuration at the time of externalization.
+    QuorumSet quorum_set = 2;
+    
+    /// IAS report for the enclave which generated the signature.
+    VerificationReport verification_report = 3;
+}
+
+message SignedBlockMetadata {
+    /// Metadata signed by the consensus node.
+    BlockMetadata contents = 1;
+
+    /// Message signing key (signer).
+    Ed25519Public node_key = 2;
+    
+    /// Signature using `node_key` over the Digestible encoding of `contents`.
+    Ed25519Signature signature = 3;
+}
+
+// NB: Only addition is field #4.
+message ArchiveBlockV1 {
+    /// Block.
+    Block block = 1;
+
+    /// Contents of the block.
+    BlockContents block_contents = 2;
+
+    /// Block signature, when available.
+    BlockSignature signature = 3;
+
+    /// Additional signed metadata about this block.
+    SignedBlockMetadata metadata = 4;
+}
+```
+
+Since this is a protobuf-additive change, we don't need a new `ArchiveBlock` type. A future block version change will make the `quorum_set` and `verification_report` required, rejecting blocks without those fields. This makes the streaming and archive APIs (defined below) use equivalent representations.
+
+The metadata signature will always differ from the block signature. The block is signed by the enclave using a private key that never leaves the enclave, while the metadata is signed by the "untrusted" code outside the enclave, in part because the enclave cannot generate this metadata.
+
 ## Streaming API
 This is the entrypoint for subscribing to block updates, leveraging
 [server streaming gRPC](https://grpc.io/docs/what-is-grpc/core-concepts/#server-streaming-rpc).
@@ -100,22 +147,8 @@ message SubscribeRequest {
     uint64 starting_height = 1;
 }
 
-message BlockWithQuorumSet {
-    /// The block data.
-    blockchain.ArchiveBlock block = 1;
-    /// QuorumSet when the block was externalized.
-    QuorumSet quorum_set = 2;
-    /// Attestation Verification report.
-    external.VerificationReport report = 3;
-}
-
-message SubscribeResponse {
-    BlockWithQuorumSet result = 1;
-    external.Ed25519Signature result_signature = 2;
-}
-
-service ConsensusUpdates {
-    rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
+service LedgerUpdates {
+    rpc Subscribe(SubscribeRequest) returns (stream ArchiveBlocks);
 }
 ```
 
@@ -128,7 +161,7 @@ determined, and can be changed without affecting the rest of this proposal.
 With that said, we outline some possible approaches below.
 
 #### Serve from consensus node
-Add the `ConsensusUpdates` gRPC server to the consensus node binary.
+Add the `LedgerUpdates` gRPC server to the consensus node binary.
 
 Pros:
 * Simple setup.
@@ -179,6 +212,8 @@ service ArchiveBlocks {
     rpc GetBaseUrl(ArchiveBlocksUrlRequest) returns (ArchiveBlocksUrlResponse);
 }
 ```
+
+Clients will then download the serialized block protobuf from the returned URL.
 
 ### Paths for archived blocks
 
