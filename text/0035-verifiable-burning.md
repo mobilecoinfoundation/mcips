@@ -17,7 +17,7 @@ There are a few reasons this may be done:
 * To adjust the supply of a synthetic asset
 * To create a deflationary pressure on a token
 
-Particularly, [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0031)
+Particularly, [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/0025)
 will provide the foundations for synthetic assets in MobileCoin.
 
 It is quite easy to make funds unspendable by just sending them to a random public address.
