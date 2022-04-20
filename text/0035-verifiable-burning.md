@@ -89,7 +89,7 @@ That is, the product of account view private key, with subaddress spend public k
 is equal to the subaddress view public key.
 
 This identity can be verified by inspecting the MobileCoin subaddress derivation implementation,
-or by referring to Mechanics of MobileCoin.
+or by referring to [Mechanics of MobileCoin](https://github.com/mobilecoinfoundation/Mechanics-of-MobileCoin).
 
 # Drawbacks
 [drawbacks]: #drawbacks
