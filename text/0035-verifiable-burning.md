@@ -150,7 +150,7 @@ This security argument also shows why it isn't important for the view private ke
 # Prior art
 [prior-art]: #prior-art
 
-None at this time.
+Thanks to @ChristianOudard who made a proof-of-concept based on randomized public addresses.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
