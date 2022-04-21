@@ -25,6 +25,8 @@ We would like to support multiple asset types on our chain, all of which need to
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
+To support multiple asset types on the MobileCoin blockchain, we have added two new transaction types, the `MintTx`, which mints new TxOuts, and the `MintConfigTx`, which specifies the configuration that the consensus validator nodes use to validate a `MintTx`.
+
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -131,49 +133,21 @@ An alternate proposal would be to use a Threshold Signature, such as [Flexible R
 
 ## Smart Contracts for Multiple Asset Support
 
-Many other blockchain ecosystems support smart contracts to enable the minting of new assets, the most well-known probably being the [ERC-20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) token standard on Ethereum. A fully-featured smart contracting system is desirable in our ecosystem and on our roadmap, but we can achieve the functionality of supporting multiple asset types without the overhead of full smart contract support.
+Many other blockchain ecosystems support smart contracts to enable the minting of new assets (see [Prior Art](#prior-art) for a sampling). A fully-featured smart contracting system is desirable in our ecosystem and on our roadmap, but we can achieve the functionality of supporting multiple asset types without the overhead of full smart contract support.
 
 # Prior art
 [prior-art]: #prior-art
 
-> Discuss prior art, both the good and the bad, in relation to this proposal.
-> A few examples of what this can include are:
->
-> - For consensus and fog proposals: Does this feature exist in other systems, and what experience have their community had?
-> - For community proposals: Is this done by some other community and what were their experiences with it?
-> - For other teams: What lessons can we learn from what other communities have done here?
-> - Papers: Are there any published papers or great posts that discuss this? If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
->
-> This section is intended to encourage you as an author to think about the lessons from other systems, provide readers of your MCIP with a fuller picture.
-> If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other systems.
->
-> Note that while precedent set by other systems is some motivation, it does not on its own motivate an MCIP.
-> Please also take into consideration that MobileCoin sometimes intentionally diverges from common cryptocurrency features.
+* The origin block of MobileCoin is the first minting action that occurred, and minted MOB. See [MobileCoin Governance, Fees, and Supply](https://mobilecoin.com/news/mobilecoin-governance-fees-and-supply) for a description. MOB will be the only asset on the MobileCoin blockchain which can never have additional minting actions.
+* Every blockchain must enable some form of minting for their initial asset, and for subsequent assets to be minted, there are schemes such as [Ethereum's ERC-20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/), [Polygon Mintable Assets](https://docs.polygon.technology/docs/develop/ethereum-polygon/mintable-assets/), [Cardano native tokens](https://docs.cardano.org/native-tokens/learn),[Solana's Token Program](https://spl.solana.com/token), and many more.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-> - What parts of the design do you expect to resolve through the MCIP process before this gets merged?
-> - What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-> - What related issues do you consider out of scope for this MCIP that could be addressed in the future independently of the solution that comes out of this MCIP?
+None at this time.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-> Think about what the natural extension and evolution of your proposal would
-> be and how it would affect the project as a whole in a holistic way. Try to
-> use this section as a tool to more fully consider all possible interactions
-> with aspects of the project in your proposal. Also consider how this all
-> fits into the roadmap for the project and of the relevant team.
->
-> This is also a good place to "dump ideas", if they are out of scope for the
-> MCIP you are writing but otherwise related.
->
-> If you have tried and cannot think of any future possibilities,
-> you may simply state that you cannot think of anything.
->
-> Note that having something written down in the future-possibilities section
-> is not a reason to accept the current or a future MCIP; such notes should be
-> in the section on motivation or rationale in this or subsequent MCIPs.
-> The section merely provides additional information.
+* Expanded/automated bridge operation
 
