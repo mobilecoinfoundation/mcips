@@ -55,13 +55,13 @@ The `masked_token_id` field is added to the [`Amount`](https://github.com/mobile
 * To compute the 4 byte `masked_token_id` from the `token_id`, we hash the TxOut shared secret, with a prefix, XORed with the `token_id`, and take the little endian representation of those bytes.
 
     ```
-    masked_token_id = (token_id ^ Blake2B(AMOUNT_TOKEN_ID_DOMAIN_TAG | shared_secret)).to_le()
+    masked_token_id = (token_id ^ Blake2B(AMOUNT_TOKEN_ID_DOMAIN_TAG || shared_secret)).to_le()
     ```
 
 * To recover the `token_id` from the `masked_token_id`, we reverse the process (if the bytes field is length = 4, otherwise `token_id = 0`).
 
     ```
-    unmasked_token_id = masked_token_id ^ Blake2b(AMOUNT_TOKEN_ID_DOMAIN_TAG | shared_secret)
+    unmasked_token_id = masked_token_id ^ Blake2b(AMOUNT_TOKEN_ID_DOMAIN_TAG || shared_secret)
     ```
 
 ### Pedersen Generators
@@ -83,7 +83,7 @@ We propose to compute `H_i` by converting `i` to little endian bytes, and XOR'in
 For example, an implementation to obtain a generator for `token_id = i` could look like:
 
 ```
-B = RistrettoPoint::from_hash(Blake2b(HASH_TO_POINT_DOMAIN_TAG | RISTRETTO_BASEPOINT ^ token_id))
+B = RistrettoPoint::from_hash(Blake2b(HASH_TO_POINT_DOMAIN_TAG || RISTRETTO_BASEPOINT ^ token_id))
 B_blinding = RISTRETTO_BASEPOINT
 ```
 
@@ -218,3 +218,4 @@ No unresolved questions at this time.
 
 No future possibilities at this time.
 
+ |
