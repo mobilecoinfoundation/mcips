@@ -58,11 +58,11 @@ pub const BURN_ADDRESS_VIEW_PRIVATE: Scalar = Scalar::from_bits([1u8; 32]);
 The bit pattern `[1u8; 32]` was chosen arbitrarily. It is the next simplest bit pattern to write in code after `[0u8; 32]`.
 We did not choose to make this scalar zero, because, zero is the "funniest number in cryptography" and sometimes leads to degeneracies.
 
-The `burn_address_spend_public` key is a ristretto curve point, intended to be a "nothing up my sleeve" number,
+The `burn_address_spend_public` key is a ristretto point, intended to be a "nothing up my sleeve" number,
 created transparently by hashing to curve.
 
-In all previous instances where MobileCoin has required such a curve point, we achieve this by fixing a string constant
-that describes the purpose of the curve point, and hashing this to curve using the `Blake2b` hash function.
+In all previous instances where MobileCoin has required such a Ristretto point, we achieve this by fixing a string constant
+that describes the purpose of the Ristretto point, and hashing this to curve using the `Blake2b` hash function.
 
 ```
 pub const BURN_ADDRESS_DOMAIN_SEPARATOR: &str = "mc_burn_address_spend_public";
@@ -137,9 +137,9 @@ The security argument has two steps:
   Another way to think about it is that we are claiming
   that the spend public key we constructed is a ``nothing up my sleeve number'' and there is no way that it could have been
   manipulated to have non-random properties. (This assumption is also used to construct Pedersen generators for MobileCoin amount commitments.)
-* Second, if there is an algorithm `A` which given a random curve point, the scalar `[1u8; 32]`, and the product of that random
-  curve point and that scalar, finds the discrete log of the curve point with high probability, then this is also an algorithm for solving
-  discrete log, since for any curve point, we can efficiently multiply it by `[1u8; 32]`, and then we would be able to use
+* Second, if there is an algorithm `A` which given a random point, the scalar `[1u8; 32]`, and the product of that random
+  point and that scalar, finds the discrete log of the point with high probability, then this is also an algorithm for solving
+  discrete log, since for any point, we can efficiently multiply it by `[1u8; 32]`, and then we would be able to use
   `A` as a black box to solve discrete log with high probability for random inputs. This directly contradicts the hardness assumption
   for discrete log in curve25519.
 
