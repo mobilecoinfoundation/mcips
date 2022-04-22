@@ -6,11 +6,11 @@
 # Summary
 [summary]: #summary
 
-A normal MobileCoin transfer transaction contains a set of inputs, which are marked spent, to create (mint) a new set of outputs. The network validators confirm that the sum of the value of the inputs is equal to the sum of the value of the outputs, using Ring Confidential Transactions. 
+A normal MobileCoin transfer transaction contains a set of inputs, which are marked spent, to create (mint) a new set of outputs. The network validators confirm that the sum of the value of the inputs is equal to the sum of the value of the outputs, using Ring Confidential Transactions.
 
-To support multiple assets, some of which represent backed assets, we will use an auditable process to introduce new token types to the MobileCoin blockchain, following a minting and burning procedure that corresponds with the status of the backed assets. 
+To support multiple assets, some of which represent backed assets, we will use an auditable process to introduce new token types to the MobileCoin blockchain, following a minting and burning procedure that corresponds with the status of the backed assets.
 
-The birds-eye view is that after a set of _Governors_ has been agreed upon by the MobileCoin consensus validator node operators, a new _Minting Configuration_  is submitted to specify the signers who are allowed to mint the new asset type on the MobileCoin blockchain. An amount of the backing asset will be verifiably locked, for example into a smart contract on another chain, and then a _Minting Transaction_ for the locked amount establishes a new set of transaction outputs for which there were no inputs marked spent on the MobileCoin blockchain, using the _confidential token ID_ (see [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/25)) for the corresponding backing asset. When the backing funds are desired to be released from the lock, the amount to be released will be _verifiably burned_ (see [MCIP #35](https://github.com/mobilecoinfoundation/mcips/pull/35)) on the MobileCoin blockchain.
+The birds-eye view is that after a set of _Governors_ has been agreed upon by the MobileCoin consensus validator node operators and signed by the MobileCoin Foundation, a new _Minting Configuration_  is submitted to specify the signers who are allowed to mint the new asset type on the MobileCoin blockchain. An amount of the backing asset will be verifiably locked, for example into a smart contract on another chain, and then a _Minting Transaction_ for the locked amount establishes a new set of transaction outputs for which there were no inputs marked spent on the MobileCoin blockchain, using the _confidential token ID_ (see [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/25)) for the corresponding backing asset. When the backing funds are desired to be released from the lock, the amount to be released will be _verifiably burned_ (see [MCIP #35](https://github.com/mobilecoinfoundation/mcips/pull/35)) on the MobileCoin blockchain.
 
 To achieve the set of functionality required to support backed assets on the MobileCoin blockchain, we will add 2 new transaction types:
 
@@ -32,7 +32,7 @@ To support multiple asset types on the MobileCoin blockchain, we have added two 
 
 ## Multiparty Minting Transaction (`MintTx`)
 
-For the Stablecoin minting procedures, each minting operation must coincide with an amount of the backing asset being ``locked", for example, into a multiparty signature (multisig) contract on another blockchain. 
+For the Stablecoin minting procedures, each minting operation must coincide with an amount of the backing asset being ``locked", for example, into a multiparty signature (multisig) contract on another blockchain.
 
 *Definition: Multisig Contract.* A smart contract requiring a minimum number of parties to approve a transaction before committing it. The threshold is often referred to as _M-of-N_.
 
@@ -44,15 +44,15 @@ Each of _N_ signers maintains an Ed25519 keypair:
 
 `(A_i, a_i)`
 
-and provides their public key to be published alongside the contract on the backing asset locking chain, for example in a [Gnosis Safe](https://gnosis-safe.io/) contract. For space consideration savings, due to high gas fees for permanent storage, a hash of all public keys 
+and provides their public key to be published alongside the contract on the backing asset locking chain, for example in a [Gnosis Safe](https://gnosis-safe.io/) contract. For space consideration savings, due to high gas fees for permanent storage, a hash of all public keys
 
 `H(A_i || A_{i+1} || ... || A_N)`
 
 may be published on the contract, and the full set of signer public keys and the hash algorithm can be published to the MobileCoin blockchain (see [Signers](#signers)), or to another decentralized record service, such as [IPFS](https://ipfs.io/).
 
-The contents of the `MintTx` include the full set of signatures of each of _M_ signers over the transaction's `TxPrefix`. 
+The contents of the `MintTx` include the full set of signatures of each of _M_ signers over the transaction's `MintTxPrefix`.
 
-Each Consensus Validator node is configured with the approved signers list, and this list is also previously published to the chain via the `MintConfigTx`. When a Consensus Validator node sees a `MintTx` with an _M-of-N_ set of signatures, it considers the transaction valid, and consensus proceeds as normal. When a quorum is reached, and the nodes externalize the transaction, the minted TxOuts are written, along with a new block contents section, `mint_txs`, which contains:
+Each Consensus Validator node tracks the currently configured approved signers list, and this list is also previously published to the chain via the `MintConfigTx`. When a Consensus Validator node sees a `MintTx` with an _M-of-N_ set of signatures that matches the most-recent `MintConfigTx` for the given token id, it considers the transaction valid, and consensus proceeds as normal. When a quorum is reached, and the nodes externalize the transaction, the minted TxOuts are written, along with a new block contents section, `mint_txs`, which contains the original `MintTx`. A `MintTx` contains:
 
 
 * The Token ID (only some Token Types allow minting, which is verified by the enclave)
@@ -60,13 +60,13 @@ Each Consensus Validator node is configured with the approved signers list, and 
 * The destination's public subaddress view key
 * The destination's public subaddress spend key
 * the Ed25519 multisig signature set, including the total _M_ signatures required for the _M-of-N_ threshold, specified by the `MintConfigTx` previously accepted and written to the blockchain
-* Nonce: random value to protect against replay attacks
+* Nonce: random value to protect against replay attacks (which can also be used as an external unique identifier for the `MintTx`)
 * Tombstone block: block index after which this transaction will be discarded by consensus, to prevent the transaction from being nominated indefinitely
 
 
 When submitting a `MintTx`, we include a random nonce to protect against replay attacks, and a tombstone block to prevent the transaction from being nominated indefinitely, and these are committed to the chain.
 
-The block, and the latest `MintConfigTx`, ensure that the blockchain is therefore a self-contained document that can be audited to confirm that the minting was sound. In addition, minting is immune to replay attacks, meaning the same transaction cannot be submitted multiple times.
+Since the blockchain contains all `MintTx`s, as well as `MintConfigTx`s that were accepted by consensus. It is therefore a self-contained document that can be audited to confirm that the minting was sound. In addition, minting is immune to replay attacks, meaning the same transaction cannot be submitted multiple times.
 
 ### Privacy Properties of Minted Transaction Outputs
 
@@ -80,17 +80,21 @@ To prepare the consensus validator nodes to validate minting transactions, they 
 The _Minting Configuration_, `MintConfigTx`, specifies the required information to declare the set of authorized signers:
 
 * Token ID: the token type to which this configuration applies
-* Signer set: the set of _N_ signers, `{A_i, A_{i+1}, ..., A_N}`
-* Threshold: the number, _M_, of signers required per `MintTx`
-* Mint limit: the total amount that can be minted in this configuration
 * Nonce: random value to protect against replay attacks
 * Tombstone block: block index after which this transaction will be discarded by consensus, to prevent the transaction from being nominated indefinitely
+* The total amount that can be minted across all configurations included in the `MintConfigTx`
+* A list of configurations for this token id, each containing:
+    * Signer set: the set of _N_ signers, `{A_i, A_{i+1}, ..., A_N}`
+    * Threshold: the number, _M_, of signers required per `MintTx`
+    * Mint limit: the total amount that can be minted in this configuration
+* the Ed25519 multisig signature set, including the total _M_ signatures required for the _M-of-N_ threshold, specified by the governors configuration, previously signed by the Foundation minting trust root key.
+
 
 All of the values above are committed to the blockchain and will be used when verifying `MintTxs`.
 
-Consensus validator nodes perform consensus when a `MintConfigTx` is proposed via an admin endpoint on the nodes. This provides flexibility to the node operators and keeps the network resilient so that a quorum is reached to allow a new minting configuration, while ensuring liveness of the network, so that the network need not restart in order to change the minting configuration. 
+Consensus validator nodes perform consensus when a `MintConfigTx` is proposed via a client RPC endpoint on the nodes. This provides flexibility to the minting governors and keeps the network resilient so that a quorum must be reached to allow a new minting configuration, while ensuring liveness of the network, so that the network need not restart in order to change the minting configuration.
 
-Consensus validator nodes use the latest minting configuration to validate `MintTxs`, and a node in catchup would use the latest `MintTx` it has seen. 
+Consensus validator nodes use the latest minting configuration to validate `MintTxs`.
 
 * Note, however, that nodes in catchup mode do not participate in consensus. The network is already resilient to nodes in catchup, and the minting procedures are similarly resilient.
 
@@ -99,7 +103,11 @@ Consensus validator nodes use the latest minting configuration to validate `Mint
 
 The consensus validator nodes must maintain a set of "master minters," also known as _governors_, who can sign the `MintConfigTx` transactions. The governor set is maintained in the node's startup configuration file, and it is the responsibility of the node operator to perform due diligence on any governor they are adding to the set.
 
-The governor set is a set of Ed25519 public keys, and a `MintConfigTx`'s `TxPrefix` must be signed by the threshold number of governors required by each node in a quorum of nodes to establish a new Minting Configuration for the network.
+The governor set is a set of Ed25519 public keys and a threshold, and a `MintConfigTx`'s `TxPrefix` must be signed by the threshold number of governors required by each node in a quorum of nodes to establish a new Minting Configuration for the network.
+
+To further protect the governors configuration, and to ensure all nodes are running with identical configuration, the consensus enclave contains a baked-in Ed25519 public key called the `Minting Trust Root` key. The consensus enclave requires that the governors configuration be signed by the matching private key (held by the MobileCoin Foundation), and that the signature is provided upon initialization. Without a valid signature over the governors configuration, the consensus enclave will refuse to initialize.
+
+The governors configuration is also hashed into the node's responder ID, preventing node-to-node attestation if the configuration differs. This is similar to how minimum fee configuration is currently handled.
 
 ### Multiple Asset Fees
 
@@ -108,7 +116,7 @@ The startup-config for the consensus validator node contains the governors, as w
 * Token ID
 * Minimum fee
 * Whether any fee is allowed 
-* The list of governors who can change the Minting Config for this token
+* The list of governors who can change the Minting Config for this token (issue `MintConfigTx` transactions)
 
 Every transaction's fee is paid in the same token type as the inputs and outputs of the transaction.
 
