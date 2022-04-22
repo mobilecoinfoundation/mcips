@@ -219,18 +219,18 @@ The memo on the change output is a note Alice writes to herself to keep track of
 memos by confirming that they belong to the change subaddress. The memo on the other output is a note from Alice to Bob,
 typically identifying Alice.
 
-When funding a gift code, the TxOut to `GIFT_CODE_SUBADDRESS` if the gift code tx out, and a change output is always written (even if value zero):
+When building a transaction which funds a gift code, the TxOut to `GIFT_CODE_SUBADDRESS` is called the "gift code output", and a change output is always written (even if value zero):
 * `0x0201 Gift code funding memo` should be attached to the change output. This memo will point to the gift code output by way of a hash, and contains any note about the purpose of the gift code.
 * `0x0001 Unauthenticated sender memo`, or `0x0002 Unauthenticated sender memo with address hash`, is attached to the gift code output.
 
-When claiming a gift code, the gift code output is spent in a self-payment to the change subaddress. The transaction has a single output, the
-change output, which goes to the change subaddress, and has a memo of type `0x0001 Unauthenticated sender memo`, or `0x0002 Unauthenticated sender memo with address hash`.
+When claiming a gift code, the gift code output is spent in a self-payment to the change subaddress. This transaction has a single output, the
+change output, which has a memo of type `0x0001 Unauthenticated sender memo`, or `0x0002 Unauthenticated sender memo with address hash`.
 The app should attempt to validate the information in the memo from the gift code -- for example, in a chat application, the app may be able
-to validate who sent the gift code message. If the information is valid, then the app should copy the memo from the gift code TxOut into the
+to validate who sent the gift code payload in a message. If the information is valid, then the app should copy the memo from the gift code TxOut into the
 self-payment TxOut. If the app decides that the information cannot be validated, then it may use `0x0000 Unused` instead, to avoid committing
 false information. Future apps may assume that any memos attached to TxOut's owned by the change subaddress are known to be valid.
 
-When cancelling a gift code, the gift code tx out is paid back to self. The transaction has a single output, the change output, which goes to
+When cancelling a gift code, the gift code output is paid back to self. This transaction has a single output, the change output, which goes to
 the change subaddress and has a `0x0202 Gift code cancellation memo`. This memo contains the tx public key of the gift code output.
 
 The overall strategy for an app implementing recoverable transaction history looks like this then:
@@ -336,11 +336,6 @@ None that we are aware of.
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-It seems that we are often in a position of reserving subaddresses for new purposes discovered in mobile applications.
-
-This conflicts with how subaddresses are used in applications like `mobilecoind` and `full-service`, which are often assigning
-a new subaddress per contact.
-
-Since we want for users to be able to export their account from mobile apps and load them in desktop apps and have things work cleanly,
-it may be a good idea to reserve a specific range of subaddresses for mobile, so that when a desktop app loads account history it doesn't
-get confused by the way mobile has been using the subaddresses.
+In the future we may want to extend the gift code memos, e.g. to include payment request ids or something. But this set of memos seems to meet
+the goals at end, including, creating memos for a peer, tracking, and cancelling them, and recovering this history, as well as creating gift
+codes with text notes.
