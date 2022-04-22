@@ -15,7 +15,7 @@ simpler since it doesn't require creating a temporary account, and instead gives
 directly.
 
 We propose that TxOut's which are sent as gift codes, should be paid first to the reserved
-`GIFT_CODE_SUBADDRESS_INDEX`, which is equal to `u64::MAX - 1` (per MCIP #36).
+`GIFT_CODE_SUBADDRESS_INDEX`, which is equal to `u64::MAX - 2` (per MCIP #36).
 
 # Motivation
 [motivation]: #motivation
@@ -94,8 +94,8 @@ private key, they can spend it as normal using the transaction builder.
 A major concern for mobile apps is the ability to track things across linked devices using the blockchain (and not a separate synchronization
 mechanism). It is a concern for instance that one app may be trying to give away a `TxOut` in a gift code, while another selects it to be spent in a transaction.
 
-To avoid that, we propose to standardize that `GIFT_CODE_SUBADDRESS_INDEX = 2`, and that before building a gift code, the app should make a self-payment to this
-subaddress witht he correct amount for the gift code. Then the gift code is built against the `TxOut` that belongs to subaddress 2.
+To avoid that, we propose to standardize that `GIFT_CODE_SUBADDRESS_INDEX = u64::MAX - 2`, and that before building a gift code, the app should make a self-payment to this
+subaddress with the correct amount for the gift code. Then the gift code is built against the `TxOut` that belongs to subaddress `u64::MAX - 2`.
 
 The advantage of this is that unlike with the temporary address, the fog user is able to track the gift code.
 * The `TxOut` still belongs to the sender's address, even if we gave the private keys away to someone (who may not have used it yet).
@@ -123,12 +123,22 @@ The wallet can then attempt to unmask the amount using the `shared_secret` of th
 of the `TxOut`. Given the one-time private key, they can compute the `KeyImage` and check if it is already spent. Finally, given all this data and a Merkle proof,
 they can spend the `TxOut` as normal with the `TransactionBuilder`.
 
-When building a `TxOutGiftCode`, the app should first make a self-payment with the desired amount of the gift code to `GIFT_CODE_SUBADDRESS_INDEX = 2`, which is
+When building a `TxOutGiftCode`, the app should first make a self-payment with the desired amount of the gift code to `GIFT_CODE_SUBADDRESS_INDEX = u64::MAX - 2`, which is
 now reserved for `TxOut`'s used with `TxOutGiftCode`. Apps should not select `TxOut`'s belonging to this subaddress for the purpose of Txo selection for other transactions,
 and they may choose not to count these balances towards the account balance represented to the user -- these `TxOut` amounts represent the value of in-flight gift codes.
 
 After a `TxOutGiftCode` is sent, the app can check if it is claimed (or "still pending") based on if this `TxOut` has been spent by someone. Until it is spent, the app can potentially
 cancel the gift code by paying the `TxOut` back to themself on subaddress 0.
+
+We additionally standardize Recoverable Transaction History memos, extending the scheme from [MCIP #4] to handle gift code transactions as well.
+
+
+| Memo type bytes | Name                                              |
+| -----------     | -----------                                       |
+| 0x0201          | Gift code funding memo                            |
+| 0x0202          | Gift code cancellation memo                       |
+| 0x0001          | Unauthenticated sender memo                       |
+| 0x0002          | Unauthenticated sender memo with address hash     |
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -202,6 +212,90 @@ When an app finds a TxOut belonging to the `GIFT_CODE_SUBADDRESS`, it can infer 
 When this TxOut is spent, the app can infer that the gift code was redeemed, or canceled. The app may cancel a gift code by
 paying it back to the primary subaddress.
 
+## Recoverable transaction history and memos
+
+Following MCIP #4, each transaction typically has an output from Alice to Bob, and a change output from Alice to Alice.
+The memo on the change output is a note Alice writes to herself to keep track of her own activity. Alice validates these
+memos by confirming that they belong to the change subaddress. The memo on the other output is a note from Alice to Bob,
+typically identifying Alice.
+
+When funding a gift code, the TxOut to `GIFT_CODE_SUBADDRESS` if the gift code tx out, and a change output is always written (even if value zero):
+* `0x0201 Gift code funding memo` should be attached to the change output. This memo will point to the gift code output by way of a hash, and contains any note about the purpose of the gift code.
+* `0x0001 Unauthenticated sender memo`, or `0x0002 Unauthenticated sender memo with address hash`, is attached to the gift code output.
+
+When claiming a gift code, the gift code output is spent in a self-payment to the change subaddress. The transaction has a single output, the
+change output, which goes to the change subaddress, and has a memo of type `0x0001 Unauthenticated sender memo`, or `0x0002 Unauthenticated sender memo with address hash`.
+The app should attempt to validate the information in the memo from the gift code -- for example, in a chat application, the app may be able
+to validate who sent the gift code message. If the information is valid, then the app should copy the memo from the gift code TxOut into the
+self-payment TxOut. If the app decides that the information cannot be validated, then it may use `0x0000 Unused` instead, to avoid committing
+false information. Future apps may assume that any memos attached to TxOut's owned by the change subaddress are known to be valid.
+
+When cancelling a gift code, the gift code tx out is paid back to self. The transaction has a single output, the change output, which goes to
+the change subaddress and has a `0x0202 Gift code cancellation memo`. This memo contains the tx public key of the gift code output.
+
+The overall strategy for an app implementing recoverable transaction history looks like this then:
+* Any TxOut's on the default subaddress are in-bound transactions, which may have 0x01.. authenticated sender memos which can be validated.
+* Any TxOut's on the change subaddress contain recoverable transaction history memos that we can trust.
+  * 0x0200 Destination memo indicates an outbound transfer, and includes the recipient and the amount.
+  * 0x0201 Gift code funding memo indicates that we funded a gift code, and indicates which TxOut is the gift code and any note
+  * 0x0202 Gift code cancellation memo indicates that we cancelled a gift code that we previously funded
+  * 0x0001 Unauthenticated sender memo, 0x0002 Unauthenticated sender memo with address hash, indicates that we claimed a gift code sent to us by someone
+  * 0x0000 Unused indicates that we claimed a gift code but we aren't sure who it came from.
+
+* Any TxOut's on the gift code subaddress indicate gift codes that we funded.
+  * We can see the amount of the gift code using our view key
+  * We can obtain notes about these TxOut's by finding the associated 0x0201 memos which would be in the same block
+  * If such a TxOut is spent, then we can represent it as claimed, unless a matching 0x0202 memo appears, in which case we know we cancelled it.
+
+## 0x0201 Gift code funding memo
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 4      |  First 4 bytes of blake2b over `tx_out_public_key` of gift code tx out |
+| 4 - 64     | "Note": A null-terminated UTF-8 string |
+
+How exactly the note is used may vary from application to application -- it could be a e.g. a phone number,
+a user id, or user generated text.
+
+It is correct for any application to display the "note" to the user as a human-readable string.
+
+Some applications will have more ability to make sense of data like a phone number or a user id than others, but it is
+correct for any app to do no more than display the note in the user's transaction history, to help them remember about
+the gift code and/or if they should cancel it.
+
+The rationale behind the 4-byte hash is:
+* The gift code funding memo is always paired with a gift code tx out, which appears in the same block.
+* Blocks are not that big, and particularly, users don't have that many TxOut's in a block.
+* In a hash space with 4 billion possible items, the probability that there are two gift codes created by the same user in the
+  same block with the same hash, is very small -- even if there are 10 gift codes funded in the same block, this probability would be
+  less than one in ten million.
+* Using only 4 bytes here reserves 60 bytes for the user's note
+
+## 0x0202 Gift code cancellation memo
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 8      | `global_index` of gift code tx out that was cancelled |
+| 8 - 64     | Unused bytes |
+
+## 0x0001 Unauthenticated sender memo
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 64     | "Note": A null-terminated UTF-8 string |
+
+In lieu of an address hash, the sender accounts for the source of the funds with a human-readable note.
+
+## 0x0002 Unauthenticated sender memo with address hash
+
+| Byte range | Item |
+| ---------- | ---- |
+| 0 - 16     | Sender's short address hash (see MCIP #4) |
+| 16 - 64    | Unused |
+
+The sender provides an address hash (same as appears in `0x0100 Authenticated sender memo`), but now there is no HMAC to authenticate it.
+The app should attempt to validate this data in some other way.
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
@@ -212,7 +306,7 @@ Using the `TxOutGiftCode` instead of the transfer-payload in mobile apps is supe
 and potentially reclaim the gift code more finely, without relying on off-chain synchronized storage to track the in-flight transfer payloads.
 
 One drawback is that this redesign did not achieve the goal of having only one on-chain event per gift code.
-We had hoped that by eliminating the need for a temporary account, and just transfering a `TxOut` directly, we
+We had hoped that by eliminating the need for a temporary account, and just transferring a `TxOut` directly, we
 would make it so that only the recipient needs to have an on-chain event. It turns out that an on-chain event
 is still required in practice and probably unavoidable, at least with this approach.
 
@@ -223,7 +317,7 @@ There are a few minor technical variations we considered like, not revealing the
 the amount and blinding factor directly instead, but this is more bytes on the wire, and it may be useful for
 the recipient to be able to read the memo anyways.
 
-Conceiveably, we could avoid the sender-side on-chain event, by using an [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0032)
+Concieveably, we could avoid the sender-side on-chain event, by using an [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0032)
 "Signed Contingent Input". Then if you have a `TxOut` for 100 MOB, and you want to create a gift-code for 10 MOB, you could make the signed
 contingent input and require that 90 MOB comes back to you as change, and give this to the counterparty, and then that would be the gift code.
 However, this has a lot of drawbacks, one being that, it doesn't help linked devices synchronize this, and another being that, these inputs
@@ -237,10 +331,7 @@ None that we are aware of.
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-There should probably be RTH memos that can be used to remember who you sent a gift code to,
-and help you remember that you canceled a gift code.
-
-We should make such memos in this MCIP or a later MCIP.
+None that we are aware of.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
