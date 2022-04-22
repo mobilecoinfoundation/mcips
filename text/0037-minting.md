@@ -70,7 +70,8 @@ Since the blockchain contains all `MintTx`s, as well as `MintConfigTx`s that wer
 
 ### Privacy Properties of Minted Transaction Outputs
 
-Once the TxOuts are minted, they are exactly the same as any other TxOuts on chain, with the exception that the recipient view and spend public keys were published in the block's `MintTx`. The privacy guarantees for these TxOuts are that even with the view and spend published, one cannot verify with the TxOut alone that it was indeed sent to the specified public address. Rather, the public address is used by the enclaves to mint the amount requested to that address, and its publication in the block indicates that some number of the TxOuts in the block was sent to that address. The enclave does guarantee that at least one TxOut was sent to the specified public address. There is nothing stopping the block from containing other transactions for multiple token IDs, though in practice, it should be assumed that the TxOuts in a block with a `MintTx` should be considered "known" to have gone to that address, and all subsequent transactions from those TxOuts have full MobileCoin privacy guarantees.
+Once the `TxOuts` are minted, they are exactly the same as any other `TxOuts` on chain, with the exception that they can be identified as `TxOuts` that came from a minting operation. That is because all enclaves deterministically generate an identical set of `TxOuts` for a given set of input `MintTxs`.
+As such, one could look at the set of `MintTxs` included in a block, and replicate the minting operation the enclave performed to see what `TxOut` they end up with. Once these `TxOuts` are used as inputs for a standard MobileCoin transaction, the outputs of that transaction have the full MobileCoin privacy guarantees.
 
 ## Declaring Authorized Signers (`MintConfigTx`)
 [signers]: #signers
