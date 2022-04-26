@@ -85,7 +85,8 @@ impact on the project requires concerted effort toward consensus-building.
 
 Please join the [MobileCoin Foundation Discord](https://discord.gg/qbW2vjyQck)
 where you can follow along in the #proposals channel, and feel free to informally
-propose changes in the #eng channel.
+propose changes in the #eng channel. Our approach is to first build consensus on
+an idea before starting work on the MCIP.
 
 As a rule of thumb, receiving encouraging feedback from long-standing project
 developers, and particularly members of the relevant team is a good
