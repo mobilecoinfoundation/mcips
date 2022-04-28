@@ -137,7 +137,7 @@ We additionally standardize Recoverable Transaction History memos, extending the
 | -----------     | -----------                                       |
 | 0x0201          | Gift code funding memo                            |
 | 0x0202          | Gift code cancellation memo                       |
-| 0x0001          | Unauthenticated sender memo                       |
+| 0x0002          | Gift code sender memo                       |
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -220,10 +220,10 @@ typically identifying Alice.
 
 When building a transaction which funds a gift code, the TxOut to `GIFT_CODE_SUBADDRESS` is called the "gift code output", and a change output is always written (even if value zero):
 * `0x0201 Gift code funding memo` should be attached to the change output. This memo will point to the gift code output by way of a hash, and contains any note about the purpose of the gift code.
-* `0x0001 Unauthenticated sender memo` is attached to the gift code output.
+* `0x0002 Gift code sender memo` is attached to the gift code output.
 
 When claiming a gift code, the gift code output is spent in a self-payment to the change subaddress. This transaction has a single output, the
-change output, which has a memo of type `0x0001 Unauthenticated sender memo`.
+change output, which has a memo of type `0x0002 Gift code sender memo`.
 The app should attempt to validate the information in the memo from the gift code. For example, in a chat application, the app may be able
 to validate who sent the gift code payload in a message. If the information is valid, then the app should copy the memo from the gift code TxOut into the
 self-payment TxOut. If the app decides that the information cannot be validated, then it may use `0x0000 Unused` instead, to avoid committing
@@ -234,12 +234,12 @@ the change subaddress and has a `0x0202 Gift code cancellation memo`. This memo 
 
 The overall strategy for an app implementing recoverable transaction history looks like this then:
 * Any TxOut's on the default subaddress are in-bound transactions, which may have 0x01.. authenticated sender memos which can be validated.
-* Any TxOut's on the change subaddress contain recoverable transaction history memos that we can trust.
-  * 0x0200 Destination memo indicates an outbound transfer, and includes the recipient and the amount.
-  * 0x0201 Gift code funding memo indicates that we funded a gift code, and indicates which TxOut is the gift code and any note
-  * 0x0202 Gift code cancellation memo indicates that we cancelled a gift code that we previously funded
-  * 0x0001 Unauthenticated sender memo indicates that we claimed a gift code sent to us by someone
-  * 0x0000 Unused indicates that we claimed a gift code but we aren't sure who it came from.
+* Any TxOut's on the change subaddress contain recoverable transaction history memos that we can trust
+  * 0x0200 Destination memo indicates an outbound transfer, and includes the recipient and the amount. This memo is written onto the txout to the gift code subaddress
+  * 0x0201 Gift code funding memo indicates that we funded a gift code, and indicates which TxOut is the gift code and any note and is written to the change txout
+  * 0x0202 Gift code cancellation memo indicates that we cancelled a gift code that we previously funded. This memo is written to the txout sent back to the main account
+  * 0x0002 Gift code sender memo indicates that a gift code was claimed by the recipient and was sent by the sender. This memo is written to the txout in the recipient's account
+  * 0x0000 Unused indicates that we claimed a gift code but we aren't sure who it came from. This memo is written to the txout in the recipient's account
 
 * Any TxOuts on the gift code subaddress indicate gift codes that we funded.
   * We can see the amount of the gift code using our view key
@@ -277,7 +277,7 @@ The rationale behind the 4-byte hash is:
 | 0 - 8      | `global_index` of gift code tx out that was cancelled |
 | 8 - 64     | Unused bytes |
 
-## 0x0001 Unauthenticated sender memo
+## 0x0002 Gift code sender memo
 
 | Byte range | Item |
 | ---------- | ---- |
