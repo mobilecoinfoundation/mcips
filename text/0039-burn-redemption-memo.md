@@ -31,7 +31,7 @@ This is a simple proposal. We propose reserving the memo type 0x0001 for the bur
 | Memo type bytes | Name                                              |
 | -----------     | -----------                                       |
 | 0x0001          | Burn redemption memo                              |
-|
+
 
 ## 0x0001 Burn redemption memo
 
