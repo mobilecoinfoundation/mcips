@@ -66,9 +66,9 @@ None that we are aware of.
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-# Future possibilities
-
 None that we are aware of.
+
+# Future possibilities
 
 [future-possibilities]: #future-possibilities
 
