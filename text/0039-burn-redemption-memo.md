@@ -1,6 +1,6 @@
 - Feature Name: Burn-Redemption-Memo
 - Start Date: 2022-05-02
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#39](https://github.com/mobilecoinfoundation/mcips/pull/39)
 - Tracking Issue: N/A
 
 # Summary
