@@ -83,6 +83,11 @@ generally a good idea to pursue feedback from other project developers
 beforehand, to ascertain that the MCIP may be desirable; having a consistent
 impact on the project requires concerted effort toward consensus-building.
 
+Please join the [MobileCoin Foundation Discord](https://discord.gg/qbW2vjyQck)
+where you can follow along in the #proposals channel, and feel free to informally
+propose changes in the #eng channel. Our approach is to first build consensus on
+an idea before starting work on the MCIP.
+
 As a rule of thumb, receiving encouraging feedback from long-standing project
 developers, and particularly members of the relevant team is a good
 indication that the MCIP is worth pursuing.
@@ -111,6 +116,8 @@ merged into the MCIP repository as a markdown file. At that point the MCIP is
   - Each pull request will be labeled with the most relevant team, which
     will lead to its being triaged by that team in a future meeting and assigned
     to a member of the team.
+  - Join the [MobileCoin Foundation Discord](https://discord.gg/qbW2vjyQck), and
+    announce the MCIP with a link to the PR in the #proposals channel.
   - Build consensus and integrate feedback. MCIPs that have broad support are
     much more likely to make progress than those that don't receive any
     comments. Feel free to reach out to the MCIP assignee in particular to get
