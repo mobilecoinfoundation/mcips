@@ -235,11 +235,11 @@ the change subaddress and has a `0x0202 Gift code cancellation memo`. This memo 
 The overall strategy for an app implementing recoverable transaction history looks like this then:
 * Any TxOut's on the default subaddress are in-bound transactions, which may have 0x01.. authenticated sender memos which can be validated.
 * Any TxOut's on the change subaddress contain recoverable transaction history memos that we can trust
-  * 0x0200 Destination memo indicates an outbound transfer, and includes the recipient and the amount. This memo is written onto the txout to the gift code subaddress
-  * 0x0201 Gift code funding memo indicates that we funded a gift code, and indicates which TxOut is the gift code and any note and is written to the change txout
-  * 0x0202 Gift code cancellation memo indicates that we cancelled a gift code that we previously funded. This memo is written to the txout sent back to the main account
-  * 0x0002 Gift code sender memo indicates that a gift code was claimed by the recipient and was sent by the sender. This memo is written to the txout in the recipient's account
-  * 0x0000 Unused indicates that we claimed a gift code but we aren't sure who it came from. This memo is written to the txout in the recipient's account
+  * 0x0200 Destination memo indicates an outbound transfer, and includes the recipient and the amount
+  * 0x0201 Gift code funding memo indicates that we funded a gift code, and indicates which TxOut is the gift code
+  * 0x0202 Gift code cancellation memo indicates that we cancelled a gift code that we previously funded
+  * 0x0002 Gift code sender memo indicates that a gift code was claimed by the recipient and was sent by the sender
+  * 0x0000 Unused indicates that we claimed a gift code but we aren't sure who it came from
 
 * Any TxOuts on the gift code subaddress indicate gift codes that we funded.
   * We can see the amount of the gift code using our view key
