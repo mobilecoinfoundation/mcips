@@ -9,13 +9,6 @@
 
 MCIP #25 introduces confidential token ids, and support for multiple tokens. To actually create a new supply for any of these tokens, a mechanism for an issuer to mint them must exist. This proposal creates a transparent minting procedure which can be audited on chain, and separates minting authority across a variety of roles to allow for a high-security issuance procedure.
 
-The birds-eye view is that after a set of _Governors_ has been agreed upon by the MobileCoin consensus validator node operators and signed by the MobileCoin Foundation, a new _Minting Configuration_  is submitted to specify the signers who are allowed to mint the new asset type on the MobileCoin blockchain. An amount of the backing asset will be verifiably locked, for example into a smart contract on another chain, and then a _Minting Transaction_ for the locked amount establishes a new set of transaction outputs for which there were no inputs marked spent on the MobileCoin blockchain, using the _confidential token ID_ (see [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/25)) for the corresponding backing asset. When the backing funds are desired to be released from the lock, the amount to be released will be _verifiably burned_ (see [MCIP #35](https://github.com/mobilecoinfoundation/mcips/pull/35)) on the MobileCoin blockchain.
-
-To achieve the set of functionality required to support backed assets on the MobileCoin blockchain, we will add 2 new transaction types:
-
-* *Multiparty Minting Transaction*, `MintTx`, producing a TxOut which is indistinguishable from other TxOuts on the chain, along with a new type of block contents that include information specific to the token mint that occurred
-* *Authorized Signer Declaration*, `MintConfigTx`, (also known as ``Set Minting Configuration Transaction''), producing a new ledger entry: *Minting Configuration*
-
 # Motivation
 [motivation]: #motivation
 
@@ -26,7 +19,12 @@ We are primarily motivated by creating a highly transparent and auditable proced
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-To support multiple asset types on the MobileCoin blockchain, we have added two new transaction types, the `MintTx`, which mints new TxOuts, and the `MintConfigTx`, which specifies the configuration that the consensus validator nodes use to validate a `MintTx`.
+The birds-eye view is that after a set of _Governors_ has been agreed upon by the MobileCoin consensus validator node operators and signed by the MobileCoin Foundation, a new _Minting Configuration_  is submitted to specify the signers who are allowed to mint the new asset type on the MobileCoin blockchain. An amount of the backing asset will be verifiably locked, for example into a smart contract on another chain, and then a _Minting Transaction_ for the locked amount establishes a new set of transaction outputs for which there were no inputs marked spent on the MobileCoin blockchain, using the _confidential token ID_ (see [MCIP #25](https://github.com/mobilecoinfoundation/mcips/pull/25)) for the corresponding backing asset. When the backing funds are desired to be released from the lock, the amount to be released will be _verifiably burned_ (see [MCIP #35](https://github.com/mobilecoinfoundation/mcips/pull/35)) on the MobileCoin blockchain.
+
+To achieve the set of functionality required to support backed assets on the MobileCoin blockchain, we will add 2 new transaction types:
+
+* *Multiparty Minting Transaction*, `MintTx`, producing a TxOut which is indistinguishable from other TxOuts on the chain, along with a new type of block contents that include information specific to the token mint that occurred
+* *Authorized Signer Declaration*, `MintConfigTx`, (also known as ``Set Minting Configuration Transaction''), producing a new ledger entry: *Minting Configuration*
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
