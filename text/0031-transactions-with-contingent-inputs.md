@@ -91,10 +91,11 @@ A "signed contingent input" is a payload consisting of:
 * A `RingMLSAG` signing this.
 * A token id, value, and blinding factor for the `pseudo_output_commitment`.
 * A token id, value, and blinding factor for any output in the `ContingentInputRules`.
+* A block version (which was in effect for the `RingMLSAG` signature).
 
 Anyone who owns a `TxOut` can use it to create a `SignedContingentInput`. The signed contingent input can be thought of as an offer
 to trade "this for that" -- you are willing to give away your `TxOut` if someone produces for you the `TxOut` that you specify.
-Once you sign the contingent input, you can give it away, and anyone who has it can fulfill your request to trade.
+Once you sign the contingent input, you can give that payload away, and anyone who has it can fulfill your request to trade.
 
 Giving away the signed contingent input does not reveal your public address, nor which `TxOut` in the ledger you actually own.
 It does reveal the token id and value of your pseudo-output, but this is unavoidable in any such scheme.
@@ -114,7 +115,8 @@ The `SignatureRctBulletProofs` object has two new fields, indicating token ids o
 message SignatureRctBulletproofs {
     repeated RingMLSAG ring_signatures = 1;
     repeated CompressedRistretto pseudo_output_commitments = 2;
-    bytes range_proofs = 3;
+    bytes range_proof = 3;
+    repeated bytes range_proofs = 4;
     repeated fixed32 pseudo_output_commitment_token_ids = 4;
     repeated fixed32 output_token_ids = 5;
 }
@@ -123,6 +125,11 @@ message SignatureRctBulletproofs {
 The `pseudo_output_commitment_token_ids` list must be the same length as `pseudo_output_commitments`,
 and `output_token_ids` must be the same length as `outputs` in the `TxPrefix`, or the transaction is invalid.
 (Alternatively, for backwards compatibility we could allow that if these lists are empty then they are filled with zeros.)
+
+We also need to add a `range_proofs` field to accommodate mixed transactions. This is because the current implementation
+of `bulletproofs` which we get from Dalek crate only allows one generator to be used for range proof aggregation. However,
+we believe that upstream could add support for using multiple generators in a single range proof, and then this complexity
+could be removed.
 
 In the `TxPrefix`, the `token_id` field is renamed to `fee_token_id`, and it only represents the token id of
 the fee output now.
@@ -152,10 +159,10 @@ and `output_token_ids`, rather than the `token_id` in the `TxPrefix`.
 
 To support contingent inputs, we introduce the following objects:
 
-A `ContingentInputRules` object is a protobuf with the following schema:
+An `InputRules` object is a protobuf with the following schema:
 
 ```
-message ContingentInputRules {
+message InputRules {
     // Outputs that must appear in the transaction for a transaction using this input to be valid
     repeated external.TxOut required_outputs = 1;
     // A maximum tombstone block value for the transaction. If zero, it means no maximum is enforced.
@@ -180,7 +187,7 @@ message TxIn {
     repeated TxOutMembershipProof proofs = 2;
     
     // Any rules which must be satisfied by the Tx that contains this TxIn
-    ContingentInputRules contingent_input_rules = 3;
+    InputRules contingent_input_rules = 3;
 }
 ```
 
@@ -242,17 +249,24 @@ the trade, but no unnecessary additional information.
 
 ```
 message SignedContingentInput {
+    // The block version rules used when making the signature
+    uint32 block_version = 1;
     // The input which is signed. Note that the membership proofs may be omitted, and built by the final Tx submitter instead.
-    TxIn input = 1;
+    TxIn input = 2;
     // A signature over the ring inputs. Note that this includes the `KeyImage` of the true output,
     // and can be used to determine if this SignedContingentInput is still spendable.
-    RingMLSAG ring_signature = 2;
+    RingMLSAG ring_signature = 3;
     // The unmasked information underlying the pseudo output from this ring
-    UmaskedAmount unmasked_pseudo_output = 3;
+    UmaskedAmount unmasked_pseudo_output = 4;
     // The unmasked information underlying any required output from the ContingentInputRules.
-    repeated UnmaskedAmount unmasked_required_outputs = 4;
+    repeated UnmaskedAmount unmasked_required_outputs = 5;
+    // The TxOut global index of every ring member
+    repeated fixed64 global_indices = 6;
 }
 ```
+
+The global-indices are there to help Fog users make use of the signed inputs on a mobile device, since this index is required to get the merkle proof from Fog ledger.
+The block version is there to help with compatibility issues across block version bumps.
 
 A `SignedContingentInput` can be validated by:
 * Checking that each `unmasked_required_output` corresponds to the commitment in the `required_outputs` field of `ContingentInputRules` in the `TxIn`. (and that there are the same number of each)
@@ -382,7 +396,7 @@ For Automated Market Makers like Uniswap, the end user experience is going to a 
 
 For swaps based on contingent inputs, one possible experience is that the service generates a signed contingent input for you, and you build a transaction with it and submit it to the network.
 However, it could also be that the user builds a signed contingent input and submits it to the service (like AirSwap), where it enters an order book and is filled by someone else.
-Potentially, SGX could be leveraged somehow, so that the service can prove to the user that they won't be front-run when they submit a trade order.
+Potentially, SGX could be leveraged somehow to improve privacy or provide execution guarantees.
 
 We think there are numerous ways that this primitive could be used to build a swapping service and a myriad of tradeoffs, and we prefer to scope this MCIP just to specifying the signed contingent input primitive.
 
