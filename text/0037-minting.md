@@ -137,6 +137,11 @@ Adding multiple confidential asset types with minting, burning, and bridge opera
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
+## Differences with USDC contract design
+
+The [USDC smart contract](https://github.com/centrehq/centre-tokens/blob/master/doc/tokendesign.md) similarly has, a lowest level `minter` role, corresponding roughly to our `signers`, and `master minters` which increase the mint allowance of individual minters, similarly to our `governor` role. The mint trust root is roughly similar to the administrator roles in that contract.
+
+Our design does not have a `pauser` or a `blacklister` role. The blacklister role doesn't appear to be practical given that our chain is a privacy chain. We did not determine that the `pauser` role would serve a useful purpose in our system.
 ## Set of Signers vs Threshold Signatures
 
 An alternate proposal would be to use a Threshold Signature, such as [Flexible Round-Optimized Schnorr Threshold Signatures (FROST)](https://datatracker.ietf.org/doc/pdf/draft-irtf-cfrg-frost-01.pdf). The reason we do not intend to use Threshold Signatures at this time is that we consider the explicit list of signers to be a desirable feature for auditability. In a threshold signature, the signer public key is a composite of all the participants, and it is not known exactly which _M_ of the _N_ participants participated to create the signature.
