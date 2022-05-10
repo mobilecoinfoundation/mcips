@@ -6,7 +6,6 @@
 # Summary
 [summary]: #summary
 
-A normal MobileCoin transfer transaction contains a set of inputs, which are marked spent, to create (mint) a new set of outputs. The network validators confirm that the sum of the value of the inputs is equal to the sum of the value of the outputs, using Ring Confidential Transactions.
 
 To support multiple assets, some of which represent backed assets, we will use an auditable process to introduce new token types to the MobileCoin blockchain, following a minting and burning procedure that corresponds with the status of the backed assets.
 
