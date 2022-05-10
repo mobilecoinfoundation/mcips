@@ -19,7 +19,9 @@ To achieve the set of functionality required to support backed assets on the Mob
 # Motivation
 [motivation]: #motivation
 
-We would like to support multiple asset types on our chain, all of which need to undergo some minting process to be initialized on the chain. This process outlines a way to enable minting in an auditable way, to support multiple asset types, including stablecoins, which is a primary focus of this design.
+In order for MCIP #25 to add any value, it must be possible to create a supply of new synthetic assets on the chain. So some minting mechanism must exist.
+
+We are primarily motivated by creating a highly transparent and auditable procedure which would be appropriate for fully-collateralized synthetic assets.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
