@@ -150,6 +150,7 @@ Many other blockchain ecosystems support smart contracts to enable the minting o
 
 * The origin block of MobileCoin is the first minting action that occurred, and minted MOB. See [MobileCoin Governance, Fees, and Supply](https://mobilecoin.com/news/mobilecoin-governance-fees-and-supply) for a description. MOB will be the only asset on the MobileCoin blockchain which can never have additional minting actions.
 * Every blockchain must enable some form of minting for their initial asset, and for subsequent assets to be minted, there are schemes such as [Ethereum's ERC-20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/), [Polygon Mintable Assets](https://docs.polygon.technology/docs/develop/ethereum-polygon/mintable-assets/), [Cardano native tokens](https://docs.cardano.org/native-tokens/learn),[Solana's Token Program](https://spl.solana.com/token), and many more.
+* This particular proposal draws heavily from the [USDC smart contract design](https://github.com/centrehq/centre-tokens/blob/master/doc/tokendesign.md).
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
