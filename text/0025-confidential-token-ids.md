@@ -20,7 +20,7 @@ Specifically, for both MOB and synthetic assets,
 
 of the transaction should remain private to the sender and recipient of the transaction.
 
-In addition we would also like that that the token id should remain private.
+In addition we would also like that the token id should remain private.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
