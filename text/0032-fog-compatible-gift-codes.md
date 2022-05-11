@@ -251,7 +251,7 @@ The overall strategy for an app implementing recoverable transaction history loo
 | Byte range | Item |
 | ---------- | ---- |
 | 0 - 4      |  First 4 bytes of blake2b over `tx_out_public_key` of gift code tx out |
-| 4 - 64     | "Note": A null-terminated UTF-8 string |
+| 4 - 64     | "Note": A UTF-8 string with that is either exactly 60 bytes or null terminated if under 60 bytes |
 
 How exactly the note is used may vary from application to application -- it could be a e.g. a phone number,
 a user id, or user generated text.
@@ -281,7 +281,7 @@ The rationale behind the 4-byte hash is:
 
 | Byte range | Item |
 | ---------- | ---- |
-| 0 - 64     | "Note": A null-terminated UTF-8 string |
+| 0 - 64     | "Note": A UTF-8 string with that is either exactly 64 bytes or null terminated if under 64 bytes |
 
 In lieu of an address hash, the sender accounts for the source of the funds with a human-readable note.
 
