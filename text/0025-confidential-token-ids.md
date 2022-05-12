@@ -213,6 +213,8 @@ transaction_1 | 0 | 4000000000 | 128
 
 Note how the two transactions paying more than their minimum fee are sorted to the top, in proportion to how much they are paying above the minimum fee, while all minimum fee transactions have an equal chance of beeing sorted because their `priority` is equal.
 
+This kind of example also explains why we require the minimum fee to be evenly divisible by 128. For instance, if the minimum fee for some token were `1000`, we would have `1000 / 128` rounding down to `7`, and a payment paying the minimum fee of 1000 would have a priority of `1000/7 = 142`. It would be impossible to get a priority of 128 like with the other tokens, and this would be a source of information leakage, since an adversary could reasonably infer that priority 142 Tx's in a single block are probably using that token and paying the minimum fee.
+
 For users who are adjusting the fees of their submitted transactions to increase the likelihood of their transaction being accepted during times of congestion, they can observe the `priority` multiplier for their `token_id`, and the recently accepted `priority` values, and determine what fee value is appropriate to increase the chances of acceptance.
 
 ### Extended message digest
