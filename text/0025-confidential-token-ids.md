@@ -39,6 +39,12 @@ Previously, the fee of a `Tx` is exposed directly to the nodes (outside of the e
 token id, because different tokens have different minimum fees. To mitigate this, the enclave divides the fee by the minimum fee, deriving a new value called `priority` which is revealed to the node
 to sort the transactions.
 
+For technical reasons, the minimum fee of every token now has additional requirements:
+
+* It must be at least 128 (in the smallest representable units)
+* It must be evenly divisible by 128
+
+This is not expected to pose any significant problems in practice, since we anticipate that minimum fees are will be > 10^6 when measured in the smallest representable units.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
