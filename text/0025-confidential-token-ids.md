@@ -59,7 +59,7 @@ Here `H` is a curve point derived by hashing to curve, and `G` is the ristretto 
 is also derived by a hash of the `TxOut` shared secret.
 
 During view key matching, the recipient of a `TxOut` attempts to compute the shared secret, by key exchange with their view private key
-against the `TxOut` public key. They cannot confirm that this shared secret computation was successful -- however, if it is successful,
+against the `TxOut` public key. They cannot confirm directly that this shared secret computation was successful -- however, if it is successful,
 then they can infer the value mask and the `v_blinding` value. They can use the value mask and the masked value to compute what `v` must be,
 and they can then infer what the entire commitment should be. They can then check if this matches the commitment appearing in the `TxOut`. If
 it does, then view key matching was successful.
