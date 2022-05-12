@@ -11,7 +11,7 @@ Enable new token types to be added to the protocol and transacted on chain witho
 # Motivation
 [motivation]: #motivation
 
-The MobileCoin ledger protocol currently supports one token type, MOB. We would like to allow the addition of assets to the ledger without revealing which assets were involved in any transaction. The transaction confidentiality and integrity guarantees should be the same for the MobileCoin blockchain no matter how many token types are supported.
+The MobileCoin ledger protocol currently supports one token type, MOB. We would like to allow the addition of new assets to the ledger. The transaction confidentiality and integrity guarantees should be the same for the MobileCoin blockchain no matter how many token types are supported.
 
 Specifically, for both MOB and synthetic assets,
 * the sender
