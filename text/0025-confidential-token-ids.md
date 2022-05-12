@@ -52,7 +52,7 @@ This is not expected to pose any significant problems in practice, since we anti
 
 Recall that in current revisions of MobileCoin, the value of a `TxOut` impacts the fields of the `TxOut` in two ways:
 
-* It appears in the masked value, where it bytes have been XOR'ed with the result of hashing the `TxOut` shared-secret
+* It appears in the `masked_value`. Here the bytes of the u64 value have been XOR'ed with the result of hashing the `TxOut` shared-secret
 * It appears in the Pedersen commitment (`Amount::Commitment`), which has the form `v * H + v_blinding * G`
 
 Here `H` is a curve point derived by hashing to curve, and `G` is the ristretto basepoint. `v_blinding`, the blinding factor,
