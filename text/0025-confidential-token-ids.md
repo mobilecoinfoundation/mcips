@@ -33,7 +33,7 @@ The transaction object may now spend inputs and outputs of any token id, but in 
 The fee for such a transaction is also paid in that `token_id`. This is now specified in the `fee_token_id` field in the `TxPrefix`, and implies the token id for all inputs and outputs.
 
 The minimum fee varies from token id to token id. This is configured by network operators at startup, and hashed into the responder id during node-to-node attestation to ensure that the network
-has one uniform value for minimum fee.
+has one uniform value for minimum fee for each token.
 
 Previously, the fee of a `Tx` is exposed directly to the nodes (outside of the enclave) so that they can sort transactions by fee. After this change, the fee value may reveal information about the
 token id, because different tokens have different minimum fees. To mitigate this, the enclave divides the fee by the minimum fee, deriving a new value called `priority` which is revealed to the node
