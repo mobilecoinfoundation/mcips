@@ -261,7 +261,7 @@ message SignedContingentInput {
     // The unmasked information underlying any required output from the ContingentInputRules.
     repeated UnmaskedAmount unmasked_required_outputs = 5;
     // The TxOut global index of every ring member
-    repeated fixed64 global_indices = 6;
+    repeated fixed64 tx_out_global_indices = 6;
 }
 ```
 
