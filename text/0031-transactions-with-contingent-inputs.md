@@ -173,7 +173,7 @@ message InputRules {
 It may be hashed in a standard way using the `mc-crypto-digestible` hashing scheme (like everything else).
 
 This `required_outputs` are there to allow the main use-case of agreeing to a swap.
-The `max_tombstone_block` is there both, to allow that some of the required outputs can be fog outputs (since fog imposes tombstone block limits),
+The `max_tombstone_block` is there both to allow that some of the required outputs can be fog outputs (since fog imposes tombstone block limits),
 and to allow that the party who builds and signs a `SignedContingentInput` can establish a "time to live" on the swap request.
 
 The `TxIn` object is modified, adding an Optional `ContingentInputRules` member.
