@@ -137,11 +137,7 @@ In Algorand, any standard asset that is created has [required parameters](https:
 >    URL (optional)
 >    MetaDataHash (optional)
 
-In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script).
-
-Only a name is required to create the asset. When subsequently registering an asset, a "description" is required. Then a ticker, url, logo, and decimals are all considered optional.
-
-In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
+In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a "description" is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
 
 In a [blog post](https://moxie.org/2022/01/07/web3-first-impressions.html), Moxie Marlinspike criticized web3 technologies that commit url's pointing to images to blockchains, but don't include e.g. a hash of the image on the chain, which would allow the user to verify that the url resolved to the correct image.
 
