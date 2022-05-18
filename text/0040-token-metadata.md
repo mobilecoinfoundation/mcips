@@ -160,4 +160,4 @@ It is also possible that we may want to handle internationalization differently,
 into other languages, or not providing a long name for a token at all, and leaving that entirely to the clients.
 
 We suspect that in the end we will want all of this metadata to go onto the chain, and the main barrier to that is implementation complexity. But this may be considerably
-simpler now that we have `MCIP 37` `MintConfigTx`'s.
+simpler now that we have `MintConfigTx`'s (MCIP #37).
