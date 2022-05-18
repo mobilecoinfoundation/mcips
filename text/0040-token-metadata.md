@@ -1,6 +1,6 @@
 - Feature Name: `token_metadata`
 - Start Date: May 16 2022
-- MCIP PR: [mobilecoinfoundation/mcips#0040](https://github.com/mobilecoinfoundation/mcips/pull/0040)
+- MCIP PR: [mobilecoinfoundation/mcips#40](https://github.com/mobilecoinfoundation/mcips/pull/40)
 - Tracking Issue: (none yet)
 
 # Summary
