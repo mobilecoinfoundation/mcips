@@ -98,11 +98,13 @@ to trade "this for that" -- you are willing to give away your `TxOut` if someone
 Once you sign the contingent input, you can give that payload away, and anyone who has it can fulfill your request to trade.
 
 Giving away the signed contingent input does not reveal your public address, nor which `TxOut` in the ledger you actually own.
-It does reveal the token id and value of your pseudo-output, but this is unavoidable in any such scheme.
+It does reveal the token id and value of your pseudo-output, and every other required output, but this is unavoidable in any such scheme.
+(There is no way for the recipient of a signed contingent input to use it to build a balanced transaction if they don't know the actual values
+of the inputs and outlays.)
 
 Anyone who receives a `SignedContingentInput` can simply add it to the transaction builder and incorporate both the input and the required
 outputs into a transaction. As long as they produce a balanced transaction at the end, their transaction will be valid and they will be able
-to perform the swap with their counterparty atomically in a normal transaction.
+to perform the swap with their counterparty atomically in an otherwise normal transaction.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
