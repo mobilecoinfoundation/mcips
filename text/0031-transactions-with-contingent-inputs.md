@@ -216,12 +216,9 @@ and if there are additional outputs in the `Tx` besides those appearing in the r
 transaction to become malleable -- if the process of proposing the Tx to consensus, a man in the middle were able to intercept it, they could tamper with these parts of the transaction, in a way that
 isn't possible for transactions currently.
 
-Since transactions are submitted over attested channels to the consensus enclave, there is already quite a lot of protection against tampering with in-flight transactions.
-However, another simple way to mitigate this is that a client can ensure that at least one input to the `Tx` does not have contingent input rules, and so signs the whole `TxPrefix`.
-
-Another possibility we considered is that inputs and outputs in a `TxPrefix` can be ordered together, and the MLSAG for an input always signs over everything that appears before it, but not over what appears later.
-However, this has a drawback, which is that if two people separately generate `SignedContingentInput`'s, then both inputs cannot be used in the same transaction.
-This is also a breaking change, while the actual proposal above allows for backwards compatibility.
+It turns out that it is hard even to build a transaction with properly balanced blinding factors if at least one input has not been presigned.
+Therefore, this should be required by all of the clients, and to completely avoid the malleability issues, the consensus network should verify that at least one input in the Tx does not have
+pre-signed rules.
 
 Finally, we describe the `SignedContingentInput` object.
 
