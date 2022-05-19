@@ -27,13 +27,13 @@ gift code flow.
 # Motivation
 [motivation]: #motivation
 
-Normal recoverable transaction history isn't possible for gift codes because at the point when a gift code is funded , 
+Normal recoverable transaction history isn't possible for gift codes because at the point when a gift code is funded, 
 it is not yet known what account will redeem this gift code. When funding or cancelling a gift code, the sender may want
 to be able to have a recoverable history for the fees they paid to do so.
 
-Similarly, when a gift code is "redeemed" the amount sent to the change address will differ from the amount received in
-the protobuf message from the sender by an amount equal to the fee paid to redeem it. This may be confusing to gift code
-recipients if they are not able to account for the fee that they paid to redeem it.
+Similarly, when a gift code is "redeemed" the amount sent to the change address will differ from the amount of the TxOut
+the receiver is able to unblind with the data received from the sender by an amount equal to the fee paid to redeem it. 
+This may be confusing to gift code recipients if they are not able to account for the fee that they paid to redeem it.
 
 Thus we propose modifications (explained below) to the gift code memo types in order to create recoverable fee history.
 
