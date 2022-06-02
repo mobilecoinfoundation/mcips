@@ -1,7 +1,7 @@
 - Feature Name: Partial Fill Rules
 - Start Date: 2022-06-02
 - MCIP PR: [mobilecoinfoundation/mcips#0042](https://github.com/mobilecoinfoundation/mcips/pull/0042)
-- Tracking Issue: (link to tracking issue)
+- Tracking Issue: [mobilecoinfoundation/mobilecoin#2081](https://github.com/mobilecoinfoundation/mobilecoin/issues/2081)
 
 # Summary
 [summary]: #summary
