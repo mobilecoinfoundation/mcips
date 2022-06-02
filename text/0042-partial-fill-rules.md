@@ -174,7 +174,7 @@ However, once we start doing partial fills, now we have a situation where the co
 
 * An originator makes a signed partial fill offer.
 * A counterparty fills the offer, but poisons the masked values going to the originator.
-* The counterparty walks away with their side of the exchange, and the originator technically received their fractional outputs, but view key matching fails to produce the correct value for these outputs, and so they cannot actually spend these outputs unless they brute-force the discrete logarithm over a u64 search space, which would be very expensive.
+* The counterparty walks away with their side of the exchange, and the originator technically received their fractional outputs, but view key matching fails to produce the correct value for these outputs, and so they cannot actually spend these outputs unless they brute-force the discrete logarithm over a u64 search space, which would be very expensive. (If you use baby-step giant-step algorithm here, then perhaps this can be done with ~4 billion elliptic curve operations. So, perhaps not impossible, but very inconvenient.)
 
 It is in principle possible that we could validate the masked value using a zero-knowledge proving framework. For example, in principle it is possible that a ZK-SNARK can prove that a particular Pedersen commitment and a particular masked_value both encrypt the same value, and this proof need not reveal what that value is.
 
