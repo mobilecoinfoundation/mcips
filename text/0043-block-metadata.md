@@ -1,9 +1,23 @@
-- Feature Name: block_metadata
-- Start Date: 2022-05-24
-- MCIP PR: [mobilecoinfoundation/mcips#43](https://github.com/mobilecoinfoundation/mcips/pull/43)
-- Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2104
+* Feature Name: block_metadata
+* Start Date: 2022-05-24
+* MCIP PR: [mobilecoinfoundation/mcips#43](https://github.com/mobilecoinfoundation/mcips/pull/43)
+* Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2104
 
-TODO: TOC
+- [Summary](#summary)
+- [Motivation](#motivation)
+- [Guide-level explanation](#guide-level-explanation)
+- [Reference-level explanation](#reference-level-explanation)
+  - [Protobuf schema](#protobuf-schema)
+  - [Tracking history of metadata signing keys](#tracking-history-of-metadata-signing-keys)
+  - [Backfilling AVRs from Watcher](#backfilling-avrs-from-watcher)
+- [Drawbacks](#drawbacks)
+- [Rationale and alternatives](#rationale-and-alternatives)
+- [Prior art](#prior-art)
+- [Unresolved questions](#unresolved-questions)
+- [Future possibilities](#future-possibilities)
+
+
+
 
 # Summary
 [summary]: #summary
