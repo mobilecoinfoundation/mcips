@@ -118,7 +118,6 @@ This mapping will contain multiple node_id:block_range entries, in the following
 TOML format:
 ```toml
 [[node]]
-responder_id = ""  # Responder ID for the consensus node.
 message_signing_pub_key = ""  # Pub key, as PEM-encoded data or a file path containing such data.
 first_block_index = X  # Index of the first block signed with this key.
 last_block_index = Y  # Optional index of the last block signed with this key.
