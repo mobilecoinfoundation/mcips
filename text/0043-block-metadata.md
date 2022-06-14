@@ -15,6 +15,8 @@ Table of Contents:
   - [Block Version bump](#block-version-bump)
 - [Drawbacks](#drawbacks)
 - [Rationale and alternatives](#rationale-and-alternatives)
+  - [Alternatives considered](#alternatives-considered)
+    - [Write metadata for older blocks](#write-metadata-for-older-blocks)
 - [Prior art](#prior-art)
 - [Unresolved questions](#unresolved-questions)
 - [Future possibilities](#future-possibilities)
@@ -163,6 +165,12 @@ data).
 
 While this capability is necessary for block streaming, it is useful to decouple
 the step of adding AVRs and quorum sets to the blockchain.
+
+## Alternatives considered
+### Write metadata for older blocks
+It's tempting to generate metadata for older blocks, as that would keep the
+lookup logic simple, but we cannot generate signatures since MCF does not have
+all the private signing keys, nor should it.
 
 # Prior art
 [prior-art]: #prior-art
