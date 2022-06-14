@@ -138,7 +138,7 @@ The lookup data will be in the following TOML format:
 responder_id = ""  # Responder ID for the consensus node.
 avr = ""  # AVR for the node's enclave, includes pubkey.
 first_block_index = X  # Index of the first block signed with this enclave.
-last_block_index = Y  # Optional index of the last block signed with this enclave.
+last_block_index = Y  # Index of the last block signed with this enclave.
 ```
 
 ## Block Version bump
