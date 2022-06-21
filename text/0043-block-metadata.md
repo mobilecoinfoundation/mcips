@@ -3,7 +3,7 @@
 * MCIP PR: [mobilecoinfoundation/mcips#43](https://github.com/mobilecoinfoundation/mcips/pull/43)
 * Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2104
 
-Table of Contents:
+Contents:
 - [Summary](#summary)
 - [Motivation](#motivation)
 - [Guide-level explanation](#guide-level-explanation)
@@ -124,9 +124,11 @@ last_block_index = Y  # Optional index of the last block signed with this key.
 ```
 
 ## Historical AVRs
-With `BlockMetadata`, consumers of the blockchain no longer need a Watcher DB.
-Ledger DB will default to reading AVRs from `BlockMetadata`, and fall back to a
-lookup table containing AVRs for older blocks.
+With `BlockMetadata`, consumers of the blockchain may not need a Watcher DB.
+Ledger DB can default to reading AVRs from `BlockMetadata` (using the
+aforementioned signing key history to authenticate the metadata signature),
+using the AVR to verify the enclave key used for the block signature, and fall back
+to a lookup table containing AVRs for older blocks.
 
 MobileCoin Foundation will publish a bootstrap file defining this lookup table
 with historical consensus enclave AVRs, up to when consensus nodes publish
@@ -136,7 +138,7 @@ The lookup data will be in the following TOML format:
 ```toml
 [[node]]
 responder_id = ""  # Responder ID for the consensus node.
-avr = ""  # AVR for the node's enclave, includes pubkey.
+avr = ""  # Hex-encoded AVR for the node's enclave, includes pubkey.
 first_block_index = X  # Index of the first block signed with this enclave.
 last_block_index = Y  # Index of the last block signed with this enclave.
 ```
@@ -174,8 +176,8 @@ all the private signing keys, nor should it.
 # Prior art
 [prior-art]: #prior-art
 
-The authors have not found any direct analogs for including network metadata in
-a blockchain.
+The author has not found any direct analogs for including network metadata in a
+blockchain.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
@@ -185,9 +187,7 @@ None as of this writing.
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-1. Opens a path to removing Watcher from Fog servers.
-1. This lets the streaming and archive APIs defined in
-   [MCIP #29](0029-block-streaming.md) use equivalent representations of
-   `struct BlockData` and `message ArchiveBlock`.
-1. Enables block streaming and other consumers to include and validate the AVRs
-   for persisted blocks, which opens a path to replacing mobilecoind in Fog.
+1. Enables the streaming and archive APIs defined in
+   [MCIP #29](0029-block-streaming.md) to use equivalent representations across the streaming and archive block APIs.
+2. Enables block streaming and other consumers to include and validate the AVRs
+   for persisted blocks, which opens a path to replacing mobilecoind and watcher in Fog.
