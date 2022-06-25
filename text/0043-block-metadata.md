@@ -11,11 +11,7 @@ Contents:
   - [Protobuf schema](#protobuf-schema)
   - [Signing metadata](#signing-metadata)
   - [Signing key history](#signing-key-history)
-    - [Key History TOML format](#key-history-toml-format)
-    - [Key History JSON format](#key-history-json-format)
   - [Historical AVRs](#historical-avrs)
-    - [AVR History TOML format](#avr-history-toml-format)
-    - [AVR History JSON format](#avr-history-json-format)
   - [Block Version bump](#block-version-bump)
 - [Drawbacks](#drawbacks)
 - [Rationale and alternatives](#rationale-and-alternatives)
@@ -118,7 +114,7 @@ signatures.
 
 This mapping will contain multiple node_id:block_range entries
 
-### Key History TOML format
+#### Key History TOML format
 ```toml
 [[node]]
 # Pub key, as hex-encoded or PEM-encoded data or a PEM file path.
@@ -129,7 +125,7 @@ first_block_index = X
 last_block_index = Y
 ```
 
-### Key History JSON format
+#### Key History JSON format
 ```json
 {
   "node": [
@@ -153,7 +149,7 @@ MobileCoin Foundation will publish a bootstrap file defining this lookup table
 with historical consensus enclave AVRs, up to when consensus nodes publish
 `BlockMetadata` with their AVRs.
 
-### AVR History TOML format
+#### AVR History TOML format
 ```toml
 [[node]]
 # Responder ID for the consensus node.
@@ -171,7 +167,7 @@ chain = ["x", "y"]
 http_body = '{...}'
 ```
 
-### AVR History JSON format
+#### AVR History JSON format
 ```json
 {
   "node": [
