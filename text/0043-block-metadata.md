@@ -11,12 +11,15 @@ Contents:
   - [Protobuf schema](#protobuf-schema)
   - [Signing metadata](#signing-metadata)
   - [Signing key history](#signing-key-history)
+    - [Key History TOML format](#key-history-toml-format)
+    - [Key History JSON format](#key-history-json-format)
   - [Historical AVRs](#historical-avrs)
+    - [AVR History TOML format](#avr-history-toml-format)
+    - [AVR History JSON format](#avr-history-json-format)
   - [Block Version bump](#block-version-bump)
 - [Drawbacks](#drawbacks)
 - [Rationale and alternatives](#rationale-and-alternatives)
   - [Alternatives considered](#alternatives-considered)
-    - [Write metadata for older blocks](#write-metadata-for-older-blocks)
 - [Prior art](#prior-art)
 - [Unresolved questions](#unresolved-questions)
 - [Future possibilities](#future-possibilities)
@@ -113,16 +116,30 @@ MobileCoin Foundation will publish a mapping/list of node_id to a range of block
 indexes, which node operators and consumers can use to verify the metadata
 signatures.
 
-This mapping will contain multiple node_id:block_range entries, in the following
-TOML format:
+This mapping will contain multiple node_id:block_range entries
+
+### Key History TOML format
 ```toml
 [[node]]
 # Pub key, as hex-encoded or PEM-encoded data or a PEM file path.
-message_signing_pub_key = ""
+message_signing_pub_key = "..."
 # Index of the first block signed with this key.
 first_block_index = X
 # Optional index of the last block signed with this key.
 last_block_index = Y
+```
+
+### Key History JSON format
+```json
+{
+  "node": [
+    {
+      "message_signing_pub_key": "...",
+      "first_block_index": 0,
+      "last_block_index": 42
+    }
+  ]
+}
 ```
 
 ## Historical AVRs
@@ -136,17 +153,40 @@ MobileCoin Foundation will publish a bootstrap file defining this lookup table
 with historical consensus enclave AVRs, up to when consensus nodes publish
 `BlockMetadata` with their AVRs.
 
-The lookup data will be in the following TOML format:
+### AVR History TOML format
 ```toml
 [[node]]
 # Responder ID for the consensus node.
 responder_id = ""
-# Hex-encoded AVR for the node's enclave, includes pubkey.
-avr = ""
 # Index of the first block signed with this enclave.
 first_block_index = X
-# Index of the last block signed with this enclave.
+# Optional index of the last block signed with this enclave.
 last_block_index = Y
+[node.avr]
+# Hex-encoded signature bytes
+sig = "..."
+# An array of hex-encoded pub key bytes
+chain = ["x", "y"]
+# IAS HTTP response body
+http_body = '{...}'
+```
+
+### AVR History JSON format
+```json
+{
+  "node": [
+    {
+      "responder_id": "",
+      "first_block_index": 0,
+      "last_block_index": 42,
+      "avr": {
+        "sig": "...",
+        "chain": ["x", "y"],
+        "http_body": "{...}"
+      }
+    }
+  ]
+}
 ```
 
 ## Block Version bump
@@ -175,7 +215,7 @@ While this capability is necessary for block streaming, it is useful to decouple
 the step of adding AVRs and quorum sets to the blockchain.
 
 ## Alternatives considered
-### Write metadata for older blocks
+#### Write metadata for older blocks
 It would be nice if we can generate metadata for older blocks, as that would
 keep the lookup logic simple, but we cannot generate signatures since MCF does
 not have all the private signing keys, nor should it.
