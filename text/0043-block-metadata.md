@@ -118,7 +118,7 @@ MobileCoin Foundation will publish a mapping/list of node_id to a range of block
 indexes, which node operators and consumers can use to verify the metadata
 signatures.
 
-This mapping will contain multiple node_id:block_range entries
+This mapping will contain multiple node_id:block_range entries, in the formats defined below.
 
 #### Key History TOML format
 ```toml
@@ -145,15 +145,22 @@ last_block_index = Y
 ```
 
 ## Historical AVRs
-The Block Signing Key used to sign the transaction data within a block is included within the
-`isvQuoteBody` field of an Intel AVR. By having AVRs available on chain, anyone can verify
-the reported block signing key is correct and that the block was signed by a valid enclave.
+The Block Signing Key used to sign the transaction data within a block is
+included within the `isvQuoteBody` field of an Intel AVR. By having AVRs
+available on chain, anyone can verify the reported block signing key is correct
+and that the block was signed by a consensus node with a valid enclave and a
+recognized SCP message signing key.
+
 Thus With `BlockMetadata`, consumers of the blockchain may not need a Watcher DB
-because Ledger DB can default to reading AVRs from `BlockMetadata` 
+because Ledger DB can default to reading AVRs from `BlockMetadata`, , and fall
+back to a lookup table containing AVRs for older blocks.
 
 MobileCoin Foundation will publish a bootstrap file defining this lookup table
 with historical consensus enclave AVRs, up to when consensus nodes publish
 `BlockMetadata` with their AVRs.
+
+Operators may not have complete historical AVR data, in which case the block
+range without AVR should be listed in the file, without the AVR fields.
 
 #### AVR History TOML format
 ```toml
@@ -164,6 +171,7 @@ responder_id = ""
 first_block_index = X
 # Optional index of the last block signed with this enclave.
 last_block_index = Y
+# Optional AVR
 [node.avr]
 # Hex-encoded signature bytes
 sig = "..."
