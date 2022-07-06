@@ -151,9 +151,9 @@ available on chain, anyone can verify the reported block signing key is correct
 and that the block was signed by a consensus node with a valid enclave and a
 recognized SCP message signing key.
 
-Thus With `BlockMetadata`, consumers of the blockchain may not need a Watcher DB
-because Ledger DB can default to reading AVRs from `BlockMetadata`, and fall
-back to a lookup table containing AVRs for older blocks.
+Thus with `BlockMetadata`, Ledger DB can default to reading AVRs from
+`BlockMetadata`, and fall back to a lookup table containing AVRs for older
+blocks.
 
 MobileCoin Foundation will publish a bootstrap file defining this lookup table
 with historical consensus enclave AVRs, up to when consensus nodes publish
@@ -336,3 +336,10 @@ None as of this writing.
 2. Enables block streaming and other consumers to include and validate the AVRs
    for persisted blocks, which opens a path to replacing mobilecoind and watcher
    in Fog.
+
+   Note that block timestamps come from the block signature, and nodes that are
+   catching up to the latest consensus (including mobilecoind, full-service, and
+   consensus nodes that are catching up) do not append any block signature,
+   relying on a Watcher to update the signatures. Replacing Watcher thus entails
+   updating this catch-up mode to handle block signatures as well as metadata,
+   perhaps reusing SCP.
