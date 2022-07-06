@@ -354,6 +354,8 @@ None as of this writing.
    Note that block timestamps come from the block signature, and nodes that are
    catching up to the latest consensus (including mobilecoind, full-service, and
    consensus nodes that are catching up) do not append any block signature,
-   relying on a Watcher to update the signatures. Replacing Watcher thus entails
-   updating this catch-up mode to handle block signatures as well as metadata,
-   perhaps reusing SCP.
+   relying on a Watcher to update the signatures (by syncing all blocks from
+   multiple sources, at least one is guaranteed to contain a signature and a
+   timestamp). Replacing Watcher thus entails updating this catch-up mode to
+   handle block metadata and signatures, perhaps by fetching the same block from
+   multiple sources until a quorum set check can be satisfied.
