@@ -48,7 +48,8 @@ version), and reject blocks that cannot be authenticated, per the following
 criteria:
 
 1. Verify that the metadata signature is valid for its contents and pub key.
-1. The metadata signer is a [Trusted Signing Key](#trusted-signing-keys) valid for the block index.
+1. The metadata signer is a [Trusted Signing Key](#trusted-signing-keys) valid
+   for the block index.
 1. The metadata includes an AVR signed by Intel Attestation Service.
 1. The key used to generate the block signature is contained in the AVR.
 
@@ -127,8 +128,8 @@ to a range of block indexes for which that key is trusted, which node operators
 and consumers can use to verify the metadata signatures. This provides a
 mechanism for revoking compromised keys.
 
-This mapping will contain multiple node_id:pub_key:block_range entries, in the formats
-defined below.
+This mapping will contain multiple node_id:pub_key:block_range entries, in the
+formats defined below.
 
 #### Trusted Signing Keys TOML format
 
