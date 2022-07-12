@@ -25,8 +25,7 @@ This provides more space in the memo beyond those used for recoverable transacti
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The [e_memo field](0003-encrypted-memos.md#reference-level-explanation
-) is an encrypted memo field on every MobileCoin TxOut.
+The <a href="0003-encrypted-memos.md#reference-level-explanation" website="proposals/encrypted-memos#reference-level-explanation">e_memo field</a> is an encrypted memo field on every MobileCoin TxOut.
 
 ## This is an update to the values from #3:
 
