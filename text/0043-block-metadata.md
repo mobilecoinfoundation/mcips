@@ -1,7 +1,7 @@
-* Feature Name: `block_metadata`
-* Start Date: 2022-05-24
-* MCIP PR: [mobilecoinfoundation/mcips#43](https://github.com/mobilecoinfoundation/mcips/pull/43)
-* Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2104
+- Feature Name: `block_metadata`
+- Start Date: 2022-05-24
+- MCIP PR: [mobilecoinfoundation/mcips#43](https://github.com/mobilecoinfoundation/mcips/pull/43)
+- Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2104
 
 Contents:
 
