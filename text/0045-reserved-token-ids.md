@@ -11,7 +11,7 @@ MobileCoin 1.2 introduced the ability for the network to operate on different as
 # Motivation
 [motivation]: #motivation
 
-We will need to allocate token IDs for development and testing purposes on our various networks. We also wish to ensure a given token ID is unique for an underlying asset across our networks: development and test network(s) (e.g. alphanet, testnet, etc.), and our main network (i.e. MainNet).
+We will need to allocate token IDs for development and testing purposes on our various networks. We also wish to ensure a given token ID is unique for an underlying asset across our networks: development and test network(s) (e.g. AlphaNet, TestNet, etc.), and our main network (i.e. MainNet).
 
 It is also critically important that a given token ID not be re-used within a network, because (presumably) the new token is not a direct successor token to the previously existing token, and it is not considered reasonable to expect the original token to be completely burned via transaction to the verifiable burn address. If a holder of a particular token loses their private key, then the contents of their account cannot be verifiably burned.
 
@@ -20,7 +20,7 @@ It is also critically important that a given token ID not be re-used within a ne
 
 As a result, the primary purpose of this change is to ensure that the same token ID is not re-used on a given network, but secondarily to ensure that a given token ID is also not re-used *between* networks. 
 
-This is done primarily to aid engineers in their debugging and testing by creating a central repository they can use to provide something akin to an order-of-magnitude style check on tokens in use in a particular environment.  For example, a token ID in the MainNet reserved range should never appear on testnet, and similarly, a token ID in the testnet reserved range should never appear on MainNet.
+This is done primarily to aid engineers in their debugging and testing by creating a central repository they can use to provide something akin to an order-of-magnitude style check on tokens in use in a particular environment.  For example, a token ID in the MainNet reserved range should never appear on TestNet, and similarly, a token ID in the TestNet reserved range should never appear on MainNet.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
