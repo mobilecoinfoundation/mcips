@@ -1,6 +1,6 @@
 - Feature Name: `reserved_token_ids`
 - Start Date: 2022-07-14
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0045](https://github.com/mobilecoinfoundation/mcips/pull/45)
 - Tracking Issue: N/A
 
 # Summary
