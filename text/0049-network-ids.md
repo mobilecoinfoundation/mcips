@@ -17,7 +17,7 @@ If this doesn't match the server, an error is returned, which includes the serve
 Two important and competing engineering goals for all financial software are:
 
 * Enable Rigorous Testing: Properly test the code before it goes live in a test environment that matches prod as closely as possible.
-* Prevent Mixing of Test and Prod: Make it hard for e.g. clients to think they are talking to testnet when they are actually talking to production.
+* Prevent Mixing of Test and Prod: Make it hard for e.g. users to think they are talking to testnet when they are actually talking to production and vice versa.
 
 The basic issue is, we DO want the test servers and clients to match production as closely as possible, so that we test the code and the code paths
 that we will actually ship. On the other hand, if there is NO way for the software to distinguish the two environments, then there is no way to have
@@ -34,10 +34,10 @@ There are a few problems with this:
 * When mixing networks occurs, an attestation failure error message results, but this error message is very hard to understand.
 * Clients typically don't clearly communicate to the user which network they are on. So this doesn't ultimately fix the problem,
   and indeed sometimes users think they are using a testnet build but actually they are using a mainnet build.
-* Now that we have the MCIP #37 minting mechanism, we have more calls that clients can make to the consensus network,
+* Now that we have the [MCIP #37](https://github.com/mobilecoinfoundation/mcips/pull/37) minting mechanism, we have more calls that clients can make to the consensus network,
   but minting commands are not attested, so there is no mechanism to prevent mixing of test and prod for that call.
 
-To try to overcome the latter issue, one form of MCIP #45 proposed things like, every token on mainnet will have a different token id
+To try to overcome the latter issue, one form of [MCIP #45](https://github.com/mobilecoinfoundation/mcips/pull/45) proposed things like, every token on mainnet will have a different token id
 from testnet, and every devnet token id will also be different. This is roughly analogous to something like "in the stock exchange, in prod the ticker is GOOG, and in test the ticker is TESTGOOG".
 
 Presumably, the next time we add a feature to consensus that adds a new API endpoint, we will need to add more configuration and more fragmentation of this
@@ -48,9 +48,9 @@ This fragmentation is harmful for several reasons.
 * Increases the complexity of properly configuring / deploying a network, which is already high.
 * The intent of "GOOG" vs. "TESTGOOG" is that it prevents a user from being confused and thinking test data is production data,
   because they'll see the word "TEST", but testing isn't harmed much because the software otherwise works the same.
-  However, for our software, lacking MCIP #40 or any alternative proposal, client software needs to obtain metadata for each token
+  However, for our software, lacking [MCIP #40](https://github.com/mobilecoinfoundation/mcips/pull/40) or any alternative proposal, client software needs to obtain metadata for each token
   id it encounters, or it cannot work properly. If this metadata doesn't match for GOOG and TESTGOOG then we may not properly be testing
-  whether GOOG works properly for prod when.
+  whether GOOG works properly before we go to prod. These same concerns aren't exactly true for a stock exchange.
 * Lacking any per-network discoverability mechanism, clients are likely forced to hard-code the map from token ids to metadata.
   This raises serious complexity and maintainability concerns. Additionally, when we step back and look at the big picture, we can see that we are fighting ourselves:
   we are using server-side configuration to make all the token ids different on every network, arbitrarily, for "safety", but then we are hard-coding logic to basically
@@ -58,7 +58,7 @@ This fragmentation is harmful for several reasons.
 * Ultimately, in a product-focused project, we want to be able to see in testing that "GOOG" displays correctly in the app when we test on testnet, and that all the correct
   UI elements work, and token-specific config is loaded correctly. This will likely motivate engineers higher up in the stack to make "TESTGOOG" and "GOOG" display in identical ways
   to the user of the app, so that they will know exactly how it will appear in real life in prod when they are testing in testnet.
-  This completely defeats the purpose "separate token ids per network" mechanism, since the user will no longer be able to distinguish being on prod vs. being on testnet.
+  This completely defeats the purpose of "separate token ids per network", since the user will no longer be able to distinguish being on prod vs. being on testnet.
 
 We propose to reduce complexity here and separate these concerns.
 
@@ -67,8 +67,8 @@ We propose to reduce complexity here and separate these concerns.
    * For example, when using Metamask, a user can select whether to talk to mainnet, an L2 network, or a test network, via a dropdown menu, and see what network they are currently talking to here.
      Even if we don't support dynamic switching of networks in a particular client, we can still display the network id somewhere, so that the users can discover TEST vs. PROD easily, without
      changing any of the other codepaths that we want to test.
-   * This could be as simple as, if the network id is not prod, then the network id is displayed in a textbox in the upper right corner.
-   * So instead of "TESTGOOG", you still see the ticker "GOOG", but "TEST" appears in the user interface.
+   * This could be as simple as, if the network id is not prod, then the network id is displayed in a textbox in the upper right corner. Or, the network can be inspected from somewhere in the menu.
+   * So instead of "TESTGOOG", you still see the ticker "GOOG", but "TEST" appears in the user interface somewhere else.
 * All of our dev, test, and prod environments currently have names that can naturally be adopted for this purpose.
 * Network id can be our primary method of "de-conflicting" and preventing mixing of networks.
 * We won't have to solve this again every time we add a new feature to consensus, and we can simplify future designs by reducing requirements. 
