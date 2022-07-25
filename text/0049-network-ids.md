@@ -26,13 +26,14 @@ safeguards that prevent e.g. accidental sending of money or minting on mainnnet.
 To date, we have mostly tried to solve the "mixing" problem in the following way:
 
 * Testnet, Prod, and Dev staging environments all have different attestation trust roots
-* Clients are either built with a hard-coded trust root, or at build time are supplied an appropriate css file.
+* Clients are either built with a hard-coded trust root, or at packaging time are supplied an appropriate css file.
 * Clients will fail attestation if they connect to the wrong network type, so as a result they cannot mix networks.
 
 There are a few problems with this:
 
 * When mixing networks occurs, an attestation failure error message results, but this error message is very hard to understand.
-* Clients typically don't clearly communicate to the user which network they are on.
+* Clients typically don't clearly communicate to the user which network they are on. So this doesn't ultimately fix the problem,
+  and indeed sometimes users think they are using a testnet build but actually they are using a mainnet build.
 * Now that we have the MCIP #37 minting mechanism, we have more calls that clients can make to the consensus network,
   but minting commands are not attested, so there is no mechanism to prevent mixing of test and prod for that call.
 
@@ -67,6 +68,7 @@ We propose to reduce complexity here and separate these concerns.
      Even if we don't support dynamic switching of networks in a particular client, we can still display the network id somewhere, so that the users can discover TEST vs. PROD easily, without
      changing any of the other codepaths that we want to test.
    * This could be as simple as, if the network id is not prod, then the network id is displayed in a textbox in the upper right corner.
+   * So instead of "TESTGOOG", you still see the ticker "GOOG", but "TEST" appears in the user interface.
 * All of our dev, test, and prod environments currently have names that can naturally be adopted for this purpose.
 * Network id can be our primary method of "de-conflicting" and preventing mixing of networks.
 * We won't have to solve this again every time we add a new feature to consensus, and we can simplify future designs by reducing requirements. 
