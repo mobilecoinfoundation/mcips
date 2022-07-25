@@ -81,12 +81,20 @@ of a new consensus feature in the future.
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A `network id` is a UTF-8 string. No particular limit on the length is imposed.
+A "network id" is a string. The string must be a valid DNS label:
 
-* Consensus servers are passed this string on startup by either a flag `--network-id` or an environment variable `MC_NETWORK_ID`. It is an error if it is missing.
-  This is called the "configured network id".
-* Client facing APIs are extended to include an OPTIONAL "expected_network_id" argument. If present, the untrusted server code checks this against the configured network
-  id immediately upon deserializing the response. If it is not a match, then an error is returned to the client which includes the configured network id.
+* Up to 63 bytes long
+* Valid characters are `a-z`, `0-9`, and `-` (hyphen).
+* You can't specify a hyphen at the beginning or end of a label.
+
+Consensus servers are passed this string on startup by either a flag `--network-id` or an environment variable `MC_NETWORK_ID`.
+* It is an error if it is missing.
+* This is called the "configured network id".
+
+Client facing APIs are extended to include an OPTIONAL "expected_network_id" argument.
+* If present, the untrusted server code checks this against the configured network
+  id immediately upon deserializing the response.
+* If it is not a match, then an error is returned to the client which includes the configured network id.
 
 This argument is optional to support backwards compatibility.
 
@@ -167,7 +175,7 @@ Chain ID was introduced in EIP-155 when the Ethereum Classic fork occurred, to p
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-Should there be any limits imposed on the network-id string? Should any UTF-8 string be valid?
+What exact network id strings should be used for the existing mainnet and testnet?
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
