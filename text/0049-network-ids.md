@@ -19,8 +19,8 @@ Two important and competing engineering goals for all financial software are:
 * Enable Rigorous Testing: Properly test the code before it goes live in a test environment that matches prod as closely as possible.
 * Prevent Mixing of Test and Prod: Make it hard for e.g. users to think they are talking to testnet when they are actually talking to production and vice versa.
 
-The basic issue is, we DO want the test servers and clients to match production as closely as possible, so that we test the code and the code paths
-that we will actually ship. On the other hand, if there is NO way for the software to distinguish the two environments, then there is no way to have
+The basic issue is, we **do** want the test servers and clients to match production as closely as possible, so that we test the code and the code paths
+that we will actually ship. On the other hand, if there is **no** way for the software to distinguish the two environments, then there is no way to have
 safeguards that prevent e.g. accidental sending of money or minting on mainnnet.
 
 To date, we have mostly tried to solve the "mixing" problem in the following way:
