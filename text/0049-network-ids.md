@@ -145,7 +145,7 @@ The primary alternative is, do nothing:
   because attestation roots live in files.
 
 Another alternative: The Ethereum [JSON-RPC API](https://ethereum.org/en/developers/docs/apis/json-rpc/) returns the network id as a string, but in practice all the ids are actually integers.
-The mapping from network names to ids is available at chainlist.org.
+The mapping from network names to ids is available at [chainlist.org](https://chainlist.org/).
 
 * Integers may be a bit smaller on the wire.
 * Assigning consecutive numbers instead of names creates additional work around an additional service and is somewhat unfriendly to ad-hoc dev networks and local networks.
