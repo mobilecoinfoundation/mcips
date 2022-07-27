@@ -74,7 +74,7 @@ We propose to reduce complexity here and separate these concerns.
 * We won't have to solve this again every time we add a new feature to consensus, and we can simplify future designs by reducing requirements. 
 * This has the benefit that the error messages when networks are mixed will be consistent and much clearer.
 
-Note that while we are partly motivated by reducing complexity and easing testing around MCIP #45, it is possible that we will do MCIP #45 as originally proposed
+Note that while we are partly motivated by reducing complexity and easing testing around [MCIP #45](https://github.com/mobilecoinfoundation/mcips/pull/45), it is possible that we will do [MCIP #45](https://github.com/mobilecoinfoundation/mcips/pull/45) as originally proposed
 and this proposal -- they are orthogonal, strictly speaking. We could decide to adopt this proposal as a secondary layer of defense against mixing problems, or in service
 of a new consensus feature in the future.
 
