@@ -8,7 +8,7 @@
 
 Each running mobilecoin consensus network will be started with a string, the "network id".
 
-Clients which make requests to consensus MAY pass the expected network id with their request.
+Clients which make requests to consensus **may** pass the expected network id with their request.
 If this doesn't match the server, an error is returned, which includes the server-side network id in the response.
 
 # Motivation
