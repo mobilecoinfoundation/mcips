@@ -106,11 +106,11 @@ Clients SHOULD:
 * Take advantage of the `expected_network_id` parameter to help prevent mistakes
 
 When the client is a cross-chain bridge, configuration should be organized so that network-id is determined at the same time that the network-id for the other chain is determined,
-and there should be a single source of truth for this association. It should be made very hard to accidentally configure the bridge to talk to e.g. an Ethereum testnet and also Mobilecoin Prod.
+and there should be a single source of truth for this association. It should be made very hard to accidentally configure the bridge to talk to e.g. an Ethereum testnet and also MobileCoin Prod.
 
-For example, either a hard-coded table or a configuration toml file could be created for the bridge which associates to a Mobilecoin network id:
+For example, either a hard-coded table or a configuration toml file could be created for the bridge which associates to a MobileCoin network id:
 
-* URLs of mobilecoin services
+* URLs of MobileCoin services
 * URLs of any other chain services
 * Network ids of any other chain networks
 * Contract ids for any relevant contracts
