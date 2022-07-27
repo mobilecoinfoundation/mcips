@@ -158,7 +158,7 @@ Ethereum actually has two ids like this: A network id, and a chain id.
 * Transaction signatures use the chain id
 
 For most networks the two values are the same.
-Chain ID was introduced in EIP-155 when the Ethereum Classic fork occurred, to prevent mixing of these two networks.
+Chain ID was introduced in [EIP-155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md) when the Ethereum Classic fork occurred, to prevent mixing of these two networks.
 
 * Putting the chain id within the transaction signature makes it easier for an off-line signer to
   have visibility on what network the transaction is submitted to. If your transaction is submitted
