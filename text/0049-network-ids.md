@@ -21,7 +21,7 @@ Two important and competing engineering goals for all financial software are:
 
 The basic issue is, we **do** want the test servers and clients to match production as closely as possible, so that we test the code and the code paths
 that we will actually ship. On the other hand, if there is **no** way for the software to distinguish the two environments, then there is no way to have
-safeguards that prevent e.g. accidental sending of money or minting on mainnnet.
+safeguards that prevent e.g. accidental sending of money or minting on Mainnet.
 
 To date, we have mostly tried to solve the "mixing" problem in the following way:
 
