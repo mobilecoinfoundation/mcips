@@ -1,7 +1,7 @@
 - Feature Name: `network_ids`
 - Start Date: 2022-07-25
 - MCIP PR: [mobilecoinfoundation/mcips#0049](https://github.com/mobilecoinfoundation/mcips/pull/0049)
-- Tracking issue: None Yet
+- Tracking issue: [mobilecoinfoundation/mobilecoin#2311](https://github.com/mobilecoinfoundation/mobilecoin/issues/2311)
 
 # Summary
 [summary]: #summary
