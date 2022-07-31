@@ -151,7 +151,7 @@ Client facing APIs are extended to include an optional "chain-id" header.
 * If present, the untrusted server code checks this against the configured chain
   id immediately upon deserializing the response.
 * If it is not a match, then an error is returned to the client.
-* The response details must include a string of the form "chain-id mismatch: 'foo'", where foo is the server's configured chain id, to help debug clients.
+* The response message must include a string of the form "chain-id mismatch: 'foo'", where foo is the server's configured chain id, to help debug clients.
 
 This header is optional to support backwards compatibility.
 
