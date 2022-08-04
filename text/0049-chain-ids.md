@@ -68,7 +68,7 @@ We propose to reduce complexity here and separate these concerns.
 * "Chain id"-aware clients is a common pattern used by other blockchains to help clients (and users) be aware of what network they are talking to.
 * Chain id can be easily displayed to the user if desired, which is something that none of our clients actually do today.
    * For example, when using Metamask, a user can select whether to talk to mainnet, an L2 network, or a test network, via a dropdown menu, and see what network they are currently talking to here.
-     Even if we don't support dynamic switching of networks in a particular client, we can still display the network id somewhere, so that the users can discover TEST vs. PROD easily, without
+     Even if we don't support dynamic switching of networks in a particular client, we can still display the chain id somewhere, so that the users can discover TEST vs. PROD easily, without
      changing any of the other codepaths that we want to test.
    * This could be as simple as, if the chain id is not prod, then the chain id is displayed in a textbox in the upper right corner. Or, the chain id can be inspected from somewhere in the menu.
    * So instead of "TESTGOOG", you still see the ticker "GOOG", but "TEST" appears in the user interface somewhere else.
@@ -114,9 +114,9 @@ For example, either a hard-coded table or a configuration toml file could be cre
 
 This is better than each of these being independent configuration parameters to the software. They should all be changing in lock-step.
 
-In block-version 3, chain-id will be incorporated to consensus in a more comprehensive way:
+In block-version 3, chain id will be incorporated to consensus in a more comprehensive way:
 
-* The enclave will become `chain-id` aware, so that the network cannot peer if the chain-id's don't match.
+* The enclave will become `chain_id` aware, so that the consensus network cannot peer if the `chain_id`'s don't match.
 * A `chain_id` field will be added to the block header in block-version 3.
 * The `TxPrefix` of a transaction will include `chain_id`. This will be checked by transaction validation.
 
@@ -203,7 +203,7 @@ Chain ID was introduced in [EIP-155](https://github.com/ethereum/EIPs/blob/maste
 
 * Putting the chain id within the transaction signature makes it easier for an off-line signer to
   have visibility on what network the transaction is submitted to. If your transaction is submitted
-  via a proxy, the proxy would control which network id is expected.
+  via a proxy, the proxy would control which chain id is expected.
 * In the status quo, the off-line signer has no visibility into this unless the proxy pipes an attested
   connection through to them, which isn't possible for some types of off-line signers.
 
