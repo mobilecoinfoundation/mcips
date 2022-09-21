@@ -76,8 +76,7 @@ The proposed changes to the `TxIn` structure and the input rules are captured in
 classDiagram
 direction BT
 InputRules --> TxIn
-PartialFillRules --> InputRules
-RevealedTxOut --> PartialFillRules
+RevealedTxOut --> InputRules
 
 TxIn: Vec~TxOut~ ring
 TxIn: Vec~...~ membership_proofs
