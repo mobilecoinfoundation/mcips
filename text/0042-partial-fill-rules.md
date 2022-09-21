@@ -37,9 +37,6 @@ A partial fill specification includes:
 
 To satisfy partial fill rules, all fractional outputs and the change output must appear in the TxPrefix, similarly as required_outputs in MCIP #31. However, the amounts of these TxOut's are allowed to be different -- every other field must be the same. Transaction validation must confirm that the amounts are different in an acceptable way.
 
-For more complex rules, the counterparty may need to supply additional data to transaction validation to confirm such rules.
-Therefore, a TxIn now has optional InputRuleVerificationData, which is required when partial fill rules are present.
-
 In order to verify that partial fills were performed correctly, we must reveal the amounts of all fractional outputs and corresponding outputs in the `TxPrefix` to the enclave. To do this, we reveal the secret which underlies both the amount commitment and the masked value, so that the enclave can essentially do view-key matching on these TxOut's.
 
 In order to avoid revealing unnecessary information, we modify the derivation of the value mask and the amount blinding factor of the Pedersen commitment from the TxOut shared secret. We introduce a second step, with a second key called the Amount shared secret.
@@ -81,26 +78,19 @@ direction BT
 InputRules --> TxIn
 PartialFillRules --> InputRules
 RevealedTxOut --> PartialFillRules
-InputRuleVerificationData --> TxIn
 
 TxIn: Vec~TxOut~ ring
 TxIn: Vec~...~ membership_proofs
 TxIn: Option~InputRules~ input_rules
-TxIn: Option~InputRuleVerificationData~ input_rule_verification_data *new*
 
 InputRules: Vec~TxOut~ required_outputs
 InputRules: uint64 max_tombstone_block
-InputRules: Option~PartialFillRules~ partial_fill_rules *new*
-
-PartialFillRules: Vec~RevealedTxOut~ fractional_outputs
-PartialFillRules: RevealedTxOut fractional_change
-PartialFillRules: uint64 max_change_value
+InputRules: Vec~RevealedTxOut~ fractional_outputs *new*
+InputRules: RevealedTxOut fractional_change *new*
+InputRules: uint64 max_change_value *new*
 
 RevealedTxOut: TxOut tx_out
 RevealedTxOut: bytes amount_shared_secret
-
-InputRuleVerificationData: Vec~Bytes~ partial_fill_output_amount_ss
-InputRuleVerificationData: Bytes partial_fill_change_amount_ss
 ```
 
 An example partial fill flow goes like this:
@@ -116,8 +106,6 @@ An example partial fill flow goes like this:
   * Bob adds an input worth at least 200 MEOWB + transaction fee.
   * Bob adds a change output with any MEOWB change to himself.
   * Bob assigns a 20 MOB output to himself.
-  * The transaction builder appropriately attaches `InputRuleVerificationData` containing these amount shared secrets
-    for any outputs corresponding to fractional outputs that it created.
 
 When the transaction settles, Bob has paid net 200 MEOWB + transaction fee, and received net of 20 MOB.
 Alice has paid a 1500 MOB output, and received the 500 MOB required output, and a 980 MOB fractional output,
@@ -143,7 +131,7 @@ In a traditional exchange, limit orders that are partially-filled remain on the 
 An alternative design which we explored first attempted to use homomorphic properties of Pedersen commitments to verify correct partial fills without revealing them:
 
 * Amount shared secret is not needed.
-* Input rule verification data instead consists of a fraction, expressed as a u64 `numerator` and a u64 `denominator`.
+* An "Input rule verification data" field is added to TxIn, and contains the fill fraction, expressed as a u64 `numerator` and a u64 `denominator`.
 * To verify equations like `real_output >= num / denom * fractional_output`, we clear denominators and convert to a form `X >= 0`.
   `denominator * real_output - num * fractional_output >= 0`. Then we consider the LHS as a "partial fill verification commitment"
   and fold this into the range proofs that already exist in the transaction. It is not too hard to see that the counter-party can always
