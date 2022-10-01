@@ -6,12 +6,12 @@
 # Summary
 [summary]: #summary
 
-Extend the set of supported "input rules", to allow that someone can produce a signed order indicating willingness to trade "this for that", but moreover, "this for that, at this exchange rate, up to this volume".
+Extend the set of supported "input rules", to allow that someone can produce a signed quote indicating willingness to trade "this for that", but moreover, "this for that, at this exchange rate, up to this volume".
 
 # Motivation
 [motivation]: #motivation
 
-In MCIP #31 we proposed a way that two parties can swap assets -- the first one can make a signed offer to trade this for that using a "Signed Contingent Input", then anyone who agrees can add this to their transaction.
+In [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0031) we proposed a way that two parties can swap assets -- the first one can make a signed offer to trade this for that using a "Signed Contingent Input", then anyone who agrees can add this to their transaction.
 
 The way it was proposed, the first party has to state the total amount of the first asset and
 the total amount of the second asset. But if the second party doesn't agree exactly, then they
@@ -19,28 +19,63 @@ may not proceed, so there is a need to negotiate exactly the price and the volum
 
 One way to make this more practical is that, the first party could instead sign that they are willing to trade at a particular price, up to a particular maximum volume. We call this a "partial fill", in analogy with partial-fill limit orders in traditional exchanges.
 
-We want to extend the MCIP #31 functionality to support this.
+**Note** however, that this is not conceptually an implementation of an "exchange" which accepts and then determines settlement of orders. It's more like a fancy quoting service, wherein one party can offer a signed quote which another party may act on or ignore.
+
+We want to extend the [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0042) functionality to support this.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
 An input rules object may now optionally contain a "partial fill rules" specification.
 
-When a Signed Contingent Input (SCI) containing partial fill rules is incorporated into a transaction, there is an implicit
-"Partial fill fraction", which is the fraction of the maximum volume that is actually transacted.
-
 A partial fill specification includes:
 
-* A list of TxOut's that may be partially filled. Each tx out here is called a "fractional output".
-* A fractional change output. This sends any left-over value from the signed input to the originator when the order is partially filled.
-* A maximum change output value. This is configurable by the originator and allows them to an implied floor on the partial fill fraction to prevent filling the order for dust amounts, which can be a form of griefing.
+* A list of TxOut's that may be partially filled. Each tx out here is called a "partial fill output".
+* A partial fill change output. This sends any left-over value from the signed input to the originator when the quote is partially filled.
+* A minimum fill value. This is configurable by the originator and allows them to prevent filling the quote for dust amounts, which can be a form of griefing.
 
-To satisfy partial fill rules, all fractional outputs and the change output must appear in the TxPrefix, similarly as required_outputs in MCIP #31. However, the amounts of these TxOut's are allowed to be different -- every other field must be the same. Transaction validation must confirm that the amounts are different in an acceptable way.
+These partial fill rules are specified (and signed) the **originator** of an SCI, who is conceptually offering a price quote.
 
-In order to verify that partial fills were performed correctly, we must reveal the amounts of all fractional outputs and corresponding outputs in the `TxPrefix` to the enclave. To do this, we reveal the secret which underlies both the amount commitment and the masked value, so that the enclave can essentially do view-key matching on these TxOut's.
+When a Signed Contingent Input (SCI) containing partial fill rules is incorporated into a transaction by the **counterparty** to a swap, there is an implicit
+"partial fill fraction", which is the fraction of the maximum allowed volume that is actually transacted when the transation settles.
+
+When a transaction contains partial fill rules, they must be satisfied, or the transaction is invalid, and this is enforced by the consensus network.
+
+To satisfy partial fill rules, all partial fill outputs and the partial fill change output must appear in the TxPrefix, similarly as required_outputs in MCIP #31. However, the amounts of these corresponding TxOut's are allowed to be different -- every other field must be the same. These modified TxOut's which are actually the ones which will enter the blockchain ledger, are called the "fractional outputs" and "fractional change output". These TxOut's are created by the **counterparty** by modifying the TxOut's which the originator signed. Essentially, the amounts are all modified according to the **partial fill fraction** which the counterparty desires. Transaction validation must confirm that the amounts are different in an acceptable way, making sure that each fractional output is large enough.
+
+An example partial fill flow goes like this:
+* Alice (the originator) has an output for 1500 MOB. Alice would like to trade up to 1000 MOB for MEOWB at a price of 10 MEOWB/MOB.
+  Alice doesn't want the trade to happen unless the counterparty takes at least .1 MOB.
+* Alice creates an SCI using her 1500 MOB input.
+  * She creates a required output to herself for 500 MOB
+  * She creates a fractional output to herself for 10,000 MEOWB
+  * She creates a fractional change output to herself for 1000 MOB
+  * She sets the min_fill_value to .1 MOB, (but expresses this in picoMOB, the smallest representable units).
+* Bob (the counterparty) sees this quote, and wants to trade 200 MEOWB for 20 MOB (+ transaction fee).
+  * Bob adds this quote to the transaction builder, and indicates that he wants to fill 2% of the quote.
+  * Bob adds an input worth at least 200 MEOWB + transaction fee.
+  * Bob adds a change output with any MEOWB change to himself.
+  * Bob assigns a 20 MOB output to himself.
+
+When the transaction settles, Bob has paid net 200 MEOWB + transaction fee, and received net of 20 MOB.
+Alice has paid a 1500 MOB output, and received the 500 MOB required output, and a 980 MOB fractional output,
+as well as 200 MEOWB from Bob.
+
+# Reference-level explanation
+[reference-level-explanation]: #reference-level-explanation
+
+The reference level explanation splits into two parts -- the Amount shared secret, and the schema and validation of the new SCI fields.
+
+Neither of these are legal before block version 3. The new SCI fields are legal in block version 3, and the alternate derivation for
+`TxOut` `MaskedAmount` must be used after block version 3.
+
+## Amount shared secret
+
+In order to verify that partial fills were performed correctly, we must reveal the amounts of all fractional outputs (which correspond to partial fill outputs) in the `TxPrefix` to the enclave. To do this, we reveal the secret which underlies both the amount commitment and the masked value, so that the enclave can essentially do view-key matching on these TxOut's. A new mechanism is specified to do precisely this, called Amount shared secret.
 
 In order to avoid revealing unnecessary information, we modify the derivation of the value mask and the amount blinding factor of the Pedersen commitment from the TxOut shared secret. We introduce a second step, with a second key called the Amount shared secret.
 
+Before:
 ```mermaid
 graph TB
     A[TxOut SharedSecret] -->|hkdf sha512| B[MemoKey]
@@ -49,11 +84,12 @@ graph TB
     A[TxOut SharedSecret] -->|blake2b| E[Value mask]
 ```
 
+After:
 ```mermaid
 graph TB
     A[TxOut SharedSecret] -->|hkdf sha512| B[MemoKey]
     A -->|blake2b| C[Confirmation Number]
-    A -->|hkdf sha512| D[Amount Shared Secret *new*]
+    A -->|sha512| D[Amount Shared Secret *new*]
     D -->|hkdf sha512| E[Amount Blinding Factor v2]
     D -->|hkdf sha512| F[Value mask v2]
 ```
@@ -66,9 +102,67 @@ Note that, this deviates from the model for "normal" transactions. For normal tr
 even to the enclave, because it is unnecessary, and we can use RingCT to validate transactions without revealing the amounts. However, for partial fill swap transactions, the use-case is that SCI's are broadcast
 to an exchange network -- the goal there is that both the originator and the counterparty are anonymous, but not that the amounts being offered to transact are secret. So when validating these swaps, keeping the amounts secret from the consensus enclave does not impact the threat model.
 
-For compatibility, we propose that the TxOut structure is evolved per MCIP #26, so that
+For compatibility, we propose that the `TxOut` structure is evolved per MCIP #26, so that
 client software can support both the old and new derivation schemes. The old scheme must always be used
 prior to block version 3, and the new scheme must always be used after block version 3.
+
+Example rust code for computing the new derivations is as follows:
+
+```rust
+/// Computes the amount shared secret from the tx_out shared secret
+fn get_amount_shared_secret(tx_out_shared_secret: &RistrettoPublic) -> [u8; 32] {
+    let mut hasher = Sha512::new();
+    hasher.update(&AMOUNT_SHARED_SECRET_DOMAIN_TAG);
+    hasher.update(&tx_out_shared_secret.to_bytes());
+    // Safety: Sha512 is a 512-bit (64-byte) hash.
+    hasher.finalize()[0..32].try_into().unwrap()
+}
+```
+
+```rust
+/// Computes the value mask, token id mask, and blinding factor for the
+/// commitment, in a masked amount.
+///
+/// # Arguments
+/// * `amount_shared_secret` - The amount shared secret, derived as a hash of
+///   `rB`.
+fn get_blinding_factors(amount_shared_secret: &[u8; 32]) -> (u64, u64, Scalar) {
+    // Use HKDF-SHA512 to produce blinding factors for value, token id, and
+    // commitment
+    let kdf = Hkdf::<Sha512>::new(
+        Some(AMOUNT_BLINDING_FACTORS_DOMAIN_TAG),
+        amount_shared_secret,
+    );
+
+    let mut value_mask = [0u8; 8];
+    kdf.expand(AMOUNT_VALUE_DOMAIN_TAG.as_bytes(), &mut value_mask)
+        .expect("Digest output size is insufficient");
+
+    let mut token_id_mask = [0u8; 8];
+    kdf.expand(AMOUNT_TOKEN_ID_DOMAIN_TAG.as_bytes(), &mut token_id_mask)
+        .expect("Digest output size is insufficient");
+
+    let mut scalar_blinding_bytes = [0u8; 64];
+    kdf.expand(
+        AMOUNT_BLINDING_DOMAIN_TAG.as_bytes(),
+        &mut scalar_blinding_bytes,
+    )
+    .expect("Digest output size is insufficient");
+
+    (
+        u64::from_le_bytes(value_mask),
+        u64::from_le_bytes(token_id_mask),
+        Scalar::from_bytes_mod_order_wide(&scalar_blinding_bytes),
+    )
+}
+```
+
+At the level of protobuf, the `TxOut.masked_amount` field is replaced with a `oneof`, selecting between V1 and V2.
+`MaskedAmountV1` uses the historical derivations and must be supported by all clients indefinitely, as outputs from block versions <=2 always use this derivation.
+`MaskedAmountV2` uses the new derivation and is mandatory for all `TxOut`'s from block version 3 and on.
+
+## Partial fill rules schema and semantics
+
 
 The proposed changes to the `TxIn` structure and the input rules are captured in this diagram:
 
@@ -84,45 +178,58 @@ TxIn: Option~InputRules~ input_rules
 
 InputRules: Vec~TxOut~ required_outputs
 InputRules: uint64 max_tombstone_block
-InputRules: Vec~RevealedTxOut~ fractional_outputs *new*
-InputRules: RevealedTxOut fractional_change *new*
-InputRules: uint64 max_change_value *new*
+InputRules: Vec~RevealedTxOut~ partial_fill_outputs *new*
+InputRules: RevealedTxOut partial_fill_change *new*
+InputRules: uint64 min_partial_fill_value *new*
 
 RevealedTxOut: TxOut tx_out
 RevealedTxOut: bytes amount_shared_secret
 ```
 
-An example partial fill flow goes like this:
-* Alice has an output for 1500 MOB. Alice would like to trade up to 1000 MOB for MEOWB at a price of 10 MEOWB/MOB.
-  Alice doesn't want the order to happen unless the volume is at least .1 MOB.
-* Alice creates an SCI using her 1500 MOB input.
-  * She creates a required output to herself for 500 MOB
-  * She creates a fractional output to herself for 10,000 MEOWB
-  * She creates a fractional change output to herself for 1000 MOB
-  * She sets the max_change_value to (1000 - .1) MOB, (but expresses this in picoMOB, the smallest representable units).
-* Bob sees this order, and wants to trade 200 MEOWB for 20 MOB (+ transaction fee).
-  * Bob adds this order to the transaction builder, and indicates that he wants to fill 2% of the order.
-  * Bob adds an input worth at least 200 MEOWB + transaction fee.
-  * Bob adds a change output with any MEOWB change to himself.
-  * Bob assigns a 20 MOB output to himself.
+Recall that the `InputRules` are created (and signed) by the **originator**, and this TxIn is added to a transaction
+by the **counterparty**, who is also obligated to add TxOut's to the TxPrefix which match to the partial fill change
+and partial fill outputs appropriately. (This is actually done under the hood by the transaction builder.)
 
-When the transaction settles, Bob has paid net 200 MEOWB + transaction fee, and received net of 20 MOB.
-Alice has paid a 1500 MOB output, and received the 500 MOB required output, and a 980 MOB fractional output,
-as well as 200 MEOWB from Bob.
+The consensus enclave must enforce any input rules, including these new partial fill rules. This is done in the following way.
 
-# Reference-level explanation
-[reference-level-explanation]: #reference-level-explanation
-
-TODO
+1. If `partial_fill_change` is not present, then no other partial fill rules may be used, and any other partial fill fields must be defaulted.
+1. If `partial_fill_change` is present, then decrypting the amount and token id using `amount_shared_secret` must succeed. The partial fill change
+   may not have a 0 value (to help clients avoid division by zero).
+1. If `partial_fill_change` is present, then a corresponding TxOut called the `fractional_change_output` must exist in the `TxPrefix.outputs`.
+   This must match the `partial_fill_change` in every field except possibly the `masked_amount`.
+1. The `fractional_change_output` must decrypt successfully using the `amount_shared_secret` of the `partial_fill_change`, and
+   it's amount must have the same token id as the `partial_fill_change`, and its value must be less or equal.
+1. The fill fraction is inferred at this point.
+  * The numerator is `partial_fill_change.value - fractional_change_output.value`.
+  * The denominator is `partial_fill_change.value`.
+1. The minimum fill rule is enforced: `partial_fill_change.value - fractional_change_output.value >= min_partial_fill_value`.
+   If this inequality does not hold, then the transaction is rejected for reasons of not meeting the minimum partial fill prescribed
+   by the origiantor.
+1. For each `partial_fill_output`:
+  * It must decrypt succesfully using the recorded `amount_shared_secret`.
+  * There must be a corresponding `fractional_output` among the `TxPrefix.outputs` which matches it in every field except possibly
+    the `masked_amount`.
+  * The fractional output must decrypt successfully using the `partial_fill_output`'s `amount_shared_secret`, and must match the
+    token id of the `partial_fill_output`.
+  * It must be the case that `fractional_output.value >= n/d * partial_fill_output.value` where `n` and `d` are the fill fraction
+    numerator and denominator. This equation must be validated by clearing denominators and checking an inequality of `u128`'s, to
+    avoid numerical issues.
+    
+    ```
+    fractional_output.value * fill_fraction_denominator >= fill_fraction_numerator * partial_fill_output.value
+    ```
+    
+    If this inequality does not hold, then the transaction must be rejected for reasons of not respecting the fill fraction.
 
 # Drawbacks
 [drawbacks]: #drawbacks
 
 This proposal has a few drawbacks.
 
-* The amounts of partial fill transactions are revealed to the enclave. Currently, MobileCoin transactions are validated using RingCT and do not reveal amounts to the enclave. It would be better if there were a way to validate partial fills without revealing this to the enclave, but for the use-cases envisioned, this data already has to be revealed anyways, so the use-cases aren't negatively impacted. We could imagine that an exchange service is based on SGX, and so the amounts of these orders are only revealed inside of SGX, and are matched inside of SGX. Even in this case, it is still the case that if you penetrate SGX you will see the amounts of the SCI orders.
-* Partial-fill SCI orders cannot be re-used by a second counterparty later if the first counter-party only matched some of the volume.
+* The amounts of partial fill transactions are revealed to the enclave. Currently, MobileCoin transactions are validated using RingCT and do not reveal amounts to the enclave. It would be better if there were a way to validate partial fills without revealing this to the enclave, but for the use-cases envisioned, this data already has to be revealed anyways, so the use-cases aren't negatively impacted. We could imagine that an exchange service is based on SGX, and so the amounts of these quotes are only revealed inside of SGX, and are matched inside of SGX. Even in this case, it is still the case that if you penetrate SGX you will see the amounts of the SCI quotes.
+* Partial-fill SCI quotes cannot be re-used by a second counterparty later if the first counter-party only matched some of the volume.
 In a traditional exchange, limit orders that are partially-filled remain on the books until being totally filled, so that potentially dozens of different parties can each match a piece of the liquidity provided by the originator. In this proposal, that would not work, because as soon as the first counterparty matches the order, the key image underlying the SCI is burned. One could imagine that there might be a way that the fractional change output which goes back to the originator could be automatically signed as an SCI somehow, so that matching can continue without the originator being in the loop. This proposal instead envisions that if the originator wants to continue matching they simply sign a new SCI themselves and re-broadcast.
+* The same input can be used to "back" multiple SCI quotes at once, in which case if any one of them is matched, the others instantly become impossible to match. This is somewhat different from how limit orders work in an exchange -- each limit order must be backed by distinct liquidity. This reflects the idea that SCI's are more in analogy with a signed quote than with a limit order as such. This is potentially confusing to e.g. a trader who looks at a list of available SCI quotes and infers that there is a certain amount of liquidity depth, reasoning as they would in a traditional exchange. But if the same inputs are used to sign multiple quotes e.g. for different currencies, it may be impossible that all of these quotes could actually match, and the "real" liquidity may be considerably less. This can be mitigated by making sure that the software they are using communicates this idea clearly.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
@@ -180,12 +287,7 @@ Section 6.2 of the [Zexe paper](https://eprint.iacr.org/2018/962.pdf) is also wo
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-At this point we aren't ready to specify exactly how the backwards compatibility works for the old (pre Amount shared secret) derivation and the new derivation of amount blinding factors from the TxOut shared secret. The idea is roughly that:
-
-* We will introduce new fields (in TxOut or a constituent) using protobuf schema evolution, in a manner compatible with our hashing
-* When performing view key matching, the presence of old or new fields in the protobuf will indicate which derivation to use
-* Before block version 3, the old derivation must be used always. After block version 3, the new derivation must be used always.
-* Partial fill rules are only valid starting at block version 3.
+None at this time.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
