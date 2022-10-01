@@ -200,26 +200,26 @@ The consensus enclave must enforce any input rules, including these new partial 
 1. The `fractional_change_output` must decrypt successfully using the `amount_shared_secret` of the `partial_fill_change`, and
    it's amount must have the same token id as the `partial_fill_change`, and its value must be less or equal.
 1. The fill fraction is inferred at this point.
-  * The numerator is `partial_fill_change.value - fractional_change_output.value`.
-  * The denominator is `partial_fill_change.value`.
+   * The numerator is `partial_fill_change.value - fractional_change_output.value`.
+   * The denominator is `partial_fill_change.value`.
 1. The minimum fill rule is enforced: `partial_fill_change.value - fractional_change_output.value >= min_partial_fill_value`.
    If this inequality does not hold, then the transaction is rejected for reasons of not meeting the minimum partial fill prescribed
    by the origiantor.
 1. For each `partial_fill_output`:
-  * It must decrypt succesfully using the recorded `amount_shared_secret`.
-  * There must be a corresponding `fractional_output` among the `TxPrefix.outputs` which matches it in every field except possibly
-    the `masked_amount`.
-  * The fractional output must decrypt successfully using the `partial_fill_output`'s `amount_shared_secret`, and must match the
-    token id of the `partial_fill_output`.
-  * It must be the case that `fractional_output.value >= n/d * partial_fill_output.value` where `n` and `d` are the fill fraction
-    numerator and denominator. This equation must be validated by clearing denominators and checking an inequality of `u128`'s, to
-    avoid numerical issues.
-    
-    ```
-    fractional_output.value * fill_fraction_denominator >= fill_fraction_numerator * partial_fill_output.value
-    ```
-    
-    If this inequality does not hold, then the transaction must be rejected for reasons of not respecting the fill fraction.
+   * It must decrypt succesfully using the recorded `amount_shared_secret`.
+   * There must be a corresponding `fractional_output` among the `TxPrefix.outputs` which matches it in every field except possibly
+     the `masked_amount`.
+   * The fractional output must decrypt successfully using the `partial_fill_output`'s `amount_shared_secret`, and must match the
+     token id of the `partial_fill_output`.
+   * It must be the case that `fractional_output.value >= n/d * partial_fill_output.value` where `n` and `d` are the fill fraction
+     numerator and denominator. This equation must be validated by clearing denominators and checking an inequality of `u128`'s, to
+     avoid numerical issues.
+     
+     ```
+     fractional_output.value * fill_fraction_denominator >= fill_fraction_numerator * partial_fill_output.value
+     ```
+     
+     If this inequality does not hold, then the transaction must be rejected for reasons of not respecting the fill fraction.
 
 # Drawbacks
 [drawbacks]: #drawbacks
