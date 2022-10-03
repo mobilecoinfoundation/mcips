@@ -50,7 +50,7 @@ An example partial fill flow goes like this:
   * She creates a required output to herself for 500 MOB
   * She creates a fractional output to herself for 10,000 MEOWB
   * She creates a fractional change output to herself for 1000 MOB
-  * She sets the min_fill_value to .1 MOB, (but expresses this in picoMOB, the smallest representable units).
+  * She sets the `min_fill_value` to 0.1 MOB
 * Bob (the counterparty) sees this quote, and wants to trade 200 MEOWB for 20 MOB (+ transaction fee).
   * Bob adds this quote to the transaction builder, and indicates that he wants to fill 2% of the quote.
   * Bob adds an input worth at least 200 MEOWB + transaction fee.
