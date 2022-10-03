@@ -293,4 +293,4 @@ None at this time.
 [future-possibilities]: #future-possibilities
 
 In the future, if/when we replace SGX transaction validation entirely with zero-knowledge proofs, we should use that proving framework to also
-support zero knowledge partial fill validation.
+support zero-knowledge partial fill validation.
