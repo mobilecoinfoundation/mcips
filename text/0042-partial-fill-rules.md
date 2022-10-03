@@ -264,7 +264,7 @@ Historically, the rationale for this is as follows:
 
 (This is also the reasoning for all other RingCT-based cryptocurrencies.)
 
-However, once we start doing partial fills, now we have a situation where the counter-party has to create the masked value for the originator. If consensus does not in some way validate the masked value, then a griefing attack becomes possible:
+However, once we start doing partial fills, now we have a situation where the counterparty has to create the masked value for the originator. If consensus does not in some way validate the masked value, then a griefing attack becomes possible:
 
 * An originator makes a signed partial fill offer.
 * A counterparty fills the offer, but poisons the masked values going to the originator.
