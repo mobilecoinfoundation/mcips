@@ -11,7 +11,7 @@ Extend the set of supported "input rules", to allow that someone can produce a s
 # Motivation
 [motivation]: #motivation
 
-In [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0031) we proposed a way that two parties can swap assets -- the first one can make a signed offer to trade this for that using a "Signed Contingent Input", then anyone who agrees can add this to their transaction.
+In [MCIP #31](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0031-transactions-with-contingent-inputs.md) we proposed a way that two parties can swap assets -- the first one can make a signed offer to trade this for that using a "Signed Contingent Input", then anyone who agrees can add this to their transaction.
 
 The way it was proposed, the first party has to state the total amount of the first asset and
 the total amount of the second asset. But if the second party doesn't agree exactly, then they
