@@ -260,7 +260,7 @@ However, consensus does not validate in any way that the masked_value actually m
 
 Historically, the rationale for this is as follows:
 * In a simple transaction, if the sender intentionally sends an output to a recipient that has a bad masked_value, this is equivalent to sending money to into a hole. The recipient will not be able to recover the value, so they will not render services to the sender.
-* In MCIP #31 atomic swaps without partial fills, the originator is setting the masked_value for the required outputs which are going to them. If the counterparty changes the masked_value at all, the transaction is invalid. So the originator can only poison their own masked value, which only throws their own money into a hole.
+* In [MCIP #31](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0031-transactions-with-contingent-inputs.md) atomic swaps without partial fills, the originator is setting the masked value for the required outputs which are going to them. If the counterparty changes the masked value at all, the transaction is invalid. So the originator can only poison their own masked value, which only throws their own money into a hole.
 
 (This is also the reasoning for all other RingCT-based cryptocurrencies.)
 
