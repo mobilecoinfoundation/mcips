@@ -45,7 +45,7 @@ To satisfy partial fill rules, all partial fill outputs and the partial fill cha
 
 An example partial fill flow goes like this:
 * Alice (the originator) has an output for 1500 MOB. Alice would like to trade up to 1000 MOB for MEOWB at a price of 10 MEOWB/MOB.
-  Alice doesn't want the trade to happen unless the counterparty takes at least .1 MOB.
+  Alice doesn't want the trade to happen unless the counterparty takes at least 0.1 MOB.
 * Alice creates an SCI using her 1500 MOB input.
   * She creates a required output to herself for 500 MOB
   * She creates a fractional output to herself for 10,000 MEOWB
