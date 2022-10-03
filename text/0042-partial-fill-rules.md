@@ -21,7 +21,7 @@ One way to make this more practical is that, the first party could instead sign 
 
 **Note** however, that this is not conceptually an implementation of an "exchange" which accepts and then determines settlement of orders. It's more like a fancy quoting service, wherein one party can offer a signed quote which another party may act on or ignore.
 
-We want to extend the [MCIP #31](https://github.com/mobilecoinfoundation/mcips/pull/0042) functionality to support this.
+We want to extend the [MCIP #31](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0031-transactions-with-contingent-inputs.md) functionality to support this.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
