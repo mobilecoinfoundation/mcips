@@ -34,7 +34,7 @@ A partial fill specification includes:
 * A partial fill change output. This sends any left-over value from the signed input to the originator when the quote is partially filled.
 * A minimum fill value. This is configurable by the originator and allows them to prevent filling the quote for dust amounts, which can be a form of griefing.
 
-These partial fill rules are specified (and signed) the **originator** of an SCI, who is conceptually offering a price quote.
+These partial fill rules are specified (and signed) by the **originator** of an SCI, who is conceptually offering a price quote.
 
 When a Signed Contingent Input (SCI) containing partial fill rules is incorporated into a transaction by the **counterparty** to a swap, there is an implicit
 "partial fill fraction", which is the fraction of the maximum allowed volume that is actually transacted when the transation settles.
