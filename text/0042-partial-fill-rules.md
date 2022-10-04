@@ -64,7 +64,10 @@ as well as 200 MEOWB from Bob.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The reference level explanation splits into two parts -- the Amount shared secret, and the schema and validation of the new SCI fields.
+The reference level explanation splits into two parts:
+
+1. The [Amount shared secret](#Amount-shared-secret)
+2. The [Partial fill rules schema and semantics](#Partial-fill-rules-schema-and-semantics) of the new SCI fields
 
 Neither of these are legal before block version 3. The new SCI fields are legal in block version 3, and the alternate derivation for
 `TxOut` `MaskedAmount` must be used after block version 3.
