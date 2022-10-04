@@ -102,7 +102,7 @@ which permits unmasking the masked value and confirming against the Pedersen com
 can impact the memos or the confirmation numbers.
 
 **Note** that, this deviates from the model for "normal" transactions. For normal transactions, amounts are not revealed
-even to the enclave, because it is unnecessary, and we can use RingCT to validate transactions without revealing the amounts. However, for partial fill swap transactions, the use-case is that SCI's are broadcast
+even to the enclave, because it is unnecessary, and we can use RingCT to validate transactions without revealing the amounts. However, for partial fill swap transactions, the use case is that SCI's are broadcast
 to an exchange network -- the goal there is that both the originator and the counterparty are anonymous, but not that the amounts being offered to transact are secret. So when validating these swaps, keeping the amounts secret from the consensus enclave does not impact the threat model.
 
 For compatibility, we propose that the `TxOut` structure is evolved per MCIP #26, so that
