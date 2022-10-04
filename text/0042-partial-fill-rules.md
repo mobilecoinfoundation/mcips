@@ -17,7 +17,7 @@ The way it was proposed, the first party has to state the total amount of the fi
 the total amount of the second asset. But if the second party doesn't agree exactly, then they
 may not proceed, so there is a need to negotiate exactly the price and the volume.
 
-One way to make this more practical is that, the first party could instead sign that they are willing to trade at a particular price, up to a particular maximum volume. We call this a "partial fill", in analogy with partial-fill limit orders in traditional exchanges.
+One way to make this more practical is that, the first party could instead sign that they are willing to trade at a particular price, up to a particular maximum volume. We call this a "partial fill", in analogy with partial fill limit orders in traditional exchanges.
 
 **Note** however, that this is not conceptually an implementation of an "exchange" which accepts and then determines settlement of orders. It's more like a fancy quoting service, wherein one party can offer a signed quote which another party may act on or ignore.
 
