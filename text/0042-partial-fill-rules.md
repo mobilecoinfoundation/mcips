@@ -198,7 +198,7 @@ The consensus enclave must enforce any input rules, including these new partial 
 1. If `partial_fill_change` is present, then a corresponding TxOut called the `fractional_change_output` must exist in the `TxPrefix.outputs`.
    This must match the `partial_fill_change` in every field except possibly the `masked_amount`.
 1. The `fractional_change_output` must decrypt successfully using the `amount_shared_secret` of the `partial_fill_change`, and
-   it's amount must have the same token id as the `partial_fill_change`, and its value must be less or equal.
+   it's amount must have the same token id as the `partial_fill_change`, and its value must be less than or equal to the `partial_fill_change`
 1. The fill fraction is inferred at this point.
    * The numerator is `partial_fill_change.value - fractional_change_output.value`.
    * The denominator is `partial_fill_change.value`.
