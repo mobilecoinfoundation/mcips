@@ -182,7 +182,7 @@ TxIn: Option~InputRules~ input_rules
 InputRules: Vec~TxOut~ required_outputs
 InputRules: uint64 max_tombstone_block
 InputRules: Vec~RevealedTxOut~ partial_fill_outputs *new*
-InputRules: RevealedTxOut partial_fill_change *new*
+InputRules: Option~RevealedTxOut~ partial_fill_change *new*
 InputRules: uint64 min_partial_fill_value *new*
 
 RevealedTxOut: TxOut tx_out
