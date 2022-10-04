@@ -207,7 +207,7 @@ The consensus enclave must enforce any input rules, including these new partial 
    * The denominator is `partial_fill_change.value`.
 1. The minimum fill rule is enforced: `partial_fill_change.value - fractional_change_output.value >= min_partial_fill_value`.
    If this inequality does not hold, then the transaction is rejected for reasons of not meeting the minimum partial fill prescribed
-   by the origiantor.
+   by the originator.
 1. For each `partial_fill_output`:
    * It must decrypt succesfully using the recorded `amount_shared_secret`.
    * There must be a corresponding `fractional_output` among the `TxPrefix.outputs` which matches it in every field except possibly
