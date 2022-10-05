@@ -67,10 +67,10 @@ as well as 200 MEOWB from Bob.
 The reference level explanation splits into two parts:
 
 1. The [Amount shared secret](#Amount-shared-secret)
-2. The [Partial fill rules schema and semantics](#Partial-fill-rules-schema-and-semantics) of the new SCI fields
+2. The [Partial fill rules schema and semantics](#Partial-fill-rules-schema-and-semantics) of the new `InputRules` fields
 
-Neither of these are legal before block version 3. The new SCI fields are legal in block version 3, and the alternate derivation for
-`TxOut` `MaskedAmount` must be used after block version 3.
+Neither of these are legal prior to block version 3. The new SCI fields are legal in block version 3, and the alternate derivation for
+`TxOut::MaskedAmount` must be used in block version 3 and on.
 
 ## Amount shared secret
 
@@ -107,7 +107,7 @@ to an exchange network -- the goal there is that both the originator and the cou
 
 For compatibility, we propose that the `TxOut` structure is evolved per [MCIP #26](https://github.com/mobilecoinfoundation/mcips/blob/main/text/0026-block-version-based-protocol-evolution.md), so that
 client software can support both the old and new derivation schemes. The old scheme must always be used
-prior to block version 3, and the new scheme must always be used after block version 3.
+prior to block version 3, and the new scheme must always be used from block version 3 and on.
 
 Example rust code for computing the new derivations is as follows:
 
@@ -161,7 +161,7 @@ fn get_blinding_factors(amount_shared_secret: &[u8; 32]) -> (u64, u64, Scalar) {
 ```
 
 At the level of protobuf, the `TxOut.masked_amount` field is replaced with a `oneof`, selecting between V1 and V2.
-`MaskedAmountV1` uses the historical derivations and must be supported by all clients indefinitely, as outputs from block versions <=2 always use this derivation.
+`MaskedAmountV1` uses the historical derivations and must be supported by all clients indefinitely, as outputs prior to block version 3 always use this derivation.
 `MaskedAmountV2` uses the new derivation and is mandatory for all `TxOut`'s from block version 3 and on.
 
 ## Partial fill rules schema and semantics
@@ -198,14 +198,14 @@ The consensus enclave must enforce any input rules, including these new partial 
 1. If `partial_fill_change` is not present, then no other partial fill rules may be used, and any other partial fill fields must be defaulted.
 1. If `partial_fill_change` is present, then decrypting the amount and token id using `amount_shared_secret` must succeed. The partial fill change
    may not have a 0 value (to help clients avoid division by zero).
-1. If `partial_fill_change` is present, then a corresponding TxOut called the `fractional_change_output` must exist in the `TxPrefix.outputs`.
+1. If `partial_fill_change` is present, then a corresponding `TxOut` called the `fractional_change_output` must exist in the `TxPrefix.outputs`.
    This must match the `partial_fill_change` in every field except possibly the `masked_amount`.
 1. The `fractional_change_output` must decrypt successfully using the `amount_shared_secret` of the `partial_fill_change`, and
    it's amount must have the same token id as the `partial_fill_change`, and its value must be less than or equal to the `partial_fill_change`
 1. The fill fraction is inferred at this point.
    * The numerator is `partial_fill_change.value - fractional_change_output.value`.
    * The denominator is `partial_fill_change.value`.
-1. The minimum fill rule is enforced: `partial_fill_change.value - fractional_change_output.value >= min_partial_fill_value`.
+1. The minimum fill rule is enforced: `min_partial_fill_value <= partial_fill_change.value - fractional_change_output.value`.
    If this inequality does not hold, then the transaction is rejected for reasons of not meeting the minimum partial fill prescribed
    by the originator.
 1. For each `partial_fill_output`:
@@ -214,12 +214,24 @@ The consensus enclave must enforce any input rules, including these new partial 
      the `masked_amount`.
    * The fractional output must decrypt successfully using the `partial_fill_output`'s `amount_shared_secret`, and must match the
      token id of the `partial_fill_output`.
-   * It must be the case that `fractional_output.value >= n/d * partial_fill_output.value` where `n` and `d` are the fill fraction
-     numerator and denominator. This equation must be validated by clearing denominators and checking an inequality of `u128`'s, to
+   * It must be the case that:
+   
+     ```
+     n/d * partial_fill_output.value <= fractional_output.value`
+     ```
+     
+     where `n/d` is the fill fraction.
+     
+     Note that ideally this could always hold with equality, but due to issues of numerical precision it may not be possible.
+     The constraint is therefore `<=`, which is in favor of the originator, and the counterparty is expected to set the
+     `fractional_output.value` as close to the inequality as possible. (The counterparty could choose to give extra, which is
+     in the favor of the originator.)
+     
+     This inequality must be validated by clearing denominators and checking an inequality of `u128`'s, to
      avoid numerical issues.
      
      ```
-     fractional_output.value * fill_fraction_denominator >= fill_fraction_numerator * partial_fill_output.value
+     fill_fraction_numerator * partial_fill_output.value <= fractional_output.value * fill_fraction_denominator
      ```
      
      If this inequality does not hold, then the transaction must be rejected for reasons of not respecting the fill fraction.
