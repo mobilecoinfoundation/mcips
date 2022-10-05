@@ -264,7 +264,7 @@ All recipients determine the value of their TxOut's by the following process:
 
 Thus value recovery relies on the masked value and the amount commitment actually encoding the same numbers. If this is not the case, then value recovery fails, even if the TxOut is truly owned by the recipient.
 
-However, consensus does not validate in any way that the masked_value actually matches the amount commitment. It only validates the correctness of the commitments.
+However, consensus does not validate in any way that the masked value actually matches the amount commitment. It only validates the correctness of the commitments.
 
 Historically, the rationale for this is as follows:
 * In a simple transaction, if the sender intentionally sends an output to a recipient that has a bad masked_value, this is equivalent to sending money to into a hole. The recipient will not be able to recover the value, so they will not render services to the sender.
