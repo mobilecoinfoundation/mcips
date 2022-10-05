@@ -1,4 +1,4 @@
-- Block version features
+- Registry: Block version features
 
 # Summary
 [summary]: #summary
