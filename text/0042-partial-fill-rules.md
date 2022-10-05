@@ -249,7 +249,12 @@ An alternative design which we explored first attempted to use homomorphic prope
   This could similarly be verified without revealing commitments by clearing denominators and converting to the form `X >= 0`, then using
   range proofs to verify the equation.
 
-The problem with this design is that, in MobileCoin, as with all RingCT-based cryptocurrencies, the amount of a TxOut actually appears in two places -- a Pedersen commitment, and a masked_value. The masked_value is a more conventional, symmetric-key encryption of the TxOut value, while the Pedersen commitment is an elliptic curve point which commits to the value, but cannot itself be directly "decrypted" efficiently by someone who doesn't already know the value.
+The problem with this design is that, in MobileCoin, as with all RingCT-based cryptocurrencies, the amount of a TxOut actually appears in two places:
+
+1. A Pedersen commitment
+2. A masked value
+
+The masked value is a more conventional, symmetric-key encryption of the TxOut value, while the Pedersen commitment is an elliptic curve point which commits to the value, but cannot itself be directly decrypted efficiently by someone who doesn't already know the value.
 
 All recipients determine the value of their TxOut's by the following process:
 * Derive the TxOut shared secret
