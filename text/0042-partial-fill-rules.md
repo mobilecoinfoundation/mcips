@@ -262,7 +262,7 @@ All recipients determine the value of their TxOut's by the following process:
 * Unmask the masked value and token id, obtaining a u64 value and a token id. These may or may not be the correct value of the Pedersen commitment.
 * Reconstruct the Pedersen commitment using these conjectured values and the amount commitment blinding factor. If this matches the commitment, then value recovery was successful.
 
-Thus value recovery relies on the masked_value and the amount commitment actually encoding the same numbers. If this is not the case, then value recovery fails, even if the TxOut is truly owned by the recipient.
+Thus value recovery relies on the masked value and the amount commitment actually encoding the same numbers. If this is not the case, then value recovery fails, even if the TxOut is truly owned by the recipient.
 
 However, consensus does not validate in any way that the masked_value actually matches the amount commitment. It only validates the correctness of the commitments.
 
