@@ -258,7 +258,7 @@ The masked value is a more conventional, symmetric-key encryption of the TxOut v
 
 All recipients determine the value of their TxOut's by the following process:
 * Derive the TxOut shared secret
-* Use the TxOut shared secret to derive the value mask, token id mask, and the amount commitment blinding factor. This computation never fails with an error, but produces "conjectures" which are expected to be correct if the Recipient owns this TxOut.
+* Use the TxOut shared secret to derive the value mask, token id mask, and the amount commitment blinding factor. This computation never fails with an error, but produces conjectures which are expected to be correct if the recipient owns this TxOut.
 * Unmask the masked value and token id, obtaining a u64 value and a token id. These may or may not be the correct value of the Pedersen commitment.
 * Reconstruct the Pedersen commitment using these conjectured values and the amount commitment blinding factor. If this matches the commitment, then value recovery was successful.
 
