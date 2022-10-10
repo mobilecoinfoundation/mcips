@@ -1,6 +1,6 @@
 - Feature Name: tx_summary_digest
 - Start Date: 2022-10-08
-- MCIP PR: [mobilecoinfoundation/mcips#0050](https://github.com/mobilecoinfoundation/mcips/pull/0050)
+- MCIP PR: [mobilecoinfoundation/mcips#0052](https://github.com/mobilecoinfoundation/mcips/pull/0052)
 - Tracking Issue: [mobilecoinfoundation/mobilecoin#2686](https://github.com/mobilecoinfoundation/mobilecoin/issues/2686)
 
 # Summary
