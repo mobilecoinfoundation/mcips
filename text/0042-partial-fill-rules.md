@@ -30,7 +30,7 @@ An input rules object may now optionally contain a "partial fill rules" specific
 
 A partial fill specification includes:
 
-* A list of TxOut's that may be partially filled. Each tx out here is called a "partial fill output".
+* A list of TxOut's that may be partially filled. Each TxOut here is called a "partial fill output".
 * A partial fill change output. This sends any left-over value from the signed input to the originator when the quote is partially filled.
 * A minimum fill value. This is configurable by the originator and allows them to prevent filling the quote for dust amounts, which can be a form of griefing.
 
