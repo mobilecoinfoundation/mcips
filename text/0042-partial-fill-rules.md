@@ -46,16 +46,19 @@ To satisfy partial fill rules, all partial fill outputs and the partial fill cha
 An example partial fill flow goes like this:
 * Alice (the originator) has an output for 1500 MOB. Alice would like to trade up to 1000 MOB for MEOWB at a price of 10 MEOWB/MOB.
   Alice doesn't want the trade to happen unless the counterparty takes at least 0.1 MOB.
-* Alice creates an SCI using her 1500 MOB input.
+* Alice creates an SCI using her 1500 MOB input, with the following input rules:
   * She creates a required output to herself for 500 MOB
-  * She creates a fractional output to herself for 10,000 MEOWB
-  * She creates a fractional change output to herself for 1000 MOB
-  * She sets the `min_fill_value` to 0.1 MOB
+  * She creates a partial fill output to herself for 10,000 MEOWB
+  * She creates a partial fill change output to herself for 1000 MOB
+  * She sets the `min_partial_fill_value` to 0.1 MOB
 * Bob (the counterparty) sees this quote, and wants to trade 200 MEOWB for 20 MOB (+ transaction fee).
   * Bob adds this quote to the transaction builder, and indicates that he wants to fill 2% of the quote.
+    * The transaction builder, under the hood, adds the required output for 500 MOB, and two further
+      outputs for Alice corresponding to the fractional output and fractional change outputs, based on
+      what it sees in the input rules and the indication that he wants to fill 2%.
   * Bob adds an input worth at least 200 MEOWB + transaction fee.
   * Bob adds a change output with any MEOWB change to himself.
-  * Bob assigns a 20 MOB output to himself.
+  * Bob assigns a 20 MOB output to himself (funded by the SCI).
 
 When the transaction settles, Bob has paid net 200 MEOWB + transaction fee, and received net of 20 MOB.
 Alice has paid a 1500 MOB output, and received the 500 MOB required output, and a 980 MOB fractional output,
