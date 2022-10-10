@@ -8,7 +8,8 @@
 
 Introduce an object called `TxSummary` which is significantly smaller than a `Tx`,
 but which with small additional data can be used to verify the values of inputs
-and outputs, and the destinations of the outputs, in a given `Tx`.
+and outputs, and the destinations of the outputs, when a device is asked to sign
+a `RingMLSAG` for a new transaction.
 
 Where previously the `extended_message_digest` is signed by Ring MLSAGs
 in a transaction, now a new digest formed using that digest and the `TxSummary` will
@@ -138,22 +139,28 @@ TxSummaryUnblindingData: uint32 block_version
 TxSummaryUnblindingData: Vec~UnmaskedAmount~ inputs
 TxSummaryUnblindingData: Vec~TxOutUnblindingData~ outputs
 TxOutUnblindingData: UnmaskedAmount amount
-TxOutUnblindingData: Option<PublicAddress> address
+TxOutUnblindingData: Option~PublicAddress~ address
 ```
+
+Strictly speaking, the `TxSummaryUnblindingData` is not part of the MobileCoin network's protocol rules,
+it's rather a detail of the hardware wallets, and they might choose not to use this schema and do their
+own thing. However, it is useful as a proof of concept, to validate that the `TxSummary` design does
+actually achieve the goals we set out. This at least provides a starting point for hardware wallet projects.
 
 # Drawbacks
 [drawbacks]: #drawbacks
 
 The main reason not to do this is that it somewhat increases the complexity of transaction validation.
+It introduces more types and more schemas, and they have only niche use-cases.
 
 It is also inelegant in that we hash a bunch of information into the extended message (by hashing the `TxPrefix`),
-and then we hash it again via the `TxSummary`, because the `TxSummary` contains some of this information duplicated.
+and then we hash it again via the `TxSummary`. The `TxSummary` contains much of the same information as the `TxPrefix`.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
 Although doing this increases the complexity of transaction validation, not doing it considerably increases
-the complexity of hardware wallet implementation and could delay the ship date of hardware wallet support.
+the complexity of hardware wallet implementation and could delay the ship date of practical hardware wallet support.
 
 Although it is inelegant to hash a bunch of stuff a second time, in practical terms, the cost of doing this is very low.
 
@@ -178,14 +185,8 @@ is actually shipped.
 It may be that hardware wallets will initially cut scope and not seek to support that feature. Then, they could cut the `InputRules`
 from the `TxInSummary` and they could assume that `address` is mandatory in `TxOutSummary::address`.
 
-They might also seek to compress or remove redundancy in some of these structures. Strictly speaking, the `TxSummaryUnblindingData`
-has no connection to MobileCoin protocol rules, it's rather a detail of the hardware wallets, so it is not necessary to create an
-MCIP for this.
-
 We view it as the prerogative of hardware wallets to define their own wire format as they see fit and carry out whatever compression / improvements they
-think are appropriate. It seems worthwhile to define a "proof of concept" `TxSummaryUnblindingData` object and show how it can be validated
-against a `TxSummary` to provide at least a baseline or starting point for such projects, since if there is actually a defect in the
-design that prevents `TxSummary` from being unblinded effectively, it would defeat the purpose of this improvement proposal.
+think are appropriate. The `TxSummaryUnblindingData` schema is only meant as a proof of concept and a starting point for such projects.
 
 # Prior art
 [prior-art]: #prior-art
