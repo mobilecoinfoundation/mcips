@@ -91,7 +91,8 @@ A[TxPrefix] -->|merlin| B[message]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
-M[concatenation] --> N[extended message (many bytes)]
+M[concatenation] --> N
+N[extended message (many bytes)]
 ```
 
 In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinfoundation/mcips/pull/25)) so that the Ring MLSAG's sign the
@@ -103,7 +104,8 @@ A[TxPrefix] -->|merlin| B[message]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
-M[merlin] --> N[extended message digest (32 bytes)]
+M[merlin] --> N
+N[extended message digest (32 bytes)]
 ```
 
 In the current proposal, we propose that in block version 3 they should sign the following digest:
@@ -114,8 +116,8 @@ A[TxPrefix] -->|merlin| B[message]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
-M[merlin] --> N[extended message digest (32 bytes)]
-N --> P
+M[merlin] --> N
+N[extended message digest (32 bytes)] --> P
 O[TxSummary] --> P
 P[merlin] --> Q[extended message and tx summary digest (32 bytes)]
 ```
