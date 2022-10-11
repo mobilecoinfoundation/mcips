@@ -165,10 +165,15 @@ A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte
 and the `TxSummary`.
 
 **Security**:
-From a security point of view, it can know that it is intractable
-for someone to find a different `TxSummary` that produces the same `extended_message_and_tx_summary`
-domain tag. The hardware wallet also knows how the validators will compute the `extended_message_and_tx_summary`
+From a security point of view, the hardware wallet can know that it is intractable
+for someone to find a different `TxSummary` that produces the same `extended_message_and_tx_summary` digest,
+so if it signs the MLSAG, this is the only thing that it can be committing to.
+The hardware wallet also knows how the validators will compute the `extended_message_and_tx_summary` digest
 based on the `Tx`, and knows that it is infeasible for anyone to find another `Tx` that has the same digest here.
+So, an attacker (on the computer) could give the device an improperly formed `TxSummary` and lie to the device
+this way, but the attacker will not be able to get consensus to accept those signatures. The device therefore
+knows that the either the `TxSummary` is accurate, or it's signature doesn't matter because the `Tx` will not
+be accepted.
 
 A hardware wallet can also expect to be supplied with the `TxSummaryUnblindingData` which allows it to see
 as much information as possible about where funds are coming from and where they are going in the `Tx`.
