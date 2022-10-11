@@ -56,7 +56,7 @@ There is exactly one possible `TxSummary` for a given `Tx`.
 The `TxSummary` contains:
 * The list of outputs (omitting "extra" parts like encrypted fog hint and encrypted memo).
 * The list of pseudo_output_commitments (commitments to the values of the true inputs)
-  * Any input rules associated to these inputs (if they are [MCIP 42](https://github.com/mobilecoinfoundation/mcips/pull/42) signed contingent inputs)
+  * Any input rules associated to these inputs (if they are [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) signed contingent inputs)
 * The fee and fee token id
 * The tombstone block
 
@@ -83,6 +83,43 @@ inputs and outputs in the `TxSummary` and to verify the destination of each outp
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
+In block version 0, the Ring MLSAG's sign the "extended message" computed roughly as follows:
+
+```mermaid
+graph TB
+A[TxPrefix] -->|merlin| B[message]
+B --> M
+C[pseudo_output_commitments] --> M
+D[range_proofs] --> M
+M[concatenation] --> N[extended message (many bytes)]
+```
+
+In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinfoundation/mcips/pull/25)) so that the Ring MLSAG's sign the
+"extended message digest" which is computed roughly as follows:
+
+```mermaid
+graph TB
+A[TxPrefix] -->|merlin| B[message]
+B --> M
+C[pseudo_output_commitments] --> M
+D[range_proofs] --> M
+M[merlin] --> N[extended message digest (32 bytes)]
+```
+
+In the current proposal, we propose that in block version 3 they should sign the following digest:
+
+```mermaid
+graph TB
+A[TxPrefix] -->|merlin| B[message]
+B --> M
+C[pseudo_output_commitments] --> M
+D[range_proofs] --> M
+M[merlin] --> N[extended message digest (32 bytes)]
+N --> P
+O[TxSummary] --> P
+P[merlin] --> Q[extended message and tx summary digest (32 bytes)]
+```
+
 The `TxSummary` is a new object with the following schema, which is constructed
 before signing a `Tx`.
 
@@ -105,7 +142,7 @@ TxInSummary: CompressedCommitment pseudo_output_commitment
 TxInSummary: Option~InputRules~ input_rules
 ```
 
-In block version 2, MLSAG's (other than the MCIP 42 Signed Contingent Inputs) sign
+In block version 2, MLSAG's (other than the [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs) sign
 the `extended_message_digest`. We propose that they should now sign the `extended_message_and_tx_summary_digest`,
 which is defined as follows, using the `mc-crypto-digestible` scheme with a Merlin transcript:
 
@@ -178,15 +215,15 @@ compute a proper merlin digest of the entire `Tx` object, which would also make 
 
 ## SCI support, definition of `TxSummaryUnblindingData`.
 
-We have tried to future-proof this design against [MCIP 42](https://github.com/mobilecoinfoundation/mcips/pull/42) Signed Contingent Inputs being present in the `Tx`.
+We have tried to future-proof this design against [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs being present in the `Tx`.
 However, these cannot even be used until block version 3, and may not be in common use at the time that hardware wallet support
 is actually shipped.
 
 It may be that hardware wallets will initially cut scope and not seek to support that feature. Then, they could cut the `InputRules`
-from the `TxInSummary` and they could assume that `address` is mandatory in `TxOutSummary::address`.
+from the `TxInSummary`, (or rather, return an error if they are present) and they could assume that `address` is mandatory in `TxOutSummary::address`.
 
 We view it as the prerogative of hardware wallets to define their own wire format as they see fit and carry out whatever compression / improvements they
-think are appropriate. The `TxSummaryUnblindingData` schema is only meant as a proof of concept and a starting point for such projects.
+think are appropriate. The `TxSummaryUnblindingData` schema is only meant as a proof of concept.
 
 # Prior art
 [prior-art]: #prior-art
