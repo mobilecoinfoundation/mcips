@@ -29,6 +29,7 @@ The `MintTxPrefix` schema is extended with a new optional field:
 ```mermaid
 classDiagram
 direction BT
+class MintTxPrefix
 MintTxPrefix: uint64 token_id
 MintTxPrefix: uint64 amount
 MintTxPrefix: RistrettoPublic view_public_key
