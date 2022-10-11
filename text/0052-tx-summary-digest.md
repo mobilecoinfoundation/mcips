@@ -92,7 +92,7 @@ B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
 M[concatenation] --> N
-N[extended message (many bytes)]
+N[[extended message (many bytes)]]
 ```
 
 In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinfoundation/mcips/pull/25)) so that the Ring MLSAG's sign the
@@ -105,7 +105,7 @@ B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
 M[merlin] --> N
-N[extended message digest (32 bytes)]
+N[[extended message digest (32 bytes)]]
 ```
 
 In the current proposal, we propose that in block version 3 they should sign the following digest:
@@ -117,9 +117,10 @@ B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
 M[merlin] --> N
-N[extended message digest (32 bytes)] --> P
+N[[extended message digest (32 bytes)]] --> P
 O[TxSummary] --> P
-P[merlin] --> Q[extended message and tx summary digest (32 bytes)]
+P[merlin] --> Q
+Q[[extended message and tx summary digest (32 bytes)]]
 ```
 
 The `TxSummary` is a new object with the following schema, which is constructed
