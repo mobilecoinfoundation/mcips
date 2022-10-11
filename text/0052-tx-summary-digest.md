@@ -87,12 +87,12 @@ In block version 0, the Ring MLSAG's sign the "extended message" computed roughl
 
 ```mermaid
 graph TB
-A[TxPrefix] -->|merlin| B[message]
+A[TxPrefix] -->|merlin| B[[message -32 bytes-]]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
 M[concatenation] --> N
-N[[extended_message -many bytes-]]
+N[extended_message -many bytes-]
 ```
 
 In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinfoundation/mcips/pull/25)) so that the Ring MLSAG's sign the
@@ -100,7 +100,7 @@ In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinf
 
 ```mermaid
 graph TB
-A[TxPrefix] -->|merlin| B[message]
+A[TxPrefix] -->|merlin| B[[message -32 bytes-]]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
@@ -114,7 +114,7 @@ which is computed roughly as follows:
 
 ```mermaid
 graph TB
-A[TxPrefix] -->|merlin| B[message]
+A[TxPrefix] -->|merlin| B[[message -32 bytes-]]
 B --> M
 C[pseudo_output_commitments] --> M
 D[range_proofs] --> M
