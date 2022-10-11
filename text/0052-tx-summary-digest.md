@@ -108,7 +108,9 @@ M[merlin] --> N
 N[[extended_message_digest -32 bytes-]]
 ```
 
-In the current proposal, we propose that in block version 3 they should sign the following digest:
+We propose that in block version 3, Ring MLSAGs (other than the [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs)
+should now sign the `extended_message_and_tx_summary_digest`,
+which is computed roughly as follows:
 
 ```mermaid
 graph TB
@@ -123,8 +125,22 @@ P[merlin] --> Q
 Q[[extended_message_and_tx_summary_digest -32 bytes-]]
 ```
 
-The `TxSummary` is a new object with the following schema, which is constructed
-before signing a `Tx`.
+Example code computing this new digest in a concrete way using the `mc-crypto-digestible` crate:
+
+```rust
+let mut transcript =
+    MerlinTranscript::new(EXTENDED_MESSAGE_AND_TX_SUMMARY_DOMAIN_TAG.as_bytes());
+extended_message.append_to_transcript(b"extended_message", &mut transcript);
+tx_summary.append_to_transcript(b"tx_summary", &mut transcript);
+
+let mut extended_message_and_tx_summary_digest = [0u8; 32];
+transcript.extract_digest(&mut extended_message_and_tx_summary_digest);
+```
+
+This digest is computable given only the 32 byte `extended_message_digest`, and the
+`TxSummary`, which are together much smaller than an entire `Tx`.
+
+The `TxSummary` is a new object with the following schema.
 
 ```mermaid
 classDiagram
@@ -145,25 +161,11 @@ TxInSummary: CompressedCommitment pseudo_output_commitment
 TxInSummary: Option~InputRules~ input_rules
 ```
 
-In block version 2, MLSAG's (other than the [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs) sign
-the `extended_message_digest`. We propose that they should now sign the `extended_message_and_tx_summary_digest`,
-which is defined as follows, using the `mc-crypto-digestible` scheme with a Merlin transcript:
-
-```rust
-let mut transcript =
-    MerlinTranscript::new(EXTENDED_MESSAGE_AND_TX_SUMMARY_DOMAIN_TAG.as_bytes());
-extended_message.append_to_transcript(b"extended_message", &mut transcript);
-tx_summary.append_to_transcript(b"tx_summary", &mut transcript);
-
-let mut extended_message_and_tx_summary_digest = [0u8; 32];
-transcript.extract_digest(&mut extended_message_and_tx_summary_digest);
-```
-
-This digest is computable given only the 32 byte extended message digest, and the
-`TxSummary`, which are together much smaller than an entire `Tx`.
-
 A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte digest
-and the `TxSummary`. From a security point of view, it can know that it is intractable
+and the `TxSummary`.
+
+**Security**:
+From a security point of view, it can know that it is intractable
 for someone to find a different `TxSummary` that produces the same `extended_message_and_tx_summary`
 domain tag. The hardware wallet also knows how the validators will compute the `extended_message_and_tx_summary`
 based on the `Tx`, and knows that it is infeasible for anyone to find another `Tx` that has the same digest here.
@@ -185,7 +187,8 @@ TxOutUnblindingData: Option~PublicAddress~ address
 Strictly speaking, the `TxSummaryUnblindingData` is not part of the MobileCoin network's protocol rules,
 it's rather a detail of the hardware wallets, and they might choose not to use this schema and do their
 own thing. However, it is useful as a proof of concept, to validate that the `TxSummary` design does
-actually achieve the goals we set out. This at least provides a starting point for hardware wallet projects.
+actually achieve the goals we set out. This at least provides a starting point for hardware wallet projects
+that does not involve sending the entire `Tx`.
 
 # Drawbacks
 [drawbacks]: #drawbacks
