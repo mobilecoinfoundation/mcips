@@ -95,7 +95,7 @@ After:
 graph TB
     A[TxOut SharedSecret] -->|hkdf sha512| B[MemoKey]
     A -->|blake2b| C[Confirmation Number]
-    A -->|sha512| D[Amount Shared Secret *new*]
+    A -->|blake2b| D[Amount Shared Secret *new*]
     D -->|hkdf sha512| E[Amount Blinding Factor v2]
     D -->|hkdf sha512| F[Value mask v2]
 ```
@@ -115,17 +115,31 @@ prior to block version 3, and the new scheme must always be used from block vers
 Example rust code for computing the new derivations is as follows:
 
 ```rust
+/// Domain separator for Amount's shared-secret hash function.
+pub const AMOUNT_SHARED_SECRET_DOMAIN_TAG: &str = "mc_amount_shared_secret";
+
 /// Computes the amount shared secret from the tx_out shared secret
 fn get_amount_shared_secret(tx_out_shared_secret: &RistrettoPublic) -> [u8; 32] {
-    let mut hasher = Sha512::new();
+    let mut hasher = Blake2b512::new();
     hasher.update(&AMOUNT_SHARED_SECRET_DOMAIN_TAG);
     hasher.update(&tx_out_shared_secret.to_bytes());
-    // Safety: Sha512 is a 512-bit (64-byte) hash.
     hasher.finalize()[0..32].try_into().unwrap()
 }
 ```
 
 ```rust
+/// Domain separator for Amount's blinding factors hkdf SALT
+pub const AMOUNT_BLINDING_FACTORS_DOMAIN_TAG: &[u8] = b"mc_amount_blinding_factors";
+
+/// Domain separator for Amount's value mask hash function.
+pub const AMOUNT_VALUE_DOMAIN_TAG: &str = "mc_amount_value";
+
+/// Domain separator for Amount's token_id mask hash function.
+pub const AMOUNT_TOKEN_ID_DOMAIN_TAG: &str = "mc_amount_token_id";
+
+/// Domain separator for Amount's blinding mask hash function.
+pub const AMOUNT_BLINDING_DOMAIN_TAG: &str = "mc_amount_blinding";
+
 /// Computes the value mask, token id mask, and blinding factor for the
 /// commitment, in a masked amount.
 ///
