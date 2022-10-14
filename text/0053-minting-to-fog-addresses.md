@@ -1,7 +1,7 @@
 - Feature Name: minting_to_fog_addresses
 - Start Date: 2022-10-9
 - MCIP PR: [mobilecoinfoundation/mcips#0053](https://github.com/mobilecoinfoundation/mcips/pull/0053)
-- Tracking Issue: None yet
+- Tracking Issue: [mobilecoinfoundation/mobilecoin#2688](https://github.com/mobilecoinfoundation/mobilecoin/issues/2688)
 
 # Summary
 [summary]: #summary
