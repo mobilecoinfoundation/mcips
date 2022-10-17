@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-Introduce an object called `TxSummary` which is significantly smaller than a `Tx`,
+Introduce a `TxSummary` that is significantly smaller than a `Tx`,
 but which with small additional data can be used to verify the values of inputs
 and outputs, and the destinations of the outputs, when a device is asked to sign
 a `RingMLSAG` for a new transaction.
@@ -28,10 +28,10 @@ the entire `Tx` on the device so that it can verify the `extended_message_digest
 because the `extended_message_digest` is the only thing that connects the `MLSAG`
 that the device is signing to the rest of the `Tx`.
 
-This increases the amount of data that has to be sent to the device from a few kb
-to `> 100kb` in the worst case. This is because Merkle proofs are each e.g. 40 bytes
-per merkle element and with a height of 20-30, so they may end up being 1 KB each.
-Then, there is a merkle proof for each `TxIn` (at most 16) and each mixin (11 per `TxIn`).
+This increases the amount of data that has to be sent to the device from a few KiB
+to over 100KiB in the worst case. This is because Merkle proofs are around 40 bytes
+per merkle element. With a height of 20-30 they may end up being 1 KB each.
+Then, there is a Merkle proof for each `TxIn` (at most 16) and each mixin (11 per `TxIn`).
 
 Having to transfer this much data to a tiny device will slow down the user experience
 noticeably, and will greatly increase the complexity of implementation, because the device
@@ -41,7 +41,7 @@ to compute the hash.
 On the other hand, if the digest that the Ring MLSAGs sign is changed as proposed, then
 we only need to send 32 bytes followed by the `TxSummary` to prove to the device where
 the digest that the MLSAG's are signing comes from, and so what the outcome of the `Tx` is.
-So we can avoid sending all merkle proofs, bulletproofs, encrypted fog hints, memos, etc.
+So we can avoid sending all Merkle proofs, bulletproofs, encrypted fog hints, memos, etc.
 and reduce the traffic with the device by perhaps a factor of 10 or so in the worst case,
 as well as reducing the implementation complexity.
 
@@ -55,8 +55,8 @@ There is exactly one possible `TxSummary` for a given `Tx`.
 
 The `TxSummary` contains:
 * The list of outputs (omitting "extra" parts like encrypted fog hint and encrypted memo).
-* The list of pseudo_output_commitments (commitments to the values of the true inputs)
-  * Any input rules associated to these inputs (if they are [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) signed contingent inputs)
+* The list of `pseudo_output_commitments` (commitments to the values of the true inputs)
+  * Any input rules associated to these inputs (if they are [MCIP 31](0031-transactions-with-contingent-inputs.md) signed contingent inputs)
 * The fee and fee token id
 * The tombstone block
 
@@ -70,7 +70,7 @@ When a hardware wallet is asked to sign an MLSAG, we can give it now the `extend
 and the `TxSummary`, and it can compute the appropriate digest from this for the MLSAG to sign.
 
 Additionally, we can provide it the `TxSummaryUnblindingData`, which inclues:
-* For each pseudo-output-commitment, the amount (value and token id), and blinding factor.
+* For each `pseudo_output_commitment`, the amount (value and token id), and blinding factor.
 * For each output, the target public address, the amount, and the `tx_private_key`, unless
   it is part of an SCI. In that case we can unblind it using the amount shared secret in the
   SCI input rules to find it's value, and we can't know
@@ -172,7 +172,7 @@ The hardware wallet also knows how the validators will compute the `extended_mes
 based on the `Tx`, and knows that it is infeasible for anyone to find another `Tx` that has the same digest here.
 So, an attacker (on the computer) could give the device an improperly formed `TxSummary` and lie to the device
 this way, but the attacker will not be able to get consensus to accept those signatures. The device therefore
-knows that the either the `TxSummary` is accurate, or it's signature doesn't matter because the `Tx` will not
+knows that either the `TxSummary` is accurate, or it's signature doesn't matter because the `Tx` will not
 be accepted.
 
 A hardware wallet can also expect to be supplied with the `TxSummaryUnblindingData` which allows it to see
@@ -224,7 +224,7 @@ Instead, we view this current proposal as the simplest and most straightforward 
 hardware wallets and help them to avoid complexities around streaming too much data and having to create a state machine to
 compute a proper merlin digest of the entire `Tx` object, which would also make the user experience significantly slower.
 
-## SCI support, definition of `TxSummaryUnblindingData`.
+## SCI support, definition of `TxSummaryUnblindingData`
 
 We have tried to future-proof this design against [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs being present in the `Tx`.
 However, these cannot even be used until block version 3, and may not be in common use at the time that hardware wallet support
