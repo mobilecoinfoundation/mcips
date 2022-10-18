@@ -35,8 +35,8 @@ Then, there is a Merkle proof for each `TxIn` (at most 16) and each mixin (11 pe
 
 Having to transfer this much data to a tiny device will slow down the user experience
 noticeably, and will greatly increase the complexity of implementation, because the device
-has much less memory than this and would have to use some kind of "windowing" strategy
-to compute the hash.
+has much less memory than this and would have to incrementally stream chunks of data
+to the hardware device to compute the hash.
 
 On the other hand, if the digest that the Ring MLSAGs sign is changed as proposed, then
 we only need to send 32 bytes followed by the `TxSummary` to prove to the device where
