@@ -346,7 +346,7 @@ compute a proper merlin digest of the entire `Tx` object, which would also make 
 
 ## SCI support, definition of `TxSummaryUnblindingData`
 
-We have tried to future-proof this design against [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs being present in the `Tx`.
+We have tried to future-proof this design against [MCIP 31](0031-transactions-with-contingent-inputs.md) Signed Contingent Inputs being present in the `Tx`.
 However, these cannot even be used until block version 3, and may not be in common use at the time that hardware wallet support
 is actually shipped.
 
