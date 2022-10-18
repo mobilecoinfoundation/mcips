@@ -213,7 +213,7 @@ M[concatenation] --> N
 N[extended_message -many bytes-]
 ```
 
-In block version 2, we changed this (in [MCIP 25](https://github.com/mobilecoinfoundation/mcips/pull/25)) so that the Ring MLSAG's sign the
+In block version 2, we changed this (in [MCIP 25](0025-confidential-token-ids.md)) so that the Ring MLSAG's sign the
 "extended message digest" which is computed roughly as follows:
 
 ```mermaid
