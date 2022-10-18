@@ -226,7 +226,7 @@ M[merlin] --> N
 N[[extended_message_digest -32 bytes-]]
 ```
 
-We propose that in block version 3, Ring MLSAGs (other than the [MCIP 31](https://github.com/mobilecoinfoundation/mcips/pull/31) Signed Contingent Inputs)
+We propose that in block version 3, Ring MLSAGs (other than the [MCIP 31](0031-transactions-with-contingent-inputs.md) Signed Contingent Inputs)
 should now sign the `extended_message_and_tx_summary_digest`,
 which is computed roughly as follows:
 
