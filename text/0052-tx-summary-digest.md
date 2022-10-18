@@ -39,8 +39,8 @@ has much less memory than this and would have to incrementally stream chunks of 
 to the hardware device to compute the hash.
 
 On the other hand, if the digest that the Ring MLSAGs sign is changed as proposed, then
-we only need to send 32 bytes followed by the `TxSummary` to prove to the device where
-the digest that the MLSAG's are signing comes from, and so what the outcome of the `Tx` is.
+we only need to send 32 bytes followed by the `TxSummary`. This will be enough to prove 
+to the device what the outcome of the `Tx` is.
 So we can avoid sending all Merkle proofs, bulletproofs, encrypted fog hints, memos, etc.
 and reduce the traffic with the device by perhaps a factor of 10 or so in the worst case,
 as well as reducing the implementation complexity.
