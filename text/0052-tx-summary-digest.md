@@ -164,7 +164,8 @@ TxInSummary: Option~InputRules~ input_rules
 A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte digest
 and the `TxSummary`.
 
-**Security**:
+# Security
+[security]: #security
 From a security point of view, the hardware wallet can know that it is intractable
 for someone to find a different `TxSummary` that produces the same `extended_message_and_tx_summary` digest,
 so if it signs the MLSAG, this is the only thing that it can be committing to.
