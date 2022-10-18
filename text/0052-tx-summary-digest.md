@@ -48,17 +48,37 @@ as well as reducing the implementation complexity.
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-A `TxSummary` is an object much like the `TxPrefix`, but where instead of the `TxIn`
-objects, the corresponding `pseudo_output_commitments` are stored.
+A `TxSummary` is an object much like the `TxPrefix`, with small but important differences
+in exactly what data are stored about inputs and outputs.
+
+The purpose of a `TxSummary` is that:
+* It is much smaller than a `Tx`.
+* It can be streamed to a small hardware device, together with the `extended_message_digest`,
+  in order to efficiently compute the (new) digest which MLSAG's must sign.
+* Small additional data (`TxSummaryUnblindingData`) can be streamed with the pieces of the `TxSummary`, allowing
+  the device to "unblind" the `TxSummary`.
+* This can be used to create a `TxSummaryUnblindingReport`, which deduces the following:
+  * For each output, the amount, and the entity to which it is destined, which is one of three possibilities:
+    * The signer themselves
+    * A known contact, identified by their public address
+    * An anonymous swap counterparty
+  * For each input, the amount, and the entity from whcih it came, which is one of two possibilities:
+    * The signer themselves
+    * An anonymous swap counterparty
+
+The design goals here are:
+* A hardware device which is expected to sign MLSAGs for a transaction, can do so while having **visibility
+  into how much funds** are being moved **from whom**, and **to whom** they are going.
+* A hardware device can use the `TxSummaryUnblindingReport` to display this (verified) information to the user.
+* The hardware device need not trust the host computer to verify this information.
 
 There is exactly one possible `TxSummary` for a given `Tx`.
 
-The `TxSummary` contains:
-* The list of outputs (omitting "extra" parts like encrypted fog hint and encrypted memo).
-* The list of `pseudo_output_commitments` (commitments to the values of the true inputs)
-  * Any input rules associated to these inputs (if they are [MCIP 31](0031-transactions-with-contingent-inputs.md) signed contingent inputs)
-* The fee and fee token id
-* The tombstone block
+To achieve the goals, and make it unnecessary for the device to see the majority of the `Tx`, we have
+to change the way that the digest which `RingMLSAG`'s sign is computed.
+
+**Note**: This change does not impact the digest that [MCIP 31](0031-transactions-with-contingent-inputs.md) signed contingent inputs (SCIs) sign,
+those inputs sign the same digest that was specified in MCIP 31.
 
 During transaction construction, the signer computes the extended message digest as before,
 but now creates a merlin transcript using that 32-byte digest, followed by digesting the
@@ -66,19 +86,117 @@ but now creates a merlin transcript using that 32-byte digest, followed by diges
 The verifier similarly computes this
 `extended-message-and-tx-summary digest` and verifies that the MLSAGs sign this.
 
+**Note**: This means that the `TxSummary` needs to be constructible by the consensus enclave, given only
+the `Tx`, and therefore cannot contain any of the transaction secrets needed to unblind the `TxSummary`. These
+secrets appear in `TxSummaryUnblindingData` instead. The host computer (ultimately the `TransactionBuilder`)
+is responsible to compute this when it creates
+a `Tx`, and then it can be streamed to, and verified by, the hardware device which is asked to sign.
+
 When a hardware wallet is asked to sign an MLSAG, we can give it now the `extended_message_digest`
-and the `TxSummary`, and it can compute the appropriate digest from this for the MLSAG to sign.
+and steam it the `TxSummary` and the `TxSummaryUnblindingData`, and it can compute the appropriate digest from this for the MLSAG to sign.
 
-Additionally, we can provide it the `TxSummaryUnblindingData`, which inclues:
-* For each `pseudo_output_commitment`, the amount (value and token id), and blinding factor.
-* For each output, the target public address, the amount, and the `tx_private_key`, unless
-  it is part of an SCI. In that case we can unblind it using the amount shared secret in the
-  SCI input rules to find it's value, and we can't know
-  exactly what address is the destination, except that it's associated to the SCI.
-* The block version these outputs all targetted.
+## Estimates
 
-These data are not very large and allow the hardware wallet to verify the amounts of all
-inputs and outputs in the `TxSummary` and to verify the destination of each output.
+We would like to provide estimates of the impact of this change.
+
+### Status quo
+
+In the status quo, MLSAG's sign the 32-byte `extended-message-digest`.
+
+To compute this digest, the entire `TxPrefix` must be digested, and then most of the
+`SignatureRctBulletproofs` must be digested on top of this digest. Substantially all of the `Tx`
+must be passed to merlin to verify this digest.
+
+If hardware wallets do not compute this digest on the device, then they can have no visibility into
+the `TxPrefix.outputs` list, which is what must be unblinded and verified to determine where output
+funds are actually going in the transaction. (These are the outputs that will actually be added to
+the blockchain.)
+
+Therefore, without this change, the only way to achieve the requirement of giving hardware wallets
+visibility into the outcome of the transaction they are signing is to stream substantially all of the `Tx`
+to them.
+
+Koe has previously in [MCIP 21](https://github.com/mobilecoinfoundation/mcips/pull/21) estimated the
+size of a Tx, assuming that there are ~4 billion TxOut's in the ledger, leading the Merkle proofs with ~32
+elements.
+
+> Currently (protocol v0), Merkle membership proofs constitute the bulk of transaction size. A 1-input/1-output transaction is ~21 kB, with membership proofs taking up ~17 kB (assuming membership proofs with 32 elements, representing a Merkle tree 31 layers deep). In a 16-input/16-output transaction (the maximum size of a transaction), membership proofs occupy ~275 kB out of ~325 kB.
+
+In mainnet at time of writing, with about 1 million blocks in the ledger, this would be only 22 elements, but this is still > 200 KB in total that must be streamed.
+
+In the proof-of-concept work for this proposal, we measured exactly the size on the wire of a max-size and min-size Tx's with 32 element merkle proofs: 
+
+-------------------------------------------------------------------------------------------------------
+|                               | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
+|-------------------------------|---------------------------------|-----------------------------------|
+| Proto-encoded tx size (bytes) | 20_020                          | 309_238                           |
+-------------------------------------------------------------------------------------------------------
+
+Note that this still does not give the device enough to actually compute the data in the `TxSummaryUnblindingReport`,
+it would still need at least the data in the `TxSummaryUnblindingData` to see the amounts and entities associated to
+the inputs and outputs.
+
+### This proposal
+
+In the proof of concept, MLSAG's sign the 32 byte `extended-message-and-tx-summary-digest`.
+
+To verify this digest, the amounts and destinations of the outputs, and the amounts and sources of the inputs, we must send to the device:
+* The 32-byte `extended-message-digest`
+* The `TxSummary` (piecewise)
+* The `TxSummaryUnblindingData` (piecewise)
+
+--------------------------------------------------------------------------------------------------------------
+|                                      | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
+|--------------------------------------|---------------------------------|-----------------------------------|
+| Proto-encoded TxSummary size (bytes) | 176                             | 2_726                             |
+| " TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
+| Total (+ 32)                         | 503                             | 7_416                             |
+--------------------------------------------------------------------------------------------------------------
+
+The size on the stack of the `TxSummaryStreamingVerifier` (using `heapless`) is 1_302 bytes.
+
+The `TxSummaryStreamingVerifier` has four steps in its protocol:
+* Initialization
+* Digest output
+* Digest input
+* Finalization
+
+The sizes of the payloads which must be transferred to make each step (in the POC) are:
+
+--------------------------------------------------------------------------
+|                                      | Wire size (proto-encoded bytes) |
+|--------------------------------------|---------------------------------|
+| Initialization                       | 32 + 32 + 4 + 2 * 8 = 84        |
+| Digest output                        | 129 + 243 = 372                 |
+| Digest input                         | 36  + 45  = 81                  |
+| Finalization                         | 3 * (2 + 8) = 30                |
+--------------------------------------------------------------------------
+
+The largest value in the above is the Digest output step, and the bulk of this is coming
+from the need to send a `PublicAddress` in order to verify that a `TxOut` was
+correctly addressed to a `PublicAddress` and then display b58 (or an associated hash)
+of this `PublicAddress`.
+
+Verifying each output / input unblinding data entails a few elliptic curve operations in the above.
+
+### Conclusions
+
+The proposal always reduces the total amount of data that needs to be streamed by a factor of >40x.
+
+Anecdotally, it takes about 10s to install an 80 KB app on the ledger nano S.
+
+This suggests about 2.5s to stream the entire `Tx` to the ledger nano S when the `Tx` has the minimum possible size,
+and about 40s to stream a max-size `Tx`.
+
+It suggests that it should take <.25s to stream all of the data required by the `TxSummaryStreamingVerifier`,
+even for a max-size `Tx`.
+
+90% of the impact of this change comes from making it so that we don't have to stream merkle proofs to the hardware device.
+The hardware device does not care about these merkle proofs anyways, and isn't capable of checking them.
+
+More savings comes from omitting the encrypted fog hints and encrypted memos of Tx's, as well as all of the TxOut's associated
+to input rings. Only the pseudo output commitments and pseudo output blinding factors associated to inputs, as well as a flag
+indicating if there are associated input rules, are streamed to the device.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -152,13 +270,13 @@ TxSummary: Vec~TxInSummary~ inputs
 TxSummary: uint64 fee_value
 TxSummary: uint64 fee_token_id
 TxSummary: uint64 tombstone_block
-TxSummary: new(&TxPrefix, &[TxInSummary])
+TxSummary: new(&TxPrefix, &[CompressedCommitment])
 TxOutSummary: CompressedRistrettoPublic public_key
 TxOutSummary: CompressedRistrettoPublic target_key
 TxOutSummary: MaskedAmount masked_amount
-TxOutSummary: from(&TxOut)
+TxOutSummary: bool associated_to_input_rules
 TxInSummary: CompressedCommitment pseudo_output_commitment
-TxInSummary: Option~InputRules~ input_rules
+TxInSummary: bool has_input_rules
 ```
 
 A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte digest
@@ -188,12 +306,13 @@ TxSummaryUnblindingData: Vec~UnmaskedAmount~ inputs
 TxSummaryUnblindingData: Vec~TxOutUnblindingData~ outputs
 TxOutUnblindingData: UnmaskedAmount amount
 TxOutUnblindingData: Option~PublicAddress~ address
+TxOutUnblindingData: Option~RistrettoPrivate~ tx_private_key
 ```
 
 Strictly speaking, the `TxSummaryUnblindingData` is not part of the MobileCoin network's protocol rules,
 it's rather a detail of the hardware wallets, and they might choose not to use this schema and do their
 own thing. However, it is useful as a proof of concept, to validate that the `TxSummary` design does
-actually achieve the goals we set out. This at least provides a starting point for hardware wallet projects
+actually achieve the goals we set out. It at least provides a starting point for hardware wallet projects
 that does not involve sending the entire `Tx`.
 
 # Drawbacks
