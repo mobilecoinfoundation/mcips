@@ -282,7 +282,7 @@ TxInSummary: bool has_input_rules
 A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte digest
 and the `TxSummary`.
 
-# Security
+## Security
 [security]: #security
 From a security point of view, the hardware wallet can know that it is intractable
 for someone to find a different `TxSummary` that produces the same `extended_message_and_tx_summary` digest,
@@ -304,7 +304,7 @@ TxOutUnblindingData --> TxSummaryUnblindingData
 TxSummaryUnblindingData: uint32 block_version
 TxSummaryUnblindingData: Vec~UnmaskedAmount~ inputs
 TxSummaryUnblindingData: Vec~TxOutUnblindingData~ outputs
-TxOutUnblindingData: UnmaskedAmount amount
+TxOutUnblindingData: UnmaskedAmount masked_amount
 TxOutUnblindingData: Option~PublicAddress~ address
 TxOutUnblindingData: Option~RistrettoPrivate~ tx_private_key
 ```
@@ -314,6 +314,109 @@ it's rather a detail of the hardware wallets, and they might choose not to use t
 own thing. However, it is useful as a proof of concept, to validate that the `TxSummary` design does
 actually achieve the goals we set out. It at least provides a starting point for hardware wallet projects
 that does not involve sending the entire `Tx`.
+
+### Unblinding proofs and verification
+
+Recall that we must consider the following cases and successfully obtain the desired data:
+
+* For each output, the amount, and the entity to which it is destined, which is one of three possibilities:
+  * The signer themselves
+  * A known contact, identified by their public address
+  * An anonymous swap counterparty
+* For each input, the amount, and the entity from which it came, which is one of two possibilities:
+  * The signer themselves
+  * An anonymous swap counterparty
+
+For outputs, we can use the following decision tree:
+* Given a `TxOutSummary`, we have the public key, target key, and masked amount of the TxOut
+  On the hardware device, we have the account view private key of the signer. We can attempt to view-key match the TxOut,
+  performing key-exchange against the public key, obtaining the `TxOut` shared secret. This can be tested against the
+  `MaskedAmount` and yields an unblinded amount if it works. This amount is correct -- it is discrete-log hard to find
+  two Pedersen commitments with different unmaskings. So in case of successful view key matching, the device
+  can always know that this amount is going to themselves, regardless of any subaddress considerations.
+* Then, if view-key matching fails, we can check the `TxOutUnblindingData` and see if it contains both
+  an address and a `tx_private_key`. This is the expected case whenever the host computer creates a TxOut to a known
+  contact using e.g. `TransactionBuilder.add_output`. The `TransactionBuilder` is responsible to handle the public address,
+  and call `TxOut::new` using a randomly chosen `tx_private_key`. Given these data, and the amount from the 
+  `TxOutSummaryUnblindingData.masked_amount`, as well as the block version being targetted, the hardware device is capable of recreating
+  the call to `TxOut::new` enough to reproduce the `TxOut` public key, the `TxOut` target key, and the `TxOut` masked amount.
+  If all of these are a match for the `TxOutSummary`, then the device has established that the `TxOut` was originally addressed to
+  this person with this amount -- it is discrete-log hard to find another amount with the same commitment. It is also generally
+  impossible to make an account that belongs to two addresses -- starting from two addresses with different view public keys,
+  finding two different tx_private keys that produce the same tx out public key implies knowledge of a linear relation between
+  the view private keys. Also obtaining a collision of tx target keys requires finding a hash collision which has negligible success
+  probability.
+* The final case occurs when the `TxOut` was not addressed to ourselves or created using `TransactionBuilder.add_output`, but rather
+  came as a required (or partial fill) output from a Signed Contingent Input. In this case it is not addressed to ourself, and due
+  to the anonyminity properties of the MCIP 31 atomic swaps, we cannot know who it is actually addressed to. We can only know that
+  it goes to our anonymous swap counterparty.
+  However, it's not okay to say that addresses / tx_private keys are optional for things that don't match to ourselves, because this
+  allows the (adversarial) host computer to simply omit the address when they don't want to tell the hardware wallet where a payment is going.
+  To prevent this tampering, `TxOutSummary` has a flag `associated_to_input_rules`, and this is in the `TxSummary`, checked also by the enclave
+  when it derives `TxSummary` from `TxPrefix`. If this flag is false, then the hardware device knows that the host computer has lied to it, by
+  witholding the address information and trying to pretend this is an SCI output.
+  
+
+**Note**: There is an assumption which is worth explaining here, that outputs that match to `InputRules` never belong to a person signing the transaction.
+This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. `InputRules` can only be used
+to constrain the person who uses a particular signed input in a transaction. If you are in fact the signer of the input, you could always remove the input
+rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). A real client would always prefer
+not to make their own input into an SCI, for simplicity. Regardless, in the above decision tree, we test if a `TxOut` belongs to the signer using view-key
+matching before reaching the last case and checking the `associated_to_input_rules` flag.
+
+For inputs, we can use the following decision tree:
+* Given a `TxInSummary`, the `TxSummaryUnblindingData` contains a corresponding `UnmaskedAmount`.
+  This include the value, token id, and blinding factor corresponding to the pseudo-output commitment.
+  We can compute the corresponding Pedersen commitment to these deterministically, and check if this matches
+  the pseudo-output commitment in the `TxInSummary`. This came from the `TxSummary` which is checked by the enclave,
+  and so we know that it must be accurate. If we manage to unblind it, then we know this is the correct unblinding,
+  because it is discrete-log hard to find another unmasking of the Pedersen commitment. If we can't unblind it, then
+  the hardware device knows that the computer has lied / provided a false unmasking, but there is no legitimate reason
+  for the computer to fail to do this, because regardless of whether this is our own input or a signed input from a
+  counterparty, we can expect to have the unmasked amount or there is no way we can possibly spend it.
+* Now having the amount in hand, the next step is to check the `has_input_rules` flag from `TxInSummary`. We know that
+  this flag is accurate because the consensus enclave checks the `TxSummary` and can see which inputs actually have rules.
+  If there are no rules, then we know that we must be signing for this transaction. If there are rules then we attribute
+  the input to an anonymous swap counterparty.
+
+**FIXME**: Here we are making a similar assumption, that inputs with `InputRules` never belong to the person signing the transaction.
+However, in this case, we don't have a similar mechanism where we can view-key-match the input, because we didn't include enough parts of
+the input in the summary for that to happen. This has a consequence -- if a host computer tries to trick the device following the decision
+tree above, by taking a normal transaction, and arbitrarily attaching empty `InputRules` to the `TxIn`, creating an SCI, they gain some advantage
+over the device, in that they can now manipulate the device into thinking that the user is making money from an anonymous swap counterparty, when
+in fact we are just moving the user's own money.
+
+* Is that an important attack?
+* Suppose that we want to mitigate this. What is the smallest / least amount of data that we could attach to the `TxInSummary` to allow that?
+* Do we actually have to attach more data? Can we rely on the idea that the device will later have to sign anything that comes from us, and so if an MLSAG
+is subsequently sent to the device that actually has rules, the device can flag that as unexpected (or simply produce an invalid signature by
+ignoring the rules?)
+
+### Discussion
+
+It may seem odd that the design of the `TxSummary` completely omits the `InputRules`. After all, the `InputRules` schema is pretty open-ended.
+Is it really true that the hardware device doesn't need direct visibility on them?
+
+We offer the following justification:
+* It is not necessary (or desirable) for the hardware wallet to check that the Tx is well-formed. Indeed it has to see the entire Tx to know that
+and the goal is to avoid that.
+* Given this, it is necessarily going to be possible for the host computer to create a Tx that is not well-formed, and get the hardware device to sign it.
+* That is not considered an attack in the threat model -- the design goal here is, the hardware wallet can prove that if it is signing the digest of a valid `Tx`,
+then it knows what the balance changes due to the `Tx` are going to be. Either, the thing it expects to happen will happen, or nothing will happen.
+
+Recall that the goal here is, the hardware wallet has visibility on:
+* The amount of each input and output
+* Who those inputs and outputs come from and are going to
+
+If the hardware wallet can see input rules, then it can know e.g. "you filled a partial fill swap at this fill rate". But this is not a requirement for the
+hardware device.
+
+The main difficulty that the input rules create is that they force case analysis to happen around outputs and inputs.
+This is because, for any output that the signer is creating, they know the public address to which it was destined, the amount, the blinding factors,
+the `tx_private_key`. They can produce all this evidence for the device about where the `TxOut` came from. But if an output comes from an SCI, then we
+did not create it, and we have no visibility into any of this, and there is no way that we can provide this evidence to the device. The input rules flags
+are present in the `TxSummary` in order to convince the device that this is really the case, and the host computer is not just withholding evidence in order
+to manipulate the logic in the device.
 
 # Drawbacks
 [drawbacks]: #drawbacks
