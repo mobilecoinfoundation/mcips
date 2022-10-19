@@ -322,7 +322,7 @@ Recall that we must consider the following cases and successfully obtain the des
   * An anonymous swap counterparty
 
 For outputs, we can use the following decision tree:
-* Given a `TxOutSummary`, we have the public key, target key, and masked amount of the TxOut
+* Given a `TxOutSummary`, we have the public key, target key, and masked amount of the TxOut.
   On the hardware device, we have the account view private key of the signer. We can attempt to view-key match the TxOut,
   performing key-exchange against the public key, obtaining the `TxOut` shared secret. This can be tested against the
   `MaskedAmount` and yields an unblinded amount if it works. This amount is correct -- it is discrete-log hard to find
@@ -336,10 +336,10 @@ For outputs, we can use the following decision tree:
   the call to `TxOut::new` enough to reproduce the `TxOut` public key, the `TxOut` target key, and the `TxOut` masked amount.
   If all of these are a match for the `TxOutSummary`, then the device has established that the `TxOut` was originally addressed to
   this person with this amount -- it is discrete-log hard to find another amount with the same commitment. It is also generally
-  impossible to make an account that belongs to two addresses -- starting from two addresses with different view public keys,
+  impossible to make a TxOut that belongs to two addresses -- starting from two addresses with different view public keys,
   finding two different tx_private keys that produce the same tx out public key implies knowledge of a linear relation between
   the view private keys. Also obtaining a collision of tx target keys requires finding a hash collision which has negligible success
-  probability.
+  probability. (TODO maybe more detail on this? I think it's a pretty fundamental security property of mobilecoin though.)
 * The final case occurs when the `TxOut` was not addressed to ourselves or created using `TransactionBuilder.add_output`, but rather
   came as a required (or partial fill) output from a Signed Contingent Input. In this case it is not addressed to ourself, and due
   to the anonyminity properties of the MCIP 31 atomic swaps, we cannot know who it is actually addressed to. We can only know that
