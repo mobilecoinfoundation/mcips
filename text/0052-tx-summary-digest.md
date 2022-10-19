@@ -126,11 +126,9 @@ In mainnet at time of writing, with about 1 million blocks in the ledger, this w
 
 In the proof-of-concept work for this proposal, we measured exactly the size on the wire of a max-size and min-size Tx's with 32 element merkle proofs: 
 
--------------------------------------------------------------------------------------------------------
 |                               | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
 |-------------------------------|---------------------------------|-----------------------------------|
 | Proto-encoded tx size (bytes) | 20_020                          | 309_238                           |
--------------------------------------------------------------------------------------------------------
 
 Note that this still does not give the device enough to actually compute the data in the `TxSummaryUnblindingReport`,
 it would still need at least the data in the `TxSummaryUnblindingData` to see the amounts and entities associated to
@@ -145,13 +143,11 @@ To verify this digest, the amounts and destinations of the outputs, and the amou
 * The `TxSummary` (piecewise)
 * The `TxSummaryUnblindingData` (piecewise)
 
---------------------------------------------------------------------------------------------------------------
 |                                      | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
 |--------------------------------------|---------------------------------|-----------------------------------|
 | Proto-encoded TxSummary size (bytes) | 176                             | 2_726                             |
 | " TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
 | Total (+ 32)                         | 503                             | 7_416                             |
---------------------------------------------------------------------------------------------------------------
 
 The size on the stack of the `TxSummaryStreamingVerifier` (using `heapless`) is 1_302 bytes.
 
@@ -163,14 +159,12 @@ The `TxSummaryStreamingVerifier` has four steps in its protocol:
 
 The sizes of the payloads which must be transferred to make each step (in the POC) are:
 
---------------------------------------------------------------------------
 |                                      | Wire size (proto-encoded bytes) |
 |--------------------------------------|---------------------------------|
 | Initialization                       | 32 + 32 + 4 + 2 * 8 = 84        |
 | Digest output                        | 129 + 243 = 372                 |
 | Digest input                         | 36  + 45  = 81                  |
 | Finalization                         | 3 * (2 + 8) = 30                |
---------------------------------------------------------------------------
 
 The largest value in the above is the Digest output step, and the bulk of this is coming
 from the need to send a `PublicAddress` in order to verify that a `TxOut` was
