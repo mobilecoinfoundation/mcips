@@ -359,10 +359,15 @@ For outputs, we can use the following decision tree:
   
 
 **Note**: There is an assumption which is worth explaining here, that outputs that match to `InputRules` never belong to a person signing the transaction.
-This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. `InputRules` can only be used
+This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. Conceptually, an SCI is a signed input
+with "strings attached", and the `InputRules` are those strings. So the nature of the interaction is "here is my input which you can use, as long as you
+follow these rules". `InputRules` can only be used
 to constrain the person who uses a particular signed input in a transaction. If you are in fact the signer of the input, you could always remove the input
-rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). A real client would always prefer
-not to make their own input into an SCI, for simplicity. This observation applies no matter what future kinds of `InputRules` we create -- if you are capable
+rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). Offering yourself one of your own
+inputs "with strings attached" never makes sense, because you already had the input and could just sign it again without the strings.
+
+A real client would always prefer not to make their own input into an SCI, for simplicity.
+This observation applies no matter what future kinds of `InputRules` we create -- if you are capable
 of signing for a given input on your own, you can always bypass any `InputRules` on an SCI by just signing that input, not as an SCI.
 Regardless, in the above decision tree, we test if a `TxOut` belongs to the signer using view-key
 matching before reaching the last case and checking the `associated_to_input_rules` flag. So if we do actually own an input, we will identify it thusly, even
