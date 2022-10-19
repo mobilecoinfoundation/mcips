@@ -190,6 +190,8 @@ and about 40s to stream a max-size `Tx`.
 It suggests that it should take <.25s to stream all of the data required by the `TxSummaryStreamingVerifier`,
 even for a max-size `Tx`.
 
+(Note that this is extrapolating from anecdotes and may be wildly off.)
+
 90% of the impact of this change comes from making it so that we don't have to stream merkle proofs to the hardware device.
 The hardware device does not care about these merkle proofs anyways, and isn't capable of checking them.
 
