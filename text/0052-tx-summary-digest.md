@@ -355,8 +355,11 @@ For outputs, we can use the following decision tree:
 This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. `InputRules` can only be used
 to constrain the person who uses a particular signed input in a transaction. If you are in fact the signer of the input, you could always remove the input
 rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). A real client would always prefer
-not to make their own input into an SCI, for simplicity. Regardless, in the above decision tree, we test if a `TxOut` belongs to the signer using view-key
-matching before reaching the last case and checking the `associated_to_input_rules` flag.
+not to make their own input into an SCI, for simplicity. This observation applies no matter what future kinds of `InputRules` we create -- if you are capable
+of signing for a given input on your own, you can always bypass any `InputRules` on an SCI by just signing that input, not as an SCI.
+Regardless, in the above decision tree, we test if a `TxOut` belongs to the signer using view-key
+matching before reaching the last case and checking the `associated_to_input_rules` flag. So if we do actually own an input, we will identify it thusly, even
+if it happens to be associated to some `InputRules`.
 
 For inputs, we can use the following decision tree:
 * Given a `TxInSummary`, the `TxSummaryUnblindingData` contains a corresponding `UnmaskedAmount`.
