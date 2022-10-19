@@ -80,10 +80,15 @@ to change the way that the digest which `RingMLSAG`'s sign is computed.
 **Note**: This change does not impact the digest that [MCIP 31](0031-transactions-with-contingent-inputs.md) signed contingent inputs (SCIs) sign,
 those inputs sign the same digest that was specified in MCIP 31.
 
-During transaction construction, the signer computes the extended message digest as before,
-but now creates a merlin transcript using that 32-byte digest, followed by digesting the
-`TxSummary`. The MLSAG's (except for SCIs) will sign 32-bytes extracted from this digest.
-The verifier similarly computes this
+During transaction construction, the signer:
+1. Computes the `extended-message-digest` as before
+1. Creates a merlin transcript, appending that digest (using the `mc-crypto-digestible-scheme`)
+1. Appends `TxSummary` (using the `mc-crypto-digestible` scheme)
+1. Extracts 32 bytes from this digest, the `extended-message-and-tx-summary-digest`.
+
+The MLSAG's (except for SCIs) will now sign this digest (instead of the `extended-message-digest` as previously).
+
+The transaction verifier similarly computes this
 `extended-message-and-tx-summary digest` and verifies that the MLSAGs sign this.
 
 **Note**: This means that the `TxSummary` needs to be constructible by the consensus enclave, given only
