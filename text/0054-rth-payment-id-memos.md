@@ -1,6 +1,6 @@
 - Feature Name: `Recoverable Transaction History Payment ID Memos`
 - Start Date: (2022-10-18)
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0054](https://github.com/mobilecoinfoundation/mcips/pull/54)
 
 # Summary
 [summary]: #summary
