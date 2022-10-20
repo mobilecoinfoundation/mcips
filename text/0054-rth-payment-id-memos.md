@@ -100,7 +100,7 @@ Additionally, adding three new memo types adds complexity to Recoverable Transac
 
 ## Rationale
 
-The original intent of recoverable transaction history was that any two parties could recover the history of all transactions between each other. This has not been accomplished with the current implementation of payment request IDs. Since there is the ability for the recipient of a transaction to determine which payment request it relates to (if applicable), the sender of that transaction should also be able to do so. As of right now there is no way for the sender to know whether or not it relates to a payment request at all.
+The original intent of Recoverable Transaction History was that any two parties could recover the history of all transactions between each other. This has not been accomplished with the current implementation of payment request IDs. Since there is the ability for the recipient of a transaction to determine which payment request it relates to (when applicable), the sender of that transaction should also be able to do so. As of this writing there is no way for the sender to recover whether the payment relates to a request at all.
 
 Since RTH supports payments requests, it follows that it should also support payment intents. This has many use-cases such as being able to invite a user that has not created or shared their public address with the prospective sender. This allows applications more options for things such as inviting new users or initiating a new transaction history between (theretofore unintroduced) existing users.
 
