@@ -23,7 +23,7 @@ The Authenticated Sender With Payment Request Id Memo was introduced to support 
 
 The user fulfilling a payment request this way, however, has no way of identifying any outgoing payment as belonging to a specific request ID after sending it. They only attach a regular destination memo to the change TxOut. Only the user which made the payment request is capable of reconstructing this aspect of the transaction history. This should be resolved so that recoverable transaction history between two parties is the same for both. This can be accomplished by creating a new destination memo type which contains the payment request ID.
 
-Additionally, some clients may wish to implement the opposite flow. A sending user could use an ID to enable the recipient to associate that payment with some previously shared and/or agreed upon payment intent. It is proposed that this be implemented with two new memo types: the Authanticated Sender With Payment Id Memo and the Destination with Payment Id Memo.
+Additionally, some clients may wish to implement the opposite flow. A sending user could use an ID to enable the recipient to associate that payment with some previously shared and/or agreed upon payment intent. It is proposed that this be implemented with two new memo types: the Authenticated Sender With Payment Id Memo and the Destination with Payment Id Memo.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
