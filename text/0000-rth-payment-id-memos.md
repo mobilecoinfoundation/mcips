@@ -39,7 +39,7 @@ This proposed Destination With Payment Request Id Memo fixes this by holding an 
 
 ## Authenticated Sender and Destination With Payment Id Memos
 
-For clients wishing to implement the opposite flow, the sender and destination with payment ID memos are proposed (type bytes `0x0102` and `0x0204`, respectively). Supposing Alice wishing to send a payment to Bob, but Bob either does not have a public address or has not shared it with her. Alice can, using some shared service or communication channel, notify Bob that a payment with a specific ID is waiting for him. Bob may then wish to create and/or share his public address with Alice to receive the payment.
+For clients wishing to implement the opposite flow, the sender and destination with payment ID memos are proposed (type bytes `0x0102` and `0x0204`, respectively). Suppose Alice wishes to send a payment to Bob, but Bob either does not have a public address or has not shared it with her. Alice can, using some shared service or communication channel, notify Bob that a payment with a specific ID is waiting for him. Bob may then wish to create and/or share his public address with Alice to receive the payment.
 
 With all of this established, Alice is able to then create and send the payment to Bob. Alice should build a sender with payment ID memo and attach it to the TxOut for Bob. Paired with that, for her own record, she should attach a destination with payment ID memo to her change TxOut so she also has record of this payment intent being fulfilled. Once Bob receives the payment, he can see that it contains a sender memo with the same payment ID as the previously shared payment intent. This informs Bob that the pending payment to him is complete. Had Bob received a different payment (from Alice or another party) in between the time the intent was shared and completed, he would know that this is not related to the same intent.
 
@@ -101,9 +101,9 @@ Additionally, adding three new memo types adds complexity to recoverable transac
 
 ## Rationale
 
-The original intent of recoverable transaction history was that any two parties could recover the history of all transactions between each other. This has not accomplished this with the current implementation of payment request IDs. Since there is the ability for the recipient of a transaction to determine which payment request it relates to (if applicable), the sender of that transaction should also be able to do so. As of right now there is no way for the sender to know whether or not it relates to a payment request at all.
+The original intent of recoverable transaction history was that any two parties could recover the history of all transactions between each other. This has not been accomplished with the current implementation of payment request IDs. Since there is the ability for the recipient of a transaction to determine which payment request it relates to (if applicable), the sender of that transaction should also be able to do so. As of right now there is no way for the sender to know whether or not it relates to a payment request at all.
 
-Since recoverable transaction history supports payments requests, it follows that it should also support payment intents. This has many use-cases such as being able to send to a user that has not created or shared their public address with the prospective sender. This allows for applications more options for tasks such as inviting new users or inintiating a new transaction history between existing users.
+Since recoverable transaction history supports payments requests, it follows that it should also support payment intents. This has many use-cases such as being able to send to a user that has not created or shared their public address with the prospective sender. This allows applications more options for things such as inviting new users or inintiating a new transaction history between (theretofore unintroduced) existing users.
 
 ## Alternative Implementation
 
@@ -112,7 +112,7 @@ Rather than use the memo type bytes to differentiate between payment requests an
 # Prior art
 [prior-art]: #prior-art
 
-There are numerous examples of payment platforms that allow for actions such as payment requests and inviting new users with a payment.
+There are numerous examples of payment platforms that allow for actions such as payment requests and payment intents.
 
 - [How to invite Venmo users by sending them a payment](https://help.venmo.com/hc/en-us/articles/217042708-Inviting-Friends)
 - [Sending payment requests through Venmo](https://help.venmo.com/hc/en-us/articles/210413477-Sending-Requesting-Money)
@@ -120,7 +120,7 @@ There are numerous examples of payment platforms that allow for actions such as 
 - [Receiving payment intent as a new Zelle user](https://www.zellepay.com/faq/someone-sent-me-money-zelle-how-do-i-receive-it)
 - [Zelle offers the ability to request payments from users](https://www.zellepay.com/faq/how-can-i-use-zelle)
 
-This proposal supports applications in implementing standard payment platform features such as these in a privacy-protecting way.
+This proposal supports applications in implementing standard payment platform features such as these in a privacy-protecting way—the complete history of which can reliably be recovered strictly from data on the blockchain.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
