@@ -58,7 +58,7 @@ The 64-byte memo data is laid out as follows:
 | 32 - 40    | Big-endian bytes of 8-byte payment request id number |
 | 40 - 64    | Unused bytes                  |
 
-This is exactly identical to RTH's destination memo except it contains an 8-byte payment request ID number. A user fulfilling a payment request will use this memo and populate that field with the same ID they put into an authenticated sender with payment request ID memo. This will allow the fulfilling user to keep a record that the payment request was fulfilled.
+This is RTH's 0x0200 Destination Memo plus an 8-byte payment request ID. A user fulfilling a payment request will use this memo and populate that field with the same ID they put into an Authenticated Sender With Payment Request ID Memo. This will allow the fulfilling user to keep a record that the payment request was fulfilled.
 
 ## 0x0102 Authenticated Sender With Payment Id Memo
 
