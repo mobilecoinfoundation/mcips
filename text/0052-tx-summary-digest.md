@@ -100,105 +100,6 @@ a `Tx`, and then it can be streamed to, and verified by, the hardware device whi
 When a hardware wallet is asked to sign an MLSAG, we can give it now the `extended_message_digest`
 and steam it the `TxSummary` and the `TxSummaryUnblindingData`, and it can compute the appropriate digest from this for the MLSAG to sign.
 
-## Estimates
-
-We would like to provide estimates of the impact of this change.
-
-### Status quo
-
-In the status quo, MLSAG's sign the 32-byte `extended-message-digest`.
-
-To compute this digest, the entire `TxPrefix` must be digested, and then most of the
-`SignatureRctBulletproofs` must be digested on top of this digest. Substantially all of the `Tx`
-must be passed to merlin to verify this digest.
-
-If hardware wallets do not compute this digest on the device, then they can have no visibility into
-the `TxPrefix.outputs` list, which is what must be unblinded and verified to determine where output
-funds are actually going in the transaction. (These are the outputs that will actually be added to
-the blockchain.)
-
-Therefore, without this change, the only way to achieve the requirement of giving hardware wallets
-visibility into the outcome of the transaction they are signing is to stream substantially all of the `Tx`
-to them.
-
-Koe has previously in [MCIP 21](https://github.com/mobilecoinfoundation/mcips/pull/21) estimated the
-size of a Tx, assuming that there are ~4 billion TxOut's in the ledger, leading the Merkle proofs with ~32
-elements.
-
-> Currently (protocol v0), Merkle membership proofs constitute the bulk of transaction size. A 1-input/1-output transaction is ~21 kB, with membership proofs taking up ~17 kB (assuming membership proofs with 32 elements, representing a Merkle tree 31 layers deep). In a 16-input/16-output transaction (the maximum size of a transaction), membership proofs occupy ~275 kB out of ~325 kB.
-
-In mainnet at time of writing, with about 1 million blocks in the ledger, this would be only 22 elements, but this is still > 200 KB in total that must be streamed.
-
-In the proof-of-concept work for this proposal, we measured exactly the size on the wire of a max-size and min-size Tx's with 32 element merkle proofs: 
-
-|                               | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
-|-------------------------------|---------------------------------|-----------------------------------|
-| Proto-encoded tx size (bytes) | 20_020                          | 309_238                           |
-
-Note that this still does not give the device enough to actually compute the data in the `TxSummaryUnblindingReport`,
-it would still need at least the data in the `TxSummaryUnblindingData` to see the amounts and entities associated to
-the inputs and outputs.
-
-### This proposal
-
-In the proof of concept, MLSAG's sign the 32 byte `extended-message-and-tx-summary-digest`.
-
-To verify this digest, the amounts and destinations of the outputs, and the amounts and sources of the inputs, we must send to the device:
-* The 32-byte `extended-message-digest`
-* The `TxSummary` (piecewise)
-* The `TxSummaryUnblindingData` (piecewise)
-
-|                                      | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
-|--------------------------------------|---------------------------------|-----------------------------------|
-| Proto-encoded TxSummary size (bytes) | 176                             | 2_726                             |
-| " TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
-| Total (+ 32)                         | 503                             | 7_416                             |
-
-The size on the stack of the `TxSummaryStreamingVerifier` (using `heapless`) is 1_302 bytes.
-
-The `TxSummaryStreamingVerifier` has four steps in its protocol:
-* Initialization
-* Digest output
-* Digest input
-* Finalization
-
-The sizes of the payloads which must be transferred to make each step (in the POC) are:
-
-|                                      | Wire size (proto-encoded bytes) |
-|--------------------------------------|---------------------------------|
-| Initialization                       | 32 + 32 + 4 + 2 * 8 = 84        |
-| Digest output                        | 129 + 243 = 372                 |
-| Digest input                         | 36  + 45  = 81                  |
-| Finalization                         | 3 * (2 + 8) = 30                |
-
-The largest value in the above is the Digest output step, and the bulk of this is coming
-from the need to send a `PublicAddress` in order to verify that a `TxOut` was
-correctly addressed to a `PublicAddress` and then display b58 (or an associated hash)
-of this `PublicAddress`.
-
-Verifying each output / input unblinding data entails a few elliptic curve operations in the above.
-
-### Conclusions
-
-The proposal always reduces the total amount of data that needs to be streamed by a factor of >40x.
-
-Anecdotally, it takes about 10s to install an 80 KB app on the ledger nano S.
-
-This suggests about 2.5s to stream the entire `Tx` to the ledger nano S when the `Tx` has the minimum possible size,
-and about 40s to stream a max-size `Tx`.
-
-It suggests that it should take <.25s to stream all of the data required by the `TxSummaryStreamingVerifier`,
-even for a max-size `Tx`.
-
-(Note that this is extrapolating from anecdotes and may be wildly off.)
-
-90% of the impact of this change comes from making it so that we don't have to stream merkle proofs to the hardware device.
-The hardware device does not care about these merkle proofs anyways, and isn't capable of checking them.
-
-More savings comes from omitting the encrypted fog hints and encrypted memos of Tx's, as well as all of the TxOut's associated
-to input rings. Only the pseudo output commitments and pseudo output blinding factors associated to inputs, as well as a flag
-indicating if there are associated input rules, are streamed to the device.
-
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -346,32 +247,20 @@ For outputs, we can use the following decision tree:
   impossible to make a TxOut that belongs to two addresses -- starting from two addresses with different view public keys,
   finding two different tx_private keys that produce the same tx out public key implies knowledge of a linear relation between
   the view private keys. Also obtaining a collision of tx target keys requires finding a hash collision which has negligible success
-  probability. (TODO maybe more detail on this? I think it's a pretty fundamental security property of mobilecoin though.)
-* The final case occurs when the `TxOut` was not addressed to ourselves or created using `TransactionBuilder.add_output`, but rather
-  came as a required (or partial fill) output from a Signed Contingent Input. In this case it is not addressed to ourself, and due
-  to the anonyminity properties of the MCIP 31 atomic swaps, we cannot know who it is actually addressed to. We can only know that
-  it goes to our anonymous swap counterparty.
+  probability.
+* In the final case, the `TxOutUnblindingData` doesn't contain an address or `tx_private_key`. This can occur normally when the `TxOut`
+  was not created using `TransactionBuilder.add_output` interface, but rather
+  came as a required (or partial fill) output from a Signed Contingent Input which was added to the `Tx`.
+  In this case it is not addressed to ourself, and due to the anonyminity properties of the MCIP 31 atomic swaps, we cannot know who
+  it is actually addressed to. We can only know that it goes to our anonymous swap counterparty.
   However, it's not okay to say that addresses / tx_private keys are optional for things that don't match to ourselves, because this
   allows the (adversarial) host computer to simply omit the address when they don't want to tell the hardware wallet where a payment is going.
   To prevent this tampering, `TxOutSummary` has a flag `associated_to_input_rules`, and this is in the `TxSummary`, checked also by the enclave
   when it derives `TxSummary` from `TxPrefix`. If this flag is false, then the hardware device knows that the host computer has lied to it, by
   witholding the address information and trying to pretend this is an SCI output.
-  
-
-**Note**: There is an assumption which is worth explaining here, that outputs that match to `InputRules` never belong to a person signing the transaction.
-This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. Conceptually, an SCI is a signed input
-with "strings attached", and the `InputRules` are those strings. So the nature of the interaction is "here is my input which you can use, as long as you
-follow these rules". `InputRules` can only be used
-to constrain the person who uses a particular signed input in a transaction. If you are in fact the signer of the input, you could always remove the input
-rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). Offering yourself one of your own
-inputs "with strings attached" never makes sense, because you already had the input and could just sign it again without the strings.
-
-A real client would always prefer not to make their own input into an SCI, for simplicity.
-This observation applies no matter what future kinds of `InputRules` we create -- if you are capable
-of signing for a given input on your own, you can always bypass any `InputRules` on an SCI by just signing that input, not as an SCI.
-Regardless, in the above decision tree, we test if a `TxOut` belongs to the signer using view-key
-matching before reaching the last case and checking the `associated_to_input_rules` flag. So if we do actually own an input, we will identify it thusly, even
-if it happens to be associated to some `InputRules`.
+  Therefore the decision tree for this third and final case is simply, check if the `TxOutSummary.associated_input_rules` flags is true, and if
+  so, attribute it to the swap counterparty. Otherwise, signal an error, that the host computer did not provide enough information for validation
+  to proceed.
 
 For inputs, we can use the following decision tree:
 * Given a `TxInSummary`, the `TxSummaryUnblindingData` contains a corresponding `UnmaskedAmount`.
@@ -388,18 +277,48 @@ For inputs, we can use the following decision tree:
   If there are no rules, then we know that we must be signing for this transaction. If there are rules then we attribute
   the input to an anonymous swap counterparty.
 
-**FIXME**: Here we are making a similar assumption, that inputs with `InputRules` never belong to the person signing the transaction.
-However, in this case, we don't have a similar mechanism where we can view-key-match the input, because we didn't include enough parts of
-the input in the summary for that to happen. This has a consequence -- if a host computer tries to trick the device following the decision
-tree above, by taking a normal transaction, and arbitrarily attaching empty `InputRules` to the `TxIn`, creating an SCI, they gain some advantage
-over the device, in that they can now manipulate the device into thinking that the user is making money from an anonymous swap counterparty, when
-in fact we are just moving the user's own money.
+#### Assumptions around `InputRules`
 
-* Is that an important attack?
-* Suppose that we want to mitigate this. What is the smallest / least amount of data that we could attach to the `TxInSummary` to allow that?
-* Do we actually have to attach more data? Can we rely on the idea that the device will later have to sign anything that comes from us, and so if an MLSAG
-is subsequently sent to the device that actually has rules, the device can flag that as unexpected (or simply produce an invalid signature by
-ignoring the rules?)
+There is an assumption which is worth explaining here, that inputs and outputs that match to `InputRules` never belong to the person signing the transaction.
+
+This is reasonable because it is never sensible for a person to be a counterparty to their own Signed Contingent Input. Conceptually, an SCI is a signed input
+with "strings attached", and the `InputRules` are those strings. So the nature of the interaction is "here is my input which you can use, as long as you
+follow these rules". `InputRules` can only be used
+to constrain the person who uses a particular signed input in a transaction. If you are in fact the signer of the input, you could always remove the input
+rules and sign the input normally, and your transaction would be valid if it were valid before (in strictly more cases). Offering yourself one of your own
+inputs "with strings attached" never makes sense, because you already had the input and could just sign it again without the strings.
+
+So, a real user would generally prefer not to make their own input into an SCI and then spend it in a transaction, for simplicity.
+This observation applies no matter what future kinds of `InputRules` we create.
+
+However, because of the threat model, we may be concerned that a malicious host computer would arbitrarily attach empty input rules to the user's inputs,
+in order to confuse the hardware wallet signing device, and cause it to display "self" inputs as "swap counterparty" inputs. And could similarly do so for
+outputs.
+
+The following analysis explains why these attempts fail:
+* For `TxOut`'s, the decision tree is specified so that we view-key match it first, and if it matches to use, we short circuit and declare it to be
+  a credit to ourself, regardless of whether it is associated to input rules.
+* For inputs, simply attaching input rules to an input, and then later asking the device to sign it as if there are no input rules, will not work.
+  In MCIP 31, inputs that have associated input rules have to sign a different digest that does not depend on the entire Tx. If instead the entire Tx
+  digest is signed, then the transaction will fail validation.
+
+There is an additional possibility: Suppose that the hardware wallet has features that also support signing the MCIP 31 SCIs. Then it could be possible
+that we authorize an sign an SCI, and then later we build a transaction that matches against it, so that we are essentially "trading with ourselves".
+In this scenario, a device using the above decision tree would (accurately) identify `TxOut`'s as going to ourselves, but identify the SCI input as
+coming from an "anonymous swap counterparty".
+
+We think this is as-intended:
+* If the anonymous swap counterparty is actually ourselves, the report produced by the decision tree is still accurate, as long as the user coalesces
+  "ourself" and "swap counterparty".
+* In most trading systems, it is the user's responsbility to ensure that they are not trading with themselves, and not the system's responsibility to
+  detect wash trading.
+* It is not technically possible for us to "view key scan" an SCI and determine that it was signed by ourselves. The only obvious way for a user
+  to determine that an SCI is their own is to see that the key image associated to the SCI corresponds to one of our own TxOut's. But in the threat
+  model that we have, the hardware wallet does not have insight into the totality of `TxOut`'s and key images belonging to the user's account, they
+  rely on the host computer to provide such `TxOut`'s, and cannot afford to store them all locally or anything like this.
+* Since the user would have to have earlier signed for any SCIs that come from their account, if the spend key really is only on the hardware wallet,
+  it is impossible that the attacker creates an SCI from the user's inputs without their knowledge. The user therefore has considerable insight into
+  when they might possibly be matching their own SCI and has the means to avoid this situation.
 
 ### Discussion
 
@@ -462,11 +381,114 @@ We have tried to future-proof this design against [MCIP 31](0031-transactions-wi
 However, these cannot even be used until block version 3, and may not be in common use at the time that hardware wallet support
 is actually shipped.
 
-It may be that hardware wallets will initially cut scope and not seek to support that feature. Then, they could cut the `InputRules`
-from the `TxInSummary`, (or rather, return an error if they are present) and they could assume that `address` is mandatory in `TxOutSummary::address`.
+It may be that hardware wallets will initially cut scope and not seek to support that feature. If hardware wallets do not support signing
+SCI's, it simplifies the security analysis around the verifier, since we will really know that an input that has associated input rules
+cannot come from ourselves if the transaction is valid.
+
+It may also be that hardware wallets want to use a different decision tree or a different `TxOutSummaryUnblindingData` schema.
 
 We view it as the prerogative of hardware wallets to define their own wire format as they see fit and carry out whatever compression / improvements they
-think are appropriate. The `TxSummaryUnblindingData` schema is only meant as a proof of concept.
+think are appropriate. The `TxSummaryUnblindingData` schema is only meant as a proof of concept, to demonstrate that the introduction of `TxSummary`
+is useful, provides an improvement over the status quo, and achieves the goals we set out initially.
+
+## Estimates
+
+We would like to provide estimates of the impact of this change.
+
+### Status quo
+
+In the status quo, MLSAG's sign the 32-byte `extended-message-digest`.
+
+To compute this digest, the entire `TxPrefix` must be digested, and then most of the
+`SignatureRctBulletproofs` must be digested on top of this digest. Substantially all of the `Tx`
+must be passed to merlin to verify this digest.
+
+If hardware wallets do not compute this digest on the device, then they can have no visibility into
+the `TxPrefix.outputs` list, which is what must be unblinded and verified to determine where output
+funds are actually going in the transaction. (These are the outputs that will actually be added to
+the blockchain.)
+
+Therefore, without this change, the only way to achieve the requirement of giving hardware wallets
+visibility into the outcome of the transaction they are signing is to stream substantially all of the `Tx`
+to them.
+
+Koe has previously in [MCIP 21](https://github.com/mobilecoinfoundation/mcips/pull/21) estimated the
+size of a Tx, assuming that there are ~4 billion TxOut's in the ledger, leading the Merkle proofs with ~32
+elements.
+
+> Currently (protocol v0), Merkle membership proofs constitute the bulk of transaction size. A 1-input/1-output transaction is ~21 kB, with membership proofs taking up ~17 kB (assuming membership proofs with 32 elements, representing a Merkle tree 31 layers deep). In a 16-input/16-output transaction (the maximum size of a transaction), membership proofs occupy ~275 kB out of ~325 kB.
+
+In mainnet at time of writing, with about 1 million blocks in the ledger, this would be only 22 elements, but this is still > 200 KB in total that must be streamed.
+
+In the proof-of-concept work for this proposal, we measured exactly the size on the wire of a max-size and min-size Tx's with 32 element merkle proofs: 
+
+|                               | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
+|-------------------------------|---------------------------------|-----------------------------------|
+| Proto-encoded tx size (bytes) | 20_020                          | 309_238                           |
+
+Note that this still does not give the device enough to actually compute the data in the `TxSummaryUnblindingReport`,
+it would still need at least the data in the `TxSummaryUnblindingData` to see the amounts and entities associated to
+the inputs and outputs.
+
+### This proposal
+
+In the proof of concept, MLSAG's sign the 32 byte `extended-message-and-tx-summary-digest`.
+
+To verify this digest, the amounts and destinations of the outputs, and the amounts and sources of the inputs, we must send to the device:
+* The 32-byte `extended-message-digest`
+* The `TxSummary` (piecewise)
+* The `TxSummaryUnblindingData` (piecewise)
+
+|                                      | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
+|--------------------------------------|---------------------------------|-----------------------------------|
+| Proto-encoded TxSummary size (bytes) | 176                             | 2_726                             |
+| " TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
+| Total (+ 32)                         | 503                             | 7_416                             |
+
+The size on the stack of the proof-of-concept `TxSummaryStreamingVerifier` (using `heapless`) is 1_600 bytes.
+
+The `TxSummaryStreamingVerifier` has four steps in its protocol:
+* Initialization
+* Digest output
+* Digest input
+* Finalization
+
+The sizes of the payloads which must be transferred to make each step (in the POC) are:
+
+|                                      | Wire size (proto-encoded bytes) |
+|--------------------------------------|---------------------------------|
+| Initialization                       | 32 + 32 + 4 + 2 * 8 = 84        |
+| Digest output                        | 129 + 243 = 372                 |
+| Digest input                         | 36  + 45  = 81                  |
+| Finalization                         | 3 * (2 + 8) = 30                |
+
+The largest value in the above is the Digest output step, and the bulk of this is coming
+from the need to send a `PublicAddress` in order to verify that a `TxOut` was
+correctly addressed to a `PublicAddress` and then display b58 (or an associated hash)
+of this `PublicAddress`.
+
+Verifying each output / input unblinding data entails a few elliptic curve operations in the above.
+
+### Conclusions
+
+The proposal always reduces the total amount of data that needs to be streamed by a factor of >40x.
+
+Anecdotally, it takes about 10s to install an 80 KB app on the ledger nano S.
+
+This suggests about 2.5s to stream the entire `Tx` to the ledger nano S when the `Tx` has the minimum possible size,
+and about 40s to stream a max-size `Tx`.
+
+It suggests that it should take <.25s to stream all of the data required by the `TxSummaryStreamingVerifier`,
+even for a max-size `Tx`.
+
+(Note that this is extrapolating from anecdotes and may be wildly off.)
+
+90% of the impact of this change comes from making it so that we don't have to stream merkle proofs to the hardware device.
+The hardware device does not care about these merkle proofs anyways, and isn't capable of checking them.
+
+More savings comes from omitting the encrypted fog hints and encrypted memos of Tx's, as well as all of the TxOut's associated
+to input rings. Only the pseudo output commitments and pseudo output blinding factors associated to inputs, as well as a flag
+indicating if there are associated input rules, are streamed to the device.
 
 # Prior art
 [prior-art]: #prior-art
