@@ -86,7 +86,7 @@ The 64-byte memo data is laid out as follows:
 | 32 - 40    | Big-endian bytes of 8-byte payment intent id number |
 | 40 - 64    | Unused bytes                  |
 
-This is exactly identical to the herein proposed destination with payment request ID memo. The only difference is the memo type. Utilizing the 2-byte memo type, client applications can differentiate payment requests from payment intents.
+This is exactly identical to the aforementioned 0x0203 Destination With Payment Request ID Memo. The only difference is the memo type. Utilizing the 2-byte memo type, client applications can differentiate payment requests from payment intents.
 
 # Drawbacks
 [drawbacks]: #drawbacks
