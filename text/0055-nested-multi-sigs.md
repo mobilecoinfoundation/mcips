@@ -88,7 +88,7 @@ We could skip doing this entirely, but that means we are putting off an improvem
 # Prior art
 [prior-art]: #prior-art
 
-[0037-minting.md] is the MCIP that introduced the need for `mc-crypto-multisig`.
+[MCIP 37](0037-minting.md) is the MCIP that introduced the need for `mc-crypto-multisig`.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
