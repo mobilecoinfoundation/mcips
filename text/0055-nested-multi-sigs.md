@@ -1,6 +1,6 @@
 - Feature Name: nested_multi_sig
 - Start Date: 2022-11-02
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0053](https://github.com/mobilecoinfoundation/mcips/pull/0053)
 - Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2693
 
 # Summary
