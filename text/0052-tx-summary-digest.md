@@ -199,6 +199,12 @@ this way, but the attacker will not be able to get consensus to accept those sig
 knows that either the `TxSummary` is accurate, or it's signature doesn't matter because the `Tx` will not
 be accepted.
 
+**Note**: One concern here is that, we do not want to create a "signing oracle" whereby the host computer
+can trick the hardware wallet into signing something that has a meaning that they never intended. It's important
+here that the host computer gives the device an extended message digest, followed by the `TxSummary`, and the
+device computes a (domain separated) Merlin digest based on this. If there is a second, alternate meaning to
+this digest, it means that the attacker found a collision in Merlin.
+
 A hardware wallet can also expect to be supplied with the `TxSummaryUnblindingData` which allows it to see
 as much information as possible about where funds are coming from and where they are going in the `Tx`.
 
@@ -275,9 +281,10 @@ For inputs, we can use the following decision tree:
   the hardware device knows that the computer has lied / provided a false unmasking, but there is no legitimate reason
   for the computer to fail to do this, because regardless of whether this is our own input or a signed input from a
   counterparty, we can expect to have the unmasked amount or there is no way we can possibly spend it.
-* Now having the amount in hand, the next step is to check the `has_input_rules` flag from `TxInSummary`. We know that
-  this flag is accurate because the consensus enclave checks the `TxSummary` and can see which inputs actually have rules.
-  If there are no rules, then we know that we must be signing for this transaction. If there are rules then we attribute
+* Now having the amount in hand, the next step is to check if `input_rules_digest` is nonempty in `TxInSummary`. We know that
+  this is nonempty exactly when there are rules, because the consensus enclave checks the `TxSummary` and can see which
+  inputs actually have rules, and generates a digest of those rules exactly when they are present.
+  If there are no rules, then we know that we must be signing for this input. If there are rules then we attribute
   the input to an anonymous swap counterparty.
 
 #### Assumptions around `InputRules`
