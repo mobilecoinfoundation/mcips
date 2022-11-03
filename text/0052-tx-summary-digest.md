@@ -98,7 +98,7 @@ is responsible to compute this when it creates
 a `Tx`, and then it can be streamed to, and verified by, the hardware device which is asked to sign.
 
 When a hardware wallet is asked to sign an MLSAG, we can give it now the `extended_message_digest`
-and steam it the `TxSummary` and the `TxSummaryUnblindingData`, and it can compute the appropriate digest from this for the MLSAG to sign.
+and stream it the `TxSummary` and the `TxSummaryUnblindingData`, and it can compute the appropriate digest from this for the MLSAG to sign.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
