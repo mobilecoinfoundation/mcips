@@ -306,7 +306,7 @@ The following analysis explains why these attempts fail:
   digest is signed, then the transaction will fail validation.
 
 There is an additional possibility: Suppose that the hardware wallet has features that also support signing the MCIP 31 SCIs. Then it could be possible
-that we authorize an sign an SCI, and then later we build a transaction that matches against it, so that we are essentially "trading with ourselves".
+that we authorize and sign an SCI, and then later we build a transaction that matches against it, so that we are essentially "trading with ourselves".
 In this scenario, a device using the above decision tree would (accurately) identify `TxOut`'s as going to ourselves, but identify the SCI input as
 coming from an "anonymous swap counterparty".
 
