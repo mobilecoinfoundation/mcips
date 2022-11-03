@@ -349,6 +349,11 @@ did not create it, and we have no visibility into any of this, and there is no w
 are present in the `TxSummary` in order to convince the device that this is really the case, and the host computer is not just withholding evidence in order
 to manipulate the logic in the device.
 
+**Note**: In the final draft, we decided to include a 32-byte merlin digest of the input rules in the TxSummary, rather than just a flag. This allows that
+if in the future we decide that the device needs visibility into the input rules, we can add this without a breaking change to the consensus enclave.
+However, in the decision tree for the device, the device does not actually check this digest against anything, it simply checks if this digest is present
+to infer whether this input has input rules.
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
