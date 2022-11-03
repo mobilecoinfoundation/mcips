@@ -1,6 +1,6 @@
 - Feature Name: tx-fee-map-digest
 - Start Date: 2022-11-03
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mobilecoin/pull/2793)
+- MCIP PR: [mobilecoinfoundation/mcips#0056](https://github.com/mobilecoinfoundation/mcips/pull/56)
 - Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2611
 
 # Summary
