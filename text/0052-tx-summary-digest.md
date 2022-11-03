@@ -178,11 +178,14 @@ TxOutSummary: CompressedRistrettoPublic target_key
 TxOutSummary: MaskedAmount masked_amount
 TxOutSummary: bool associated_to_input_rules
 TxInSummary: CompressedCommitment pseudo_output_commitment
-TxInSummary: bool has_input_rules
+TxInSummary: bytes input_rules_digest
 ```
 
 A hardware wallet which is asked to sign an MLSAG can expect to see that 32 byte digest
 and the `TxSummary`.
+
+The `TxInSummary::input_rules_digest` is a canonical 32-byte digest of the `InputRules` object in the `TxIn`
+if any exists. Otherwise it is 0 bytes.
 
 ## Security
 [security]: #security
@@ -439,11 +442,11 @@ To verify this digest, the amounts and destinations of the outputs, and the amou
 * The `TxSummary` (piecewise)
 * The `TxSummaryUnblindingData` (piecewise)
 
-|                                      | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
-|--------------------------------------|---------------------------------|-----------------------------------|
-| Proto-encoded TxSummary size (bytes) | 176                             | 2_726                             |
-| " TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
-| Total (+ 32)                         | 503                             | 7_416                             |
+|                                                  | Min-size (1 input, 1 output) Tx | Max-size (16 input, 16 output) Tx |
+|--------------------------------------------------|---------------------------------|-----------------------------------|
+| Proto-encoded TxSummary size (bytes)             | 176                             | 2_726                             |
+| Proto-encoded TxSummaryUnblindingData (bytes)    | 295                             | 4_690                             |
+| Total (+ 32)                                     | 503                             | 7_416                             |
 
 The size on the stack of the proof-of-concept `TxSummaryStreamingVerifier` (using `heapless`) is 1_600 bytes.
 
@@ -459,7 +462,7 @@ The sizes of the payloads which must be transferred to make each step (in the PO
 |--------------------------------------|---------------------------------|
 | Initialization                       | 32 + 32 + 4 + 2 * 8 = 84        |
 | Digest output                        | 129 + 243 = 372                 |
-| Digest input                         | 36  + 45  = 81                  |
+| Digest input                         | 78  + 45  = 123                 |
 | Finalization                         | 3 * (2 + 8) = 30                |
 
 The largest value in the above is the Digest output step, and the bulk of this is coming
