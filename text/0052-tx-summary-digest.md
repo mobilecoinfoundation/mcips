@@ -254,7 +254,7 @@ For outputs, we can use the following decision tree:
 * In the final case, the `TxOutUnblindingData` doesn't contain an address or `tx_private_key`. This can occur normally when the `TxOut`
   was not created using `TransactionBuilder.add_output` interface, but rather
   came as a required (or partial fill) output from a Signed Contingent Input which was added to the `Tx`.
-  In this case it is not addressed to ourself, and due to the anonyminity properties of the MCIP 31 atomic swaps, we cannot know who
+  In this case it is not addressed to ourself, and due to the anonymity properties of the MCIP 31 atomic swaps, we cannot know who
   it is actually addressed to. We can only know that it goes to our anonymous swap counterparty.
   However, it's not okay to say that addresses / tx_private keys are optional for things that don't match to ourselves, because this
   allows the (adversarial) host computer to simply omit the address when they don't want to tell the hardware wallet where a payment is going.
