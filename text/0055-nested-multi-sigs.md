@@ -37,7 +37,7 @@ Since we are only adding a field, this change is backwards compatible when it co
 [reference-level-explanation]: #reference-level-explanation
 
 We propose to add a third field to the struct, `multi_signers`, that allows including other `SignerSet`s. Following the change, the struct will look like this:
-```
+```rust
 pub struct SignerSet<P: Default + PublicKey + Message> {
     /// List of potential individual signers.
     #[prost(message, repeated, tag = "1")]
