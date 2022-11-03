@@ -62,7 +62,7 @@ The purpose of a `TxSummary` is that:
     * The signer themselves
     * A known contact, identified by their public address
     * An anonymous swap counterparty
-  * For each input, the amount, and the entity from whcih it came, which is one of two possibilities:
+  * For each input, the amount, and the entity from which it came, which is one of two possibilities:
     * The signer themselves
     * An anonymous swap counterparty
 
