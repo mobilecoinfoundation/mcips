@@ -23,8 +23,8 @@ The rationale for this rule is
 
 This only justifies why this rule should be a **best practice for clients**, but not why
 it should be enforced at the level of the consensus network. In fact, this rule is not needed
-to protect the integrity of the cryptocurrency -- it doesn't allow double spends or imbalanced
-transactions to remove this rule. It simply helps to prevent clients from using bad ring sampling
+to protect the integrity of the cryptocurrency -- removing it doesn't allow double spends
+or imbalanced transactions. It simply helps to prevent clients from using bad ring sampling
 code in production.
 
 After MCIP #31, the rationale for the rule is no longer universally applicable, because
