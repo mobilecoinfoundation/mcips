@@ -33,7 +33,7 @@ there may be multiple parties involved in building a transaction. Consider the f
 1. Alice creates a Signed Contingent Input. Alice's client must choose a ring of mixins at this time.
    By chance, Alice chooses one of Bob's outputs as a mixin.
 1. Bob tries to create a transaction that incorporates this SCI. Bob's client adds this SCI to the
-   transaction builder, and to pay for it, performs ring selection, also adding some of Bob's outputs.
+   transaction builder, and to pay for it, performs input selection, also adding some of Bob's outputs.
 1. The consensus network rejects Bob's transaction with a "DuplicateRingElements" error.
    This is because Bob's real input is the same as one of Alice's mixins.
 
