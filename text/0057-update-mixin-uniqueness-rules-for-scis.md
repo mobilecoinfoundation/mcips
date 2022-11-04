@@ -101,21 +101,26 @@ This has some drawbacks:
 * Harms the user experience, which now requires an additional transaction fee and waiting time
   to accomplish what they were trying to accomplish.
 * Increases the complexity of client code
-* Not much different in terms of ring analysis. If an adversary who can see the rings sees that
-  * An SCI was published and a particular TxOut was one of its ring elements
-  * A Tx was subsequently submitted using that same TxOut as one of its ring elements
-  * One of the outputs of that Tx was subsequently used immediately in a Tx that also consumed this SCI
-  then the adversary can probably infer that this TxOut was used to consume the SCI.
-  On the other hand, if we followed this proposal and allowed this to happen in one transaction,
-  there is still a plausible alternative that the Alice happened to choose a mixin which is the same
-  as a mixin chosen by Bob.
+* Not much different in terms of ring analysis.
+
+To this last point: If an adversary who can see the rings sees that
+
+* An SCI was published and a particular TxOut was one of its ring elements
+* A Tx was subsequently submitted using that same TxOut as one of its ring elements (but not using the SCI)
+* One of the outputs of that Tx was subsequently used immediately in a Tx that also consumed this SCI
+
+then the adversary can probably infer that this TxOut was used to consume the SCI.
+
+On the other hand, if we followed this proposal and allowed this to happen in one transaction,
+there is still a plausible alternative that Alice happened to choose a mixin which is the same
+as a mixin chosen by Bob. (This will happen with nontrivial probability due to the birthday paradox.)
 
 Finally, the main concern around this change is that allowing this could somehow weaken the security
 of rings. 
 
 * Ultimately, the security of rings derives from the algorithm used to sample rings, and not
   this particular check in the consensus network.
-* Even if there is an overlap of one ring elements between an SCI and the rest of the rings,
+* Even if there is an overlap of one ring element between an SCI and the rest of the rings,
   this is no worse than having a ring size of 10 instead of 11 for the SCI, which is only a
   marginal change. And it is still considerably better than that, because the adversary has no
   obvious way to determine if this ring element is the true input of the SCI, the other ring,
@@ -130,7 +135,10 @@ of rings.
 # Prior art
 [prior-art]: #prior-art
 
-None that we are aware of.
+[MCIP 17](https://github.com/mobilecoinfoundation/mcips/pull/17) discussed alternative ring selection strategies.
+
+To our knowledge, no other block chains using ring signatures have a feature like MCIP 31,
+so we don't expect to find prior art around this.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
