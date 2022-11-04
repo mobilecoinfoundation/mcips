@@ -55,7 +55,9 @@ undermined. It is no longer the case that
 
 We propose that, the original rule applies to any inputs without rules, and a lesser rule
 applies to any inputs with rules -- we only check that ring elements are unique within a ring,
-when the input contains rules. This prevents a regression compared to block version 2.
+when the input contains rules. 
+
+Input rules and SCI's are new in block version 3, which is not yet released. This change does not allow any transactions that would have been invalid in block version 2 to be valid -- it only changes how this historical rule will apply to new transactions that involve block version 3 features.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
