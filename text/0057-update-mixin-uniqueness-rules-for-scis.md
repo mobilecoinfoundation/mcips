@@ -132,12 +132,22 @@ of rings.
   collisions. Testing by enforcing hard rules at the level of the consensus network
   is insufficient to ensure security and correctness of the implementation.
 
+Another concern which was raised in review is that the stauts quo allows an active attack along
+the following lines:
+
+* Adversary creates an SCI, selecting as a mixin a TxOut that is conjectured to belong to the victim.
+* Victim tries to match against this SCI, building a transaction using it
+* Adversary observes the `DuplicateRingElement` error and gets nontrivial statistical insight into the
+  victim's TxOut set.
+
+This proposal mitigates this concern.
+
 # Prior art
 [prior-art]: #prior-art
 
 [MCIP 17](https://github.com/mobilecoinfoundation/mcips/pull/17) discussed alternative ring selection strategies.
 
-To our knowledge, no other block chains using ring signatures have a feature like MCIP 31,
+To our knowledge, no other blockchains using ring signatures have a feature like MCIP 31,
 so we don't expect to find prior art around this.
 
 # Unresolved questions
