@@ -1,6 +1,6 @@
 - Feature Name: `View Authenticate Sender Memo`
 - Start Date: `2022-11-09`
-- MCIP PR: [mobilecoinfoundation/mcips#0055](https://github.com/mobilecoinfoundation/mcips/pull/55)
+- MCIP PR: [mobilecoinfoundation/mcips#0058](https://github.com/mobilecoinfoundation/mcips/pull/58)
 
 # Summary
 [summary]: #summary
