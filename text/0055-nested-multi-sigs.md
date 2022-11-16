@@ -1,4 +1,4 @@
-- Feature Name: nested_multi_sig
+- Feature Name: Nested Minting Multi-Signatures
 - Start Date: 2022-11-02
 - MCIP PR: [mobilecoinfoundation/mcips#0053](https://github.com/mobilecoinfoundation/mcips/pull/0053)
 - Tracking Issue: https://github.com/mobilecoinfoundation/mobilecoin/issues/2693
@@ -6,13 +6,13 @@
 # Summary
 [summary]: #summary
 
-We currently require multi-signatures for authorizing `MintConfigTx` and `MintTx` transactions. At the moment, each multi-signature is defined as requiring M-of-N signatures. The set of authorized signers (`SignerSet`) specifies the potential signers coupled with the threshold (the `M` in `M-of-N`). Each signer is identified by their Ed25519 pulic key.
+We currently require multi-signatures for authorizing `MintConfigTx` and `MintTx` transactions. At the moment, each multi-signature is defined as requiring M-of-N signatures. Each signer is identified by their Ed25519 public key.
 We would like to evolve this such that each member of a signer set can either be an individual Ed25519 public key, or another signer set.
 
 # Motivation
 [motivation]: #motivation
 
-Allowing each signer in a multi-sig `SignerSet` to either be an individual key or it's own M-of-N set allows us to better represent the real-world signature hierarchy that we would like to use for minting and minting configurations.
+Allowing each signer in a multi-signature to either be an individual key or it's own multi-signature allows us to better represent the real world signature hierarchy that we would like to use for minting and minting configurations.
 
 For example, when specifying the required signers for some arbitrary token, we might say that we want two entities to authorize a minting transaction:
 1. The MobileCoin foundation
@@ -20,16 +20,16 @@ For example, when specifying the required signers for some arbitrary token, we m
 
 Right now, there is no good way to specify this, unless each organization simply has a single key. That is suboptimal, since in reality the organization might prefer to have a few keys and require it's own M-of-N such that there is no single person in the organization that can authorize a mint. That is a more secure scheme.
 
-Following the change in this PR, it will become possible to specify such signer sets, where each signer can be either an individual key, or another signer set.
+Following the proposal in this MCIP, it will become possible to specify such multi-signatures, where each signer can be either an individual key, or another multi-signature.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
 Multi-signatures, and signer set definitions are provided by the `mc-crypto-multisig` crate. This crate exposes an object called `SignerSet`, which is an array of public keys and a threshold that specifies the minimum number of signatures that is required for a multi-signature to be considered valid.
 
-We propose to add a third field to the struct, `multi_signers`, that allows including other `SignerSet`s. Signature validation code will be changed to look for matches over both `individual_signers` and `multi_signers`, where a match over a multi-signer is considered as a single signature when counting against the threshold.
+We propose to add a third field to the struct, `multi_signers`, that allows including other `SignerSet`s. Signature validation code will be changed to look for matches over both `individual_signers` and `multi_signers`, where a match over an entry in `multi_signers` is considered as a single signature when counting against the threshold.
 
-We will make minor changes to the `tokens.json` file format and the `mc-consensus-mint-client` tool to allow specifying nested signer sets.
+We will make minor changes to the `tokens.json` file format and the `mc-consensus-mint-client` tool to allow specifying nested multi-signers.
 
 Since we are only adding a field, this change is backwards compatible when it comes to the protobuf representation of `SignerSet`s. . However, `SignerSet`s make their way into blocks (they are included in `MintConfig`s and `ValidatedMintConfigTx`s and those go into `BlockContents`. This means we will need to gate this feature on a block version change, so that clients have time to upgrade before it gets enabled and used. This is similar to what we have done in previous changes that affect data going into the ledger.
 
