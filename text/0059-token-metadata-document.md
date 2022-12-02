@@ -65,32 +65,32 @@ The `token_metadata.json` document has the following schema (example):
 
 ```
 {
-    signing_timestamp: "10020032320032",
-    metadata: [
+    "signing_timestamp": "10020032320032",
+    "metadata": [
         {
-            token_id: "0",
-            currency_name: "Mobilecoin",
-            ticker_symbol: "MOB",
-            decimals: 12,
-            logo_svg: "b64...==",
-            info_url: "https://www.mobilecoin.com"
+            "token_id": "0",
+            "currency_name": "MobileCoin",
+            "ticker_symbol": "MOB",
+            "decimals": 12,
+            "logo_svg": "b64...==",
+            "info_url": "https://www.mobilecoin.com"
         },
         {
-            token_id: "1",
-            currency_name: "Electronic Dollars",
-            ticker_symbol: "eUSD",
-            symbol: "$",
-            decimals: 6,
-            logo_svg: "b64...==",
-            info_url: "https://mobilecoin.com/blog/mobilecoin-launches-eusd"
+            "token_id": "1",
+            "currency_name": "Electronic Dollars",
+            "ticker_symbol": "eUSD",
+            "symbol": "$",
+            "decimals": 6,
+            "logo_svg": "b64...==",
+            "info_url": "https://mobilecoin.com/blog/mobilecoin-launches-eusd"
         },
         {
-            token_id: "14",
-            currency_name: 'Meowblecoin',
-            ticker_symbol: 'MEOW',
-            decimals: 12,
-            logo_svg: "b64...==",
-            info_url: "https://www.meowblecoin.com"
+            "token_id": "14",
+            "currency_name": 'Meowblecoin',
+            "ticker_symbol": 'MEOW',
+            "decimals": 12,
+            "logo_svg": "b64...==",
+            "info_url": "https://www.meowblecoin.com"
         }
     ],
 }
