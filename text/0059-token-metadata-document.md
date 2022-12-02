@@ -52,8 +52,8 @@ This proposal creates a source of truth for token metadata for tokens on the Mob
 
 Two documents are hosted on the MobileCoin foundation website:
 
-* `https://mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
-* `https://mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
+* `https://www.mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
+* `https://www.mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
 The ed25519 signing key will be controlled by the mobilecoin foundation.
 This MCIP will be updated, and the public key will be posted here, after the key is created,
@@ -151,6 +151,10 @@ Since this signature can easily be performed off-line anyways, and the document 
 
 In our design, we included SVG images inline in the metadata document to avoid this validation issue.
 This will not scale well to e.g. millions of tokens, and we expect to transition to on-chain metadata before that becomes a problem.
+
+This proposal does not envision having different token registries per network. It is believed that this complexity is unnecessary.
+However, it means that just as clients need to hit Intel's IAS services as part of testing (in prod and dev), they will have to hit
+the `mobilecoin.com` URLs as well, so this is another way in which testing a deployed network will not be completely isolated to the servers deployed as part of the network.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
