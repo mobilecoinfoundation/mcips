@@ -101,7 +101,7 @@ about the token of that id.
 
 For example:
 
-* A `TxOut` with token id of 0 and a (u64) value of `1.5*1^12`, may be displayed as "1.5 MOB" to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
+* A `TxOut` with token id of 0 and a (u64) value of `1.5 * 10^12`, may be displayed as "1.5 MOB" to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
 * A `TxOut` with a token id of 1 and a  (u64) value of `5 * 10^8` may be displayed as `500 eUSD` to the user, because the token id corresponds to eUSD, and the number of decimals is 6.
 * That `TxOut` might also be displayed as `$500` because the symbol of `eUSD` is specified as `$`.
 
