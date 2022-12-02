@@ -19,10 +19,19 @@ and how they can go on to use this data.
 # Motivation
 [motivation]: #motivation
 
-If we do not support dynamic discovery of token metadata, then it must be baked into clients,
+When a client gets a `TxOut`, at the lowest level, both the `value` and `token_id` are `u64`
+numbers which can be decrypted from the blockchain records. However, it isn't appropriate to
+display the `token_id` number directly to the users, since they won't know what this means.
+
+Metadata about a `token_id` consists of all the data which helps clients figure out how they
+can appropriately represent value to the users. Tampering with this metadata can represent an attack
+to confuse or steal from the users, so there is considerable interest in ensuring that there
+is a robust way for clients to authenticate the metadata.
+
+If we do not support dynamic discovery of token metadata, then it must always be baked into clients,
 which is what we do today.
 
-Because some clients, such as Signal, have relatively long upgrade times, this means that new
+Because some clients have relatively long upgrade times, this means that new
 tokens that are launched still cannot actually be used by users. This effectively hurts the
 time-to-market on any new token that is created.
 
@@ -31,6 +40,10 @@ points in time, then users can get bitten in a bad way. For instance, if a Moby 
 to a Signal user, and at the time, Moby supports eUSD but Signal does not, then the recipient
 cannot see the payment in their app, or send it anywhere, or send it back to the Moby user.
 This could lead to disputed payments, bad user experiences, etc.
+
+At the same time, putting token metadata on chain will require an enclave upgrade, while creating
+new tokens on the chain does not. So there is considerable interest in having an off-chain source
+of token metadata that can be validated by clients.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -88,7 +101,7 @@ about the token of that id.
 
 For example:
 
-* A `TxOut` with token id of 0 and a (u64) value of `1.5*1^12, may be displayed as "1.5 MOB" to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
+* A `TxOut` with token id of 0 and a (u64) value of `1.5*1^12`, may be displayed as "1.5 MOB" to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
 * A `TxOut` with a token id of 1 and a  (u64) value of `5 * 10^8` may be displayed as `500 eUSD` to the user, because the token id corresponds to eUSD, and the number of decimals is 6.
 * That `TxOut` might also be displayed as `$500` because the symbol of `eUSD` is specified as `$`.
 
