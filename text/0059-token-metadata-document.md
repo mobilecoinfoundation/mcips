@@ -39,8 +39,8 @@ This proposal creates a source of truth for token metadata for tokens on the Mob
 
 Two documents are hosted on the MobileCoin foundation website:
 
-`https://mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
-`https://mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
+* `https://mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
+* `https://mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
 The ed25519 signing key will be controlled by the mobilecoin foundation.
 This MCIP will be updated, and the public key will be posted here, after the key is created,
@@ -52,7 +52,7 @@ The `token_metadata.json` document has the following schema (example):
 
 ```
 {
-    publication_timestamp: "10020032320032",
+    signing_timestamp: "10020032320032",
     metadata: [
         {
             token_id: "0",
@@ -97,18 +97,18 @@ For example:
 
 The token-metadata json fields have the following semantics:
 
-* `publication_timestamp`: A string representation of the unix timestamp at the time of creating the document's signature.
+* `signing_timestamp`: A string representation of the unix timestamp at the time of creating the document's signature.
 * `token_id`: A decimal string representation of the `u64` corresponding to the token id.
 * `currency_name`: A UTF-8 string which is the full, official name of the currency. This is intended to be an english-language word.
 * `ticker_symbol`: A ticker symbol for the currency. This is appropriate to be displayed by an exchange, as a short form of the name of the currency. Not more than 12 printable ASCII characters, including `[A-Za-z0-9].-`.
 * `symbol`: Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also, Bitcoin has ₿, and Ethereum has Ξ. This may be optionally specified as a UTF-8 string in the "symbol" field. How exactly it is displayed may be locale specific and we do not attempt to formally specify that at this time.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency.
-* `logo_svg`: An optional logo image. This is a base64 encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
+* `logo_svg`: An optional logo image. This is a base64-encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
 * `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
 
 Clients MUST download and validate the `token_metadata.sig` before attempting to process the `token_metadata.json`, and must reject the json with an error if the signature fails.
 
-Clients SHOULD include a minimum for `publication_timestamp` as part of their build, and reject any `token_metadata.json` which is less than the baked-in `publication_timestamp`. This prevents replay attacks where an old `token_metadata.json` document is substituted for the latest one with the goal of confusing the users by making their tokens display differently or not at all. They can fetch the latest `token_metadata.json` at build time to get the latest `publication_timestamp`.
+Clients SHOULD include a minimum for `signing_timestamp` as part of their build, and reject any `token_metadata.json` which is less than the baked-in `signing_timestamp`. This prevents replay attacks where an old `token_metadata.json` document is substituted for the latest one with the goal of confusing the users by making their tokens display differently or not at all. They can fetch the latest `token_metadata.json` at build time to get the latest `signing_timestamp`.
 
 Clients MAY continue to bake token metadata into their build at their discretion, for instance, in order to support offline wallets or other cases where the client cannot access the internet. When both baked-in metadata and the `token_metadata.json` are available, the validated `token_metadata.json` should be considered a more reliable source of truth.
 
@@ -124,7 +124,7 @@ Maintainers of this document SHOULD NOT:
 # Drawbacks
 [drawbacks]: #drawbacks
 
-This proposal has a few drawbacks relative to MCIP 40:
+This proposal has a few drawbacks relative to [MCIP 40](https://github.com/mobilecoinfoundation/mcips/pull/0040):
 
 * MCIP 40 puts the token metadata on chain. This makes it possible to enforce protocol level rules around how the document can evolve. It also ensures the availability of the document.
 * It also would take longer to develop since it would require an enclave upgrade.
