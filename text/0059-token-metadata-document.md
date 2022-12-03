@@ -159,7 +159,7 @@ the `mobilecoin.com` URLs as well, so this is another way in which testing a dep
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-We chose json instead of protobuf to make it easier for clients (which may be web browsers) to directly consume this document in e.g. javascript.
+We chose JSON instead of protobuf to make it easier for clients (which may be web browsers) to directly consume this document in e.g. Javascript.
 
 We chose to separate the signature from the document to avoid the complexity of storing serialized json within json.
 This also allows that we can modify the signature scheme in the future while maintaining backwards compatibility, as long as we continue to serve both the old signature and the new signature,
