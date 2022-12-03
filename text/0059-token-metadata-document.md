@@ -107,15 +107,14 @@ For example:
 
 **Note**: In some locales, the actual presentation of currency amounts is different. For example, per [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting):
 
-|-----------------------------------------------------------------------------------------------------
-| **Description**                                                    | **Country/Region** | Formatting
-|-----------------------------------------------------------------------------------------------------
-|The negative sign before both the currency symbol and the number   | UK                 | -£127.54
-|                                                                   | France             | -127,54 €
-|The negative sign before the number but behind the currency symbol | Denmark            | kr-127,54
-|The negative sign after the number                                 | Netherlands        | € 127,54-
-|Enclosed in parentheses.                                           | US                 | ($127.54)
-|----------------------------------------------------------------------------------------------------
+| **Description**                                                    | **Country/Region** | Formatting |
+|------------------------------------------------------------------------------------------------------|
+|The negative sign before both the currency symbol and the number   | UK                 | -£127.54    |
+|                                                                   | France             | -127,54 €   |
+|The negative sign before the number but behind the currency symbol | Denmark            | kr-127,54   |
+|The negative sign after the number                                 | Netherlands        | € 127,54-   |
+|Enclosed in parentheses.                                           | US                 | ($127.54)   |
+|------------------------------------------------------------------------------------------------------|
 
 Most currencies use the same decimal and thousands separator that other numbers in the locale use, but this is not always true. In some places in Switzerland, they use the period as a decimal separator for Swiss francs (Sfr. 127.54), but then use commas as the decimal separator everywhere else (127,54).
 
