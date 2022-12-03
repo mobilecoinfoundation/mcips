@@ -10,7 +10,7 @@ This MCIP specifies a means for clients to dynamically discover metadata about t
 on the MobileCoin blockchain, so that they can then display the balance of a new token to customers
 in an appropriate way.
 
-This proposal differs from an earlier proposal MCIP 40, in that it is a stop-gap mechanism which
+This proposal differs from an earlier proposal [MCIP 40](https://github.com/mobilecoinfoundation/mcips/pull/0040), in that it is a stop-gap mechanism which
 does not post metadata to the blockchain.
 
 This proposal specifies how clients should dynamically discover token metadata, authenticate this data,
