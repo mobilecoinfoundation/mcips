@@ -163,7 +163,7 @@ We chose JSON instead of protobuf to make it easier for clients (which may be we
 
 We chose to separate the signature from the document to avoid the complexity of storing serialized json within json.
 This also allows that we can modify the signature scheme in the future while maintaining backwards compatibility, as long as we continue to serve both the old signature and the new signature,
-at different url's.
+at different URLs.
 
 We chose not to attempt to standardize the localization of any cryptocurrency names, since it does not seem conventional to do so in cryptocurrency wallets.
 
