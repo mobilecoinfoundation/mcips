@@ -449,7 +449,7 @@ In the Ethereum ecosystem, most tokens (fungible and non-fungible) have logos, b
 
 In [EIS-2569](https://eips.ethereum.org/EIPS/eip-2569) it was proposed to actually store SVG data on chain.
 
-Typically, wallets like metamask use services like Infura to access names and logos of tokens. There is not a standard way outside of these
+Typically, wallets like MetaMask use services like Infura to access names and logos of tokens. There is not a standard way outside of these
 services to get this data for an arbitrary ERC-20.
 
 In Algorand, any standard asset that is created has [required parameters](https://developer.algorand.org/docs/get-details/asa/#asset-parameters)
