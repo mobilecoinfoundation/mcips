@@ -101,11 +101,11 @@ about the token of that id.
 
 For example:
 
-* A `TxOut` with token id of 0 and a (u64) value of `1.5 * 10^12`, may be displayed as "1.5 MOB" to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
+* A `TxOut` with token id of 0 and a (u64) value of `1.5 * 10^12`, may be displayed as `1.5 MOB` to the user, because the token id corresponds to MOB, and the number of decimals of MOB is 12.
 * A `TxOut` with a token id of 1 and a  (u64) value of `5 * 10^8` may be displayed as `500 eUSD` to the user, because the token id corresponds to eUSD, and the number of decimals is 6.
 * That `TxOut` might also be displayed as `$500` because the symbol of `eUSD` is specified as `$`.
 
-**Note**: In some locales, the actual presentation of currency amounts is different. For example, per [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting):
+**Note**: In some locales, the actual presentation of currency amounts is different from this example. For example, per [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting):
 
 | **Description**                                                    | **Country/Region** | Formatting |
 | ------------------------------------------------------------------ | ------------------ | ---------- |
@@ -117,8 +117,7 @@ For example:
 
 Most currencies use the same decimal and thousands separator that other numbers in the locale use, but this is not always true. In some places in Switzerland, they use the period as a decimal separator for Swiss francs (Sfr. 127.54), but then use commas as the decimal separator everywhere else (127,54).
 
-We take the point of view that these are not "token metadata", which are determined by the ID of the token that we are using, but rather localization properties determined by the locale of the user.
-So, for example the same app might be capable of displaying `kr 127,54` and `127.54 kr`, depending on the locale of the user, and token metadata does not influence this.
+We take the point of view that these differences are not "token metadata", which are determined by the ID of the token that we are using, but rather localization properties determined by the locale of the user. So, for example the same app might be capable of displaying `kr 127,54` and `127.54 kr`, depending on the locale of the user, and token metadata does not influence this.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
