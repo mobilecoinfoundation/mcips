@@ -114,7 +114,6 @@ For example:
 | The negative sign before the number but behind the currency symbol | Denmark            | kr-127,54  |
 | The negative sign after the number                                 | Netherlands        | € 127,54-  |
 | Enclosed in parentheses.                                           | US                 | ($127.54)  |
-| ------------------------------------------------------------------ | ------------------ | ---------- |
 
 Most currencies use the same decimal and thousands separator that other numbers in the locale use, but this is not always true. In some places in Switzerland, they use the period as a decimal separator for Swiss francs (Sfr. 127.54), but then use commas as the decimal separator everywhere else (127,54).
 
