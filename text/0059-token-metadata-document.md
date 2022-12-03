@@ -55,16 +55,16 @@ Two documents are hosted on the MobileCoin foundation website:
 * `https://www.mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
 * `https://www.mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
-The ed25519 signing key will be controlled by the MobileCoin foundation.
-This MCIP will be updated, and the public key will be posted here, after the key is created,
-if the proposal is accepted.
+The ed25519 signing key is be controlled by the MobileCoin foundation.
+We propose that the `MINTING_TRUST_ROOT` key is reused for this purpose.
 
-Token metadata ed25519 public key hex bytes: `TBD`
+Minting trust root ed25519 public key hex bytes: `TODO`
 
 The `token_metadata.json` document has the following schema (example):
 
 ```
 {
+    "schema_version": 1,
     "signing_timestamp": "10020032320032",
     "metadata": [
         {
@@ -127,6 +127,7 @@ So, for example the same app might be capable of displaying `kr 127,54` and `127
 
 The token-metadata json fields have the following semantics:
 
+* `schema_version`: An integer describing the version number of the schema of this document. This is 1 until a future MCIP proposes schema modifications.
 * `signing_timestamp`: A string representation of the unix timestamp at the time of creating the document's signature.
 * `token_id`: A decimal string representation of the `u64` corresponding to the token id.
 * `currency_name`: A UTF-8 string which is the full, official name of the currency. This is intended to be an english-language noun or noun phrase.
