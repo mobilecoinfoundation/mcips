@@ -55,7 +55,7 @@ Two documents are hosted on the MobileCoin foundation website:
 * `https://www.mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
 * `https://www.mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
-The ed25519 signing key will be controlled by the mobilecoin foundation.
+The ed25519 signing key will be controlled by the MobileCoin foundation.
 This MCIP will be updated, and the public key will be posted here, after the key is created,
 if the proposal is accepted.
 
