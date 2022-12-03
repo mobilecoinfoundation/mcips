@@ -105,6 +105,23 @@ For example:
 * A `TxOut` with a token id of 1 and a  (u64) value of `5 * 10^8` may be displayed as `500 eUSD` to the user, because the token id corresponds to eUSD, and the number of decimals is 6.
 * That `TxOut` might also be displayed as `$500` because the symbol of `eUSD` is specified as `$`.
 
+**Note**: In some locales, the actual presentation of currency amounts is different. For example, per [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting):
+
+----------------------------------------------------------------------------------------------------
+**Description**                                                    | **Country/Region** | Formatting
+----------------------------------------------------------------------------------------------------
+The negative sign before both the currency symbol and the number   | UK                 | -£127.54
+                                                                   | France             | -127,54 €
+The negative sign before the number but behind the currency symbol | Denmark            | kr-127,54
+The negative sign after the number                                 | Netherlands        | € 127,54-
+Enclosed in parentheses.                                           | US                 | ($127.54)
+----------------------------------------------------------------------------------------------------
+
+Most currencies use the same decimal and thousands separator that other numbers in the locale use, but this is not always true. In some places in Switzerland, they use the period as a decimal separator for Swiss francs (Sfr. 127.54), but then use commas as the decimal separator everywhere else (127,54).
+
+We take the point of view that these are not "token metadata", which are determined by the ID of the token that we are using, but rather localization properties determined by the locale of the user.
+So, for example the same app might be capable of displaying `kr 127,54` and `127.54 kr`, depending on the locale of the user, and token metadata does not influence this.
+
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -468,6 +485,8 @@ In Algorand, any standard asset that is created has [required parameters](https:
 In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a "description" is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
 
 In a [blog post](https://moxie.org/2022/01/07/web3-first-impressions.html), Moxie Marlinspike criticized web3 technologies that commit url's pointing to images to blockchains, but don't include e.g. a hash of the image on the chain, which would allow the user to verify that the url resolved to the correct image. In this proposal, SVG images are inline in the metadata document.
+
+We examined [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting) and [Shopify's localization guide](https://polaris.shopify.com/foundations/formatting-localized-currency) when considering how currency localization should work and how that connects to token metadata.
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
