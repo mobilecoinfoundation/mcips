@@ -119,6 +119,8 @@ Most currencies use the same decimal and thousands separator that other numbers 
 
 We take the point of view that these differences are not "token metadata", which are determined by the ID of the token that we are using, but rather localization properties determined by the locale of the user. So, for example the same app might be capable of displaying `kr 127,54` and `127.54 kr`, depending on the locale of the user, and token metadata does not influence this.
 
+This is also consistent with [how shopify handles currency localization](https://polaris.shopify.com/foundations/formatting-localized-currency).
+
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
