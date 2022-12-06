@@ -50,15 +50,21 @@ of token metadata that can be validated by clients.
 
 This proposal creates a source of truth for token metadata for tokens on the MobileCoin blockchain.
 
-Two documents are hosted on the MobileCoin foundation website:
+Two documents are hosted by (or on behalf of) the MobileCoin Foundation:
 
-* `https://www.mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
-* `https://www.mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
+* `https://mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
+* `https://mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
-The ed25519 signing key is be controlled by the MobileCoin foundation.
+The ed25519 signing key is controlled by the MobileCoin foundation.
 We propose that the `MINTING_TRUST_ROOT` key is reused for this purpose.
 
-Minting trust root ed25519 public key hex bytes: `TODO`
+At time of writing the `MINTING_TRUST_ROOT` ed25519 public key (in DER encoding) is:
+
+```
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEA6rqMXns4wNN+W16Eblsue+gqeXlW5C5WhN3MGCc1Ntw=
+-----END PUBLIC KEY-----
+```
 
 The `token_metadata.json` document has the following schema (example):
 
@@ -86,8 +92,8 @@ The `token_metadata.json` document has the following schema (example):
         },
         {
             "token_id": "14",
-            "currency_name": 'Meowblecoin',
-            "short_code": 'MEOW',
+            "currency_name": "Meowblecoin",
+            "short_code": "MEOW",
             "decimals": 12,
             "logo_svg": "b64...==",
             "info_url": "https://www.meowblecoin.com"
@@ -130,13 +136,13 @@ The token-metadata json fields have the following semantics:
 * `signing_timestamp`: A string representation of the unix timestamp at the (approximate) time of creating the document's signature. This is an integer number of seconds since the unix epoch.
 * `token_id`: A decimal string representation of the `u64` corresponding to the token id.
 * `currency_name`: A UTF-8 string which is the full, official name of the currency. This is intended to be an English language noun or noun phrase.
-* `short_code`: A short code for the currency. This may be displayed to users in a manner similar to ISO 4217 currency codes, for example, USD, GBP, CAD, in connection to an amount of currency. This may also typically match the ticker symbol used for this asset on cryptocurrency exchanges. Not more than 12 printable ASCII characters, including `[A-Za-z0-9].-`.
-* `symbol`: Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also. Bitcoin has ₿. Ethereum has Ξ. This may be optionally specified as a UTF-8 string in the "symbol" field. How exactly it is displayed may be locale specific and we do not attempt to formally specify that at this time.
+* `short_code`: A short code for the currency. This may be displayed to users in a manner similar to ISO 4217 currency codes, for example, USD, GBP, CAD, in connection to an amount of currency. This is expected to match the ticker symbol used for this asset on cryptocurrency exchanges. Not more than 12 printable ASCII characters, including `[A-Za-z0-9].-`.
+* `symbol`: Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also. Bitcoin has ₿. Ethereum has Ξ. This may be optionally specified as a UTF-8 string in the "symbol" field.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency. For example, MOB has 12 decimals, which indicates that `10^12` of the smallest representable units of MOB on the MobileCoin blockchain are equal to one MOB.
 * `logo_svg`: An optional logo image. This is a base64-encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
 * `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should have basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
 
-Clients MUST download and validate the `token_metadata.sig` against the bytes of the `token_metadata.json` before attempting to process the `token_metadata.json`, and must reject the json with an error if the signature checking fails.
+Clients MUST download and validate the `token_metadata.sig` against the bytes of the `token_metadata.json` and the `MINTING_TRUST_ROOT` public key before attempting to process the `token_metadata.json`. Clients MUST reject the json with an error if the signature checking fails.
 
 Clients SHOULD include a minimum for `signing_timestamp` as part of their build, and reject any `token_metadata.json` which is less than the baked-in `signing_timestamp`. This prevents replay attacks where an old `token_metadata.json` document is substituted for the latest one with the goal of confusing the users by making their tokens display differently or not at all. They can fetch the latest `token_metadata.json` at build time to get the latest `signing_timestamp`.
 
@@ -148,7 +154,7 @@ Maintainers of the `token_metadata.json` SHOULD NOT:
 * Delete a token id's record
 * Modify data such as the `short_code` or `decimals` of a token, which may confuse users, and particularly, any exchanges that use this as a source of truth.
 * There may be legitimate reasons to make changes to the `currency_name` or `logo_svg`, but this needs to be carefully considered.
-* Allow two token ids with `currency_name`s which could be confused
+* Allow two token ids with `currency_name`'s which could be confused
 * Allow the same `short_code` to appear twice, or, allowing two short codes which differ only in case, or the replacement of letters with similar numbers.
 * Sign a new version of the `token_metadata.json` with a signing timestamp that is less or equal to the previous version.
 
@@ -252,7 +258,7 @@ In Algorand, any standard asset that is created has [required parameters](https:
 >    URL (optional)
 >    MetaDataHash (optional)
 
-In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a "description" is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
+In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a description is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
 
 In a [blog post](https://moxie.org/2022/01/07/web3-first-impressions.html), Moxie Marlinspike criticized web3 technologies that commit url's pointing to images to blockchains, but don't include e.g. a hash of the image on the chain, which would allow the user to verify that the url resolved to the correct image. In this proposal, SVG images are inline in the metadata document.
 
@@ -266,6 +272,6 @@ None at this time.
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-In the future we hope to do on-chain token metadata as envisioned in MCIP 40.
+In the future we hope to do on-chain token metadata as envisioned in [MCIP 40](https://github.com/mobilecoinfoundation/mcips/pull/0040).
 
 This is likely required for doing user-created tokens, and will be required before there are too many tokens for this document to be manageable by humans.
