@@ -142,7 +142,7 @@ Clients SHOULD include a minimum for `signing_timestamp` as part of their build,
 
 Clients MAY continue to bake token metadata into their build at their discretion, for instance, in order to support offline wallets or other cases where the client cannot access the internet. When both baked-in metadata and the `token_metadata.json` are available, the validated `token_metadata.json` should be considered a more reliable source of truth.
 
-Maintainers of this document SHOULD NOT:
+Maintainers of the `token_metadata.json` SHOULD NOT:
 
 * Allow duplicate records for a given token id
 * Delete a token id's record
