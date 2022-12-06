@@ -129,7 +129,7 @@ The token-metadata json fields have the following semantics:
 * `schema_version`: An integer describing the version number of the schema of this document. This is 1 until a future MCIP proposes schema modifications.
 * `signing_timestamp`: A string representation of the unix timestamp at the time of creating the document's signature.
 * `token_id`: A decimal string representation of the `u64` corresponding to the token id.
-* `currency_name`: A UTF-8 string which is the full, official name of the currency. This is intended to be an english-language noun or noun phrase.
+* `currency_name`: A UTF-8 string which is the full, official name of the currency. This is intended to be an English language noun or noun phrase.
 * `ticker_symbol`: A ticker symbol for the currency. This is appropriate to be displayed by an exchange, as a short form of the name of the currency. Not more than 12 printable ASCII characters, including `[A-Za-z0-9].-`.
 * `symbol`: Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also, Bitcoin has ₿, and Ethereum has Ξ. This may be optionally specified as a UTF-8 string in the "symbol" field. How exactly it is displayed may be locale specific and we do not attempt to formally specify that at this time.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency.
