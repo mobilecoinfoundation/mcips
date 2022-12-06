@@ -134,7 +134,7 @@ The token-metadata json fields have the following semantics:
 * `symbol`: Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also, Bitcoin has ₿, and Ethereum has Ξ. This may be optionally specified as a UTF-8 string in the "symbol" field. How exactly it is displayed may be locale specific and we do not attempt to formally specify that at this time.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency.
 * `logo_svg`: An optional logo image. This is a base64-encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
-* `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
+* `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should have basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
 
 Clients MUST download and validate the `token_metadata.sig` before attempting to process the `token_metadata.json`, and must reject the json with an error if the signature fails.
 
