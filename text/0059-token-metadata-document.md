@@ -71,7 +71,7 @@ The `token_metadata.json` document has the following schema (example):
 ```
 {
     "schema_version": 1,
-    "signing_timestamp": "10020032320032",
+    "signing_timestamp": "1670377814",
     "metadata": [
         {
             "token_id": "0",
