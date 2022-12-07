@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-This MCIP specifies a means for clients to dynamically discover metadata about token ids
+This MCIP specifies a means for clients to dynamically discover metadata about token IDs
 on the MobileCoin blockchain, so that they can then display the balance of a new token to customers
 in an appropriate way.
 
