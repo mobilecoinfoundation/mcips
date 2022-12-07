@@ -98,7 +98,7 @@ The `token_metadata.json` document has the following schema (example):
             "logo_svg": "b64...==",
             "info_url": "https://www.meowblecoin.com"
         }
-    ],
+    ]
 }
 ```
 
