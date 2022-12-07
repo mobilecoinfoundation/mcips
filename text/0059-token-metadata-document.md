@@ -247,14 +247,14 @@ In Algorand, any standard asset that is created has [required parameters](https:
 
 > These eight parameters can *only* be specified when an asset is created.
 >
->    Creator (required)
->    AssetName (optional, but recommended)
->    UnitName (optional, but recommended)
->    Total (required)
->    Decimals (required)
->    DefaultFrozen (required)
->    URL (optional)
->    MetaDataHash (optional)
+>   * Creator (required)
+>   * AssetName (optional, but recommended)
+>   * UnitName (optional, but recommended)
+>   * Total (required)
+>   * Decimals (required)
+>   * DefaultFrozen (required)
+>   * URL (optional)
+>   * MetaDataHash (optional)
 
 In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a description is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
 
