@@ -78,6 +78,7 @@ The `token_metadata.json` document has the following schema (example):
             "currency_name": "MobileCoin",
             "short_code": "MOB",
             "decimals": 12,
+            "suggested_precision": 4,
             "logo_svg": "b64...==",
             "info_url": "https://www.mobilecoin.com"
         },
@@ -87,6 +88,7 @@ The `token_metadata.json` document has the following schema (example):
             "short_code": "eUSD",
             "symbol": "$",
             "decimals": 6,
+            "suggested_precision": 2,
             "logo_svg": "b64...==",
             "info_url": "https://mobilecoin.com/blog/mobilecoin-launches-eusd"
         },
@@ -95,6 +97,7 @@ The `token_metadata.json` document has the following schema (example):
             "currency_name": "Meowblecoin",
             "short_code": "MEOW",
             "decimals": 12,
+            "suggested_precision": 4,
             "logo_svg": "b64...==",
             "info_url": "https://www.meowblecoin.com"
         }
@@ -137,6 +140,7 @@ The token-metadata json fields have the following semantics:
 * `short_code`: A short code for the currency, up to 12 ASCII characters matching `/[A-Za-z0-9.-]{1,12}/`. This may be displayed to users in a manner similar to ISO 4217 currency codes, for example, USD, GBP, CAD, in connection to an amount of currency. This is expected to match the ticker symbol used for this asset on cryptocurrency exchanges.
 * `symbol`: Optional UTF-8 string. Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also. Bitcoin has ₿. Ethereum has Ξ.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency. For example, MOB has 12 decimals, which indicates that `10^12` of the smallest representable units of MOB on the MobileCoin blockchain are equal to one MOB.
+* `suggested_precision`: An integer specifying how many digits after the decimal point it is suggested to display when displaying an amount of this currency. For MOB the suggested precision is four digits, so if the user has a precise amount of `1.00449 MOB`, it is suggested to round this to `1.0045 MOB` when displaying it. For `eUSD` it is suggested to round the nearest hundredth instead, and this is indicated by the `suggested_precision` of two. The `suggested_precision` could also be a negative number. If for example the `suggested_precision` is `-2`, then amounts are suggested to be rounded to the nearest 100 units. Clients are free to ignore the `suggested_precision` if they so choose.
 * `logo_svg`: An optional logo image. This is a base64-encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
 * `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should have basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
 
