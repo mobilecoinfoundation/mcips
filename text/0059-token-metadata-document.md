@@ -79,17 +79,19 @@ The `token_metadata.json` document has the following schema (example):
             "short_code": "MOB",
             "decimals": 12,
             "suggested_precision": 4,
-            "logo_svg": "b64...==",
+            "logo_svg_url": "https://www.mobilecoin.com/mob-logo.svg",
+            "logo_svg_blake2b_digest": "044F4A75DC1147629",
             "info_url": "https://www.mobilecoin.com"
         },
         {
             "token_id": "1",
-            "currency_name": "Electronic Dollars",
+            "currency_name": "Electronic Dollar",
             "short_code": "eUSD",
             "symbol": "$",
             "decimals": 6,
             "suggested_precision": 2,
-            "logo_svg": "b64...==",
+            "logo_svg_url": "https://www.mobilecoin.com/eusd-logo.svg",
+            "logo_svg_blake2b_digest": "0123FFFAB12344567",
             "info_url": "https://mobilecoin.com/blog/mobilecoin-launches-eusd"
         },
         {
@@ -98,7 +100,8 @@ The `token_metadata.json` document has the following schema (example):
             "short_code": "MEOW",
             "decimals": 12,
             "suggested_precision": 4,
-            "logo_svg": "b64...==",
+            "logo_svg_url": "https://www.meowblecoin.com/meowb-logo.svg",
+            "logo_svg_blake2b_digest": "F8876CBD11189422B",
             "info_url": "https://www.meowblecoin.com"
         }
     ]
@@ -141,18 +144,23 @@ The token-metadata json fields have the following semantics:
 * `symbol`: Optional UTF-8 string. Most fiat currencies have a printable character such as $, £, ¥. Some cryptocurrencies do also. Bitcoin has ₿. Ethereum has Ξ.
 * `decimals`: An integer specifying how the `u64` integer in a TxOut in the blockchain is scaled to compute a user-displayed amount of the currency. For example, MOB has 12 decimals, which indicates that `10^12` of the smallest representable units of MOB on the MobileCoin blockchain are equal to one MOB.
 * `suggested_precision`: An integer specifying how many digits after the decimal point it is suggested to display when displaying an amount of this currency. For MOB the suggested precision is four digits, so if the user has a precise amount of `1.00449 MOB`, it is suggested to round this to `1.0045 MOB` when displaying it. For `eUSD` it is suggested to round the nearest hundredth instead, and this is indicated by the `suggested_precision` of two. The `suggested_precision` could also be a negative number. If for example the `suggested_precision` is `-2`, then amounts are suggested to be rounded to the nearest 100 units. Clients are free to ignore the `suggested_precision` if they so choose.
-* `logo_svg`: An optional logo image. This is a base64-encoded SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
+* `logo_svg_url`: An optional link to a logo image for the currency. This link produces an SVG document. This is expected to have been sanitized using something like [svg-hush](https://github.com/cloudflare/svg-hush), to remove scripting, hyperlinks to other documents, and references to cross-origin resources. The full extent of such sanitization will not be specified here.
+* `logo_svg_blake2b_digest`: This is required if `logo_svg_url` is present. This field is a hex-encoding of the 64-byte blake2b digest of the logo svg document. This permits validation of the logo svg after it is downloaded. The blake2b digest is computed against the raw bytes of the entire svg document. This is the same as the bytes of the HTTP body of the response to a GET request that fetches the image, or the blake2b digest of the bytes of the SVG file as it exists on disk.
 * `info_url`: A link to a website containing more information about the token that may be interesting to token holders. This should have basic information about the purpose of the token, its supply, any utility that it has, or links to associated whitepapers.
 
 Clients MUST download and validate the `token_metadata.sig` against the bytes of the `token_metadata.json` and the `MINTING_TRUST_ROOT` public key before attempting to process the `token_metadata.json`. Clients MUST reject the json with an error if the signature checking fails.
 
-Clients SHOULD include a minimum for `signing_timestamp` as part of their build, and reject any `token_metadata.json` which is less than the baked-in `signing_timestamp`. This prevents replay attacks where an old `token_metadata.json` document is substituted for the latest one with the goal of confusing the users by making their tokens display differently or not at all. They can fetch the latest `token_metadata.json` at build time to get the latest `signing_timestamp`.
+Clients SHOULD include a validated `token_metadata.json` baked-in to the app as part of their build, and also at run-time try to fetch a new `token_metadata.json`.
+Clients then MUST reject any `token_metadata.json` which has a `signing_timestamp` less than the baked-in `signing_timestamp`, and fallback to the baked-in `token_metadata.json`. This prevents replay attacks where an old `token_metadata.json` document is substituted for the latest one with the goal of confusing the users by making their tokens display differently or not at all. Clients can fetch the latest `token_metadata.json` at build time / as part of their release process.
 
 Clients MAY continue to bake token metadata into their build at their discretion, for instance, in order to support offline wallets or other cases where the client cannot access the internet. When both baked-in metadata and the `token_metadata.json` are available, the validated `token_metadata.json` should be considered a more reliable source of truth.
 
+Clients SHOULD follow all `logo_svg_url` links and download and cache the images when they get the token metadata document.
+Clients MUST check the `logo_svg_blake2b_digest` for any svg document that they download this way, and reject it if the hash doesn't match.
+
 Maintainers of the `token_metadata.json` SHOULD NOT:
 
-* Allow duplicate records for a given token id
+* Allow duplicate records for a given token id (within a given version of `token_metadata.json`)
 * Delete a token id's record
 * Modify data such as the `short_code` or `decimals` of a token, which may confuse users, and particularly, any exchanges that use this as a source of truth.
 * There may be legitimate reasons to make changes to the `currency_name` or `logo_svg`, but this needs to be carefully considered.
@@ -175,8 +183,7 @@ This proposal's authentication scheme is a single ed25519 signature.
 
 Since this signature can easily be performed off-line anyways, and the document isn't expected to change often, we think a single ed25519 signature is fine for this stop-gap proposal.
 
-In our design, we included SVG images inline in the metadata document to avoid this validation issue.
-This will not scale well to e.g. millions of tokens, and we expect to transition to on-chain metadata before that becomes a problem.
+Having a single document will not scale well to e.g. millions of tokens, and we expect to transition to on-chain metadata before that becomes a problem.
 
 This proposal does not envision having different token registries per network. It is believed that this complexity is unnecessary.
 However, it means that just as clients need to hit Intel's IAS services as part of testing (in prod and dev), they will have to hit
@@ -194,6 +201,8 @@ at different URLs.
 We chose not to attempt to standardize the localization of any cryptocurrency names, since it does not seem conventional to do so in cryptocurrency wallets.
 
 We chose to allow numbers and some punctuation to be used in ticker symbols.
+
+We chose not to inline the SVG logo images into the document, because it will make the document bigger and more unwieldy, and harder to edit, particularly if the SVG has to be escaped and stored as a string. Base64-encoded SVG is considered an anti-pattern which increases the size of the document and makes it harder to consume. The logos are expected to be online at reachable URLs anyways, so simply storing their blake2b hash in the signed metadata document reduces the size and complexity of the signed metadata document. There are blake2b libraries available in javascriptThis pattern is also extensible if we need to have more than one version of the logo appropriate for different form factors, we can simply add more `logo_svg_size_url...` fields.
 
 This is based on looking at token lists on various cryptocurrency exchanges:
 
@@ -262,7 +271,7 @@ In Algorand, any standard asset that is created has [required parameters](https:
 
 In Cardano, native assets can be created before being [registered with the token registry](https://developers.cardano.org/docs/native-tokens/token-registry/How-to-prepare-an-entry-for-the-registry-NA-policy-script). Only a name is required to create the asset. When subsequently registering an asset, a description is required. Then a ticker, url, logo, and decimals are all considered optional. In the Cardano registry, metadata can be deleted and updated, but it requires a signature from the creator.
 
-In a [blog post](https://moxie.org/2022/01/07/web3-first-impressions.html), Moxie Marlinspike criticized web3 technologies that commit url's pointing to images to blockchains, but don't include e.g. a hash of the image on the chain, which would allow the user to verify that the url resolved to the correct image. In this proposal, SVG images are inline in the metadata document.
+In a [blog post](https://moxie.org/2022/01/07/web3-first-impressions.html), Moxie Marlinspike criticized web3 technologies that commit url's pointing to images to blockchains, but don't include e.g. a hash of the image on the chain, which would allow the user to verify that the url resolved to the correct image. In this proposal, SVG images are stored online, but a blake2b digest of their contents is stored in the metadata document for validation.
 
 We examined [Microsoft's localization guide](https://learn.microsoft.com/en-us/globalization/locale/currency-formatting) and [Shopify's localization guide](https://polaris.shopify.com/foundations/formatting-localized-currency) when considering how currency localization should work and how that connects to token metadata.
 
