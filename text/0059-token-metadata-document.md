@@ -1,7 +1,7 @@
 - Feature Name: token_metadata_document
 - Start Date: 2022-12-02
 - MCIP PR: [mobilecoinfoundation/mcips#0059](https://github.com/mobilecoinfoundation/mcips/pull/0059)
-- Tracking Issue: TBD
+- Tracking Issue: [mobilecoinfoundation/mobilecoin#3049](https://github.com/mobilecoinfoundation/mobilecoin/issues/3049)
 
 # Summary
 [summary]: #summary
