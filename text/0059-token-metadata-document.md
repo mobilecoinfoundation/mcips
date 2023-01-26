@@ -202,7 +202,7 @@ We chose not to attempt to standardize the localization of any cryptocurrency na
 
 We chose to allow numbers and some punctuation to be used in ticker symbols.
 
-We chose not to inline the SVG logo images into the document, because it will make the document bigger and more unwieldy, and harder to edit, particularly if the SVG has to be escaped and stored as a string. Base64-encoded SVG is considered an anti-pattern which increases the size of the document and makes it harder to consume. The logos are expected to be online at reachable URLs anyways, so simply storing their blake2b hash in the signed metadata document reduces the size and complexity of the signed metadata document. There are blake2b libraries available in javascriptThis pattern is also extensible if we need to have more than one version of the logo appropriate for different form factors, we can simply add more `logo_svg_size_url...` fields.
+We chose not to inline the SVG logo images into the document, because it will make the document bigger and more unwieldy, and harder to edit, particularly if the SVG has to be escaped and stored as a string. Base64-encoded SVG is considered an anti-pattern which increases the size of the document and makes it harder to consume. The logos are expected to be online at reachable URLs anyways, so simply storing their blake2b hash in the signed metadata document reduces the size and complexity of the signed metadata document. There are blake2b libraries available in javascript. This pattern is also extensible if we need to have more than one version of the logo appropriate for different form factors, we can simply add more `logo_svg_size_url...` fields.
 
 This is based on looking at token lists on various cryptocurrency exchanges:
 
