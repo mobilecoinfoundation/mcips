@@ -52,8 +52,8 @@ This proposal creates a source of truth for token metadata for tokens on the Mob
 
 Two documents are hosted by (or on behalf of) the MobileCoin Foundation:
 
-* `https://mobilecoin.com/token_metadata.json`: A JSON document containing token metadata
-* `https://mobilecoin.com/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
+* `https://config.mobilecoin.foundation/token_metadata.json`: A JSON document containing token metadata
+* `https://config.mobilecoin.foundation/token_metadata.sig`: An ed25519 signature over the bytes of the .json document. This is binary data.
 
 The ed25519 signing key is controlled by the MobileCoin foundation.
 We propose that the `MINTING_TRUST_ROOT` key is reused for this purpose.
@@ -79,9 +79,9 @@ The `token_metadata.json` document has the following schema (example):
             "short_code": "MOB",
             "decimals": 12,
             "suggested_precision": 4,
-            "logo_svg_url": "https://www.mobilecoin.com/mob-logo.svg",
+            "logo_svg_url": "https://mobilecoin.foundation/mob-logo.svg",
             "logo_svg_blake2b_digest": "044F4A75DC1147629",
-            "info_url": "https://www.mobilecoin.com"
+            "info_url": "https://mobilecoin.foundation"
         },
         {
             "token_id": "1",
