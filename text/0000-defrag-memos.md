@@ -1,5 +1,5 @@
 - Feature Name: RTH Defragmentation Memos
-- Start Date: (fill me in with today's date, 2023-01-31)
+- Start Date: (fill me in with today's date, 2023-02-02)
 - MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
 
 # Summary
@@ -17,15 +17,7 @@ From the client's perspective, these larger `TxOut`s created by defragmentation 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-> Explain the proposal as if it was already included in the system and you were teaching it to a user. That generally means:
->
-> - Introducing new named concepts
-> - Explaining the feature largely in terms of examples.
-> - Explaining how users should *think* about the feature, and how it should impact the way they use MobileCoin. It should explain the impact as concretely as possible.
-> - If applicable, provide sample error messages, deprecation warnings, or migration guidance.
-> - If applicable, describe the differences between teaching this to existing users and new users.
->
-> For implementation-oriented MCIPs (e.g. for ledger formats), this section should focus on how other contributors should think about the change, and give examples of its concrete impact. For policy MCIPs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
+This proposal adds one new encrypted memo type.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
