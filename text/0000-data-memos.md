@@ -1,5 +1,5 @@
 - Feature Name: RTH Custom Memo Types
-- Start Date: 2023-02-01
+- Start Date: 2023-02-03
 - MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
 
 # Summary
@@ -59,9 +59,9 @@ The 64-byte memo data is laid out as follows:
 | Byte range | Item |
 | ---------- | ---- |
 | 0 - 16     | Recipient's Address Hash |
-| 16 - 17    | The number of recipients, as an unsigned 8-bit number |
-| 17 - 24    | Big-endian bytes of fee amount, as an unsigned 56-bit number |
-| 24 - 32    | Big-endian bytes of the total outlay amount, as an unsigned 64-bit number |
+| 16 - 17    | The number of recipients, an unsigned 8-bit number |
+| 17 - 24    | Big-endian bytes of fee amount, an unsigned 56-bit number |
+| 24 - 32    | Big-endian bytes of the total outlay amount, an unsigned 64-bit number |
 | 32 - 64    | Custom Data                   |
 
 This is memo is mostly the same as RTH's destination memo. Instead of leaving bytes 32-64 unused, however, this space can be filled with aritrary data by the client.
@@ -102,6 +102,7 @@ There could also be a separate memo type for the payload and change `TxOut`s, bu
 [unresolved-questions]: #unresolved-questions
 
 - Would it be beneficial to have two different Custom Memo types: one for the payload `TxOut` and one for the change `TxOut`? Maybe the memo builder can accept a 'data' field and a 'change data' field. If the 'change data' field is not set, then the 'data' field is used for both outputs.
+- Do these memo names effectively communicate their function? Some other names that have been considered are "General Purpose" and "Data." Renaming the Custom Memo to Data Memo would be more consistent with the other two memos, but it is anticipated that clients will come up with their own memo types using it.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
