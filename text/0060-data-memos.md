@@ -1,6 +1,6 @@
 - Feature Name: RTH Custom Memo Types
 - Start Date: 2023-02-03
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0060](https://github.com/mobilecoinfoundation/mcips/pull/0060)
 
 # Summary
 [summary]: #summary
