@@ -42,7 +42,7 @@ This memo will be written to the payload `TxOut` of a defragmentation transactio
 # Drawbacks
 [drawbacks]: #drawbacks
 
-Accounts which have already performed defragmentation will either have no memos or sender/destination memos for their old defragmentation transactions. Though we encourage not using an account with more than one application, not all developers will implement protections against it nor will all users heed this advice. If new applications do not handle legacy defragmentation transactions, they may inadvertently display them as normal transactions.
+Accounts which have already performed defragmentation will either have no memos or sender/destination memos for their old defragmentation transactions. Though using an account with more than one application should be discouraged, not all developers will implement protections against it nor will all users heed this advice. If new applications do not handle legacy defragmentation transactions, they may inadvertently display them as normal transactions.
 
 This proposal will also require minor modifications to SDK clients. Since the addition of RTH, all transactions will generate a change `TxOut` regardless of whether or not there is change or if RTH memos are even being written at all. It is fairly trivial to make the required changes, however.
 
