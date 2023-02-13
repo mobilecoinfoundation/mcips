@@ -49,7 +49,7 @@ This proposal will also require minor modifications to SDK clients. Since the ad
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-One alternative to defragmentatino memos would be to continue using RTH for identifying defragmentation transactions. But this approach has a higher barrier of entry for client developers in terms of MobileCoin knowledge. It is much simpler to just check the memo type; and when it comes to sharing example code, defragmentation memos are much easier to demonstrate.
+One alternative to defragmentation memos would be to continue using RTH for identifying defragmentation transactions. But this approach has a higher barrier of entry for client developers in terms of MobileCoin knowledge. It is much simpler to just check the memo type; and when it comes to sharing example code, defragmentation memos are much easier to demonstrate.
 
 Including a defragmentation ID may also not be necessary. Conversely, it may be better to use a larger value. A single u64 was chosen for simplicity and should be enough for one account. If clients do not need the ID field, they can also choose to ignore it.
 
