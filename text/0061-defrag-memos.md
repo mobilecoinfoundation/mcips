@@ -1,6 +1,7 @@
 - Feature Name: RTH Defragmentation Memos
 - Start Date: 2023-02-03
 - MCIP PR: [mobilecoinfoundation/mcips#0061](https://github.com/mobilecoinfoundation/mcips/pull/0061)
+- Implementation PR: [mobilecoinfoundation/mobilecoin#3170](https://github.com/mobilecoinfoundation/mobilecoin/pull/3170)
 
 # Summary
 [summary]: #summary
