@@ -19,7 +19,7 @@ Similar to the motivations in [MCIP #32](0032-fog-compatible-gift-codes.md), a c
 
 Another concern is that because there are multiple types of ways to specify the rules of an SCI (one example being [MCIP #42](0042-partial-fill-rules.md) which extended the SCI rules to include partial fills) one might want to have some record of that information on the blockchain (instead of relying on a secondary service)
 
-# Guide-level explanation
+# Guide-level explanation - WIP (awaiting feedback and discussion)
 
 [guide-level-explanation]: #guide-level-explanation
 
