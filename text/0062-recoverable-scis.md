@@ -26,6 +26,8 @@ Another concern is that because there are multiple types of ways to specify the 
 When one wishes to generate an SCI, the app must first make a self payment to the `SCI_SUBADDRESS_INDEX = u64::MAX - 3`, which is now reserved for `TxOut`s used as `SCI`s.
 Apps should not select `TxOut`s at this subaddress for inputs in other transactions, and they may choose not to include these in the account balances as they represent the amount of active `SCI`s.
 
+The `TxOut` generated for use as the SCI must contain an `SCI Generation Memo` to identify the details of the SCI it was included in (specifics TBD as feature evolves from feedback and discussion)
+
 After an SCI is sent, an app can check if it has been claimed based on if this `TxOut` has been spent. Until it has been spent, the app can potentially cancel the `SCI` by sending a self payment with the `TxOut`.
 
 We additionally extend Recoverable Transaction History memos from [MCIP #4](0004-recoverable-transaction-history.md) to handle `SCI`s as well.
@@ -36,7 +38,7 @@ We additionally extend Recoverable Transaction History memos from [MCIP #4](0004
 | 0x0302          | SCI cancellation memo |
 | 0x0003          | SCI sender memo       |
 
-# Reference-level explanation
+# Reference-level explanation - TODO (awaiting feedback of prior sections)
 
 [reference-level-explanation]: #reference-level-explanation
 
@@ -48,13 +50,13 @@ We additionally extend Recoverable Transaction History memos from [MCIP #4](0004
 >
 > The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
 
-# Drawbacks
+# Drawbacks - TODO (awaiting feedback of prior sections)
 
 [drawbacks]: #drawbacks
 
 > Why should we _not_ do this?
 
-# Rationale and alternatives
+# Rationale and alternatives - TODO (awaiting feedback of prior sections)
 
 [rationale-and-alternatives]: #rationale-and-alternatives
 
@@ -62,7 +64,7 @@ We additionally extend Recoverable Transaction History memos from [MCIP #4](0004
 > - What other designs have been considered and what is the rationale for not choosing them?
 > - What is the impact of not doing this?
 
-# Prior art
+# Prior art - TODO (awaiting feedback of prior sections)
 
 [prior-art]: #prior-art
 
@@ -80,7 +82,7 @@ We additionally extend Recoverable Transaction History memos from [MCIP #4](0004
 > Note that while precedent set by other systems is some motivation, it does not on its own motivate an MCIP.
 > Please also take into consideration that MobileCoin sometimes intentionally diverges from common cryptocurrency features.
 
-# Unresolved questions
+# Unresolved questions - TODO (awaiting feedback of prior sections)
 
 [unresolved-questions]: #unresolved-questions
 
@@ -88,7 +90,7 @@ We additionally extend Recoverable Transaction History memos from [MCIP #4](0004
 > - What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
 > - What related issues do you consider out of scope for this MCIP that could be addressed in the future independently of the solution that comes out of this MCIP?
 
-# Future possibilities
+# Future possibilities - TODO (awaiting feedback of prior sections)
 
 [future-possibilities]: #future-possibilities
 
