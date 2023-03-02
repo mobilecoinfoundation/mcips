@@ -40,7 +40,7 @@ The 64-byte memo data is laid out as follows:
 
 The fee `Amount` value is stored as a u56 in the first 7 bytes. This is done for consistency with RTH Destination memos. The next 8 bytes contain the total outlay of the defragmentation transaction. Lastly, the defragmentation ID is stored in 8 bytes as a u64.
 
-This memo will be written to both `TxOut`s of a defragmentation transaction. One output will have the non-zero defragmentation `Amount`. The other output will have the change `Amount`, which is always 0 for defragmentation transactions. The non-zero `Amount` output will get a memo with the fee and outlay for that transaction. The 0 `Amount` output will get a memo with a fee and outlay of 0, but the same ID as the non-zero output. Both of the `TxOut`s are sent to the users change subaddress. The memos can be validated by checking that the subaddress the `TxOut`s were sent to is the change subaddress.
+This memo will be written to both `TxOut`s of a defragmentation transaction. One output will have the non-zero defragmentation `Amount`. The other output will have the change `Amount`, which is always 0 for defragmentation transactions. The non-zero `Amount` output will get a memo with the fee and outlay for that transaction. The 0 `Amount` output will get a memo with a fee and outlay of 0, but the same ID as the non-zero output. Both of the `TxOut`s are sent to the user's change subaddress. The memos can be validated by checking that the subaddress the `TxOut`s were sent to is the change subaddress.
 
 # Drawbacks
 [drawbacks]: #drawbacks
