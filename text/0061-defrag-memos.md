@@ -61,8 +61,7 @@ Including a defragmentation ID may also not be necessary. Conversely, it may be 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-- ~~Is a defragmentation ID necessary or valuable? Should it be larger than 64 bits?~~
-- ~~Does this memo need any sort of validation? If client applications are hiding defragmentation transactions, users with custom clients could create 'invisible' transactions. This doesn't seem like a major issue, however.~~
+None
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
