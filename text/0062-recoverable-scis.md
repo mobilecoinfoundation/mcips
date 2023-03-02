@@ -1,6 +1,6 @@
 - Feature Name: recoverable_scis
 - Start Date: 2023-03-02
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
+- MCIP PR: [mobilecoinfoundation/mcips#0062](https://github.com/mobilecoinfoundation/mcips/pull/0062)
 - Tracking Issue: (link to tracking issue)
 
 # Summary
