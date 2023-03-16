@@ -62,9 +62,3 @@ Including a defragmentation ID may also not be necessary. Conversely, it may be 
 [unresolved-questions]: #unresolved-questions
 
 None
-
-# Future possibilities
-[future-possibilities]: #future-possibilities
-
-This proposal should make it much easier for developers to create apps that behave more like regular payment apps. It will also reduce the amount of code needed to identify defragmentation transactions.
-
