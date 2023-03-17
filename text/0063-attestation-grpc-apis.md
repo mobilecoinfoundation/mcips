@@ -225,6 +225,8 @@ the `tcbInfo` attribute is sent as a JSON document and the `signature` is a
 separate element. This prevents clients from parsing an unverified JSON document
 to get to the signature.  See [`SignedJson`](#signedjson).
 
+> Note: Using thin wrapper around [`SignedJson`] to prevent type ambiguity.
+
 ```proto
 message TcbInfo {
     SignedJson tcb = 1;
