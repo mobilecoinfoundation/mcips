@@ -17,7 +17,8 @@ API.
 
 The newer
 [Intel® SGX DCAP](https://www.intel.com/content/www/us/en/developer/articles/technical/quote-verification-attestation-with-intel-sgx-dcap.html)
-attestation protocol contains different attestation evidence than the previous
+attestation protocol uses a different format for the attestation evidence than
+the previous
 [EPID](https://api.trustedservices.intel.com/documents/sgx-attestation-api-spec.pdf)
 protocol. The use of an opaque buffer of bytes prevents the recipient of the
 attestation evidence from knowing if the evidence is for EPID or DCAP.
@@ -166,8 +167,9 @@ message AttestResponse {
 A [`oneof`](https://protobuf.dev/programming-guides/proto3/#oneof) is used to
 allow for new evidence types to be provided in the future.
 
-The name `quote3` was chosen as that is how the binary format is refered to in
-the Intel SDK.
+The name `quote3` was chosen to mimic the naming of the binary format that Intel
+uses for the DCAP attestation service. It is possible to get other attestation
+types via a DCAP service.
 
 ```proto
 message AttestationEvidence {
@@ -178,6 +180,10 @@ message AttestationEvidence {
 ```
 
 ### `Quote3Evidence`
+
+The name `Quote3Evidence` was chosen to mimic the naming of the binary format
+that Intel uses for the DCAP attestation service. It is possible to get other
+attestation types via a DCAP service.
 
 The `Quote3Evidence` is composed of two parts:
 
@@ -193,6 +199,10 @@ message QuoteV3Evidence {
 ```
 
 ### `QuoteV3`
+
+The name `QuoteV3` was chosen to mimic the naming of the binary format that
+Intel uses for the DCAP attestation service. It is possible to get other
+attestation types via a DCAP service.
 
 The quote format is described in
 [Intel_SGX_ECDSA_QuoteLibReference_DCAP_API.pdf](https://download.01.org/intel-sgx/latest/dcap-latest/linux/docs/Intel_SGX_ECDSA_QuoteLibReference_DCAP_API.pdf).
