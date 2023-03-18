@@ -1,4 +1,4 @@
-- Feature Name: `minting`
+- Feature Name: Token Minting
 - Start Date: 2022-04-21
 - MCIP PR: [mobilecoinfoundation/mcips#0037](https://github.com/mobilecoinfoundation/mcips/pull/37)
 - Tracking Issue: N/A
