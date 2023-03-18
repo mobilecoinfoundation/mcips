@@ -1,8 +1,8 @@
-* Feature Name: `block_streaming`
-* Start Date: 2022-03-01
-* MCIP PR:
+- Feature Name: `block_streaming`
+- Start Date: 2022-03-01
+- MCIP PR:
   [mcips #29](https://github.com/mobilecoinfoundation/mcips/pull/29)
-* Tracking Issue:
+- Tracking Issue:
   [mobilecoin #1433](https://github.com/mobilecoinfoundation/mobilecoin/issues/1433)
 
 
