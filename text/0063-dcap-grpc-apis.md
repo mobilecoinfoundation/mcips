@@ -1,4 +1,4 @@
-- Feature Name: `attestation-grpc-apis`
+- Feature Name: `dcap-grpc-apis`
 - Start Date: 2023-03-14
 - MCIP PR: [mobilecoinfoundation/mcips#0063](https://github.com/mobilecoinfoundation/mcips/pull/0063)
 - Tracking Issue: [mobilecoinfoundation/mobilecoin#3119](https://github.com/mobilecoinfoundation/mobilecoin/issues/3119)
@@ -6,14 +6,15 @@
 # Summary
 [summary]: #summary
 
-Define the [gRPC](https://grpc.io/) APIs used to perform attestation of an enclave.
+Define the [gRPC](https://grpc.io/) APIs used to perform DCAP attestation of an
+enclave.
 
 # Motivation
 [motivation]: #motivation
 
-The current gRPC attestation API only supports a stream of opaque bytes. This
-requires both parties to know how to interpret this data outside of the gRPC
-API.
+The current (EPID) gRPC attestation API only supports a stream of opaque bytes.
+This requires both parties to know how to interpret this data outside of the
+gRPC API.
 
 The newer
 [Intel® SGX DCAP](https://www.intel.com/content/www/us/en/developer/articles/technical/quote-verification-attestation-with-intel-sgx-dcap.html)
