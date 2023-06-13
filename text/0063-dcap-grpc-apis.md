@@ -117,7 +117,11 @@ Enclave to enclave attestation is for enclaves on disparate machines
 communicating with each other. A common use case is for communication between
 concensus nodes.
 
-Enclave to encalve attestation differs from
+Typically, this technique is most interesting for `peer` enclaves, that have the same measurement. Each enclave can get its measurement from SGX using the EREPORT, and verify that the other enclave has the same measurement as it.
+
+In situations like fog router -> fog worker, this typically is not a peering connection, it's a client -> enclave connection and attestation only goes in one direction. The worker attests to the router, and the router attests to the user, establishing a chain of trust. It's not necessary for the router to attest to the worker in this example.
+
+Enclave to enclave attestation differs from
 [client to enclave](#1-client-to-enclave) in that the requester will provide its
 own attestation evidence when requesting attestation evidence from the other
 enclave. The enclave recieving the request will verify the evidence of the
@@ -145,7 +149,7 @@ Used to initiate client to enclave communication.
 The `noise` field contains
 [noise protocol](http://www.noiseprotocol.org/) handshake data.
 
-```prot
+```proto
 message AttestRequest {
     bytes noise = 1;
 }
