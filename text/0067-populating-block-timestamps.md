@@ -136,6 +136,13 @@ Then the validators validate the timestamp as part of validating the block. This
 approach doesn't work for SCP since all the nodes need to create the same block
 and their system times may differ.
 
+[MCIP 12](https://github.com/mobilecoinfoundation/mcips/pull/12) proposed nodes
+nominating a dedicated time range value during SCP. An approach similar to this
+was attempted, but the current SCP implementation doesn't guarantee which kind
+of values make it onto the ballots. Thus there were times where the dedicated
+time value did not make it onto ballots. In order to support a dedicated time
+range the SCP implementation would need to be re-worked.
+
 # Prior art
 [prior-art]: #prior-art
 
