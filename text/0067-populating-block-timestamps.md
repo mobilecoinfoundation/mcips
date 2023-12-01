@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-A way for consenus nodes to agree on the value that goes into the block
+A way for consensus nodes to agree on the value that goes into the block
 timestamp field.
 
 # Motivation
