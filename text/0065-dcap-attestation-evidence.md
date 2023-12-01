@@ -20,38 +20,42 @@ logic for verifying both the EPID and DCAP flavors of attestation evidence.
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-For the current EPID attestation the client provides the expected measurements
-and advisories to a verifier. The verifier then checks the evidence against the
-expected measurements and advisories.
+Clients provide a list of expected measurements and advisories to a common
+backend. The common backend is responsible for determining how to verify
+the attestation evidence with these expected measurements.
+
+Previous versions of the MobileCoin client libraries created an EPID verifier and provided the verifier to a common backend to verify the attestation evidence.
 
 A _Measurement_ is either a `MRENCLAVE` value or a `MRSIGNER` value set.
 
-A `MRENCLAVE` value is a hash that uniquely identifies the enclave's code
+`MRENCLAVE`
+: value is a hash that uniquely identifies the enclave's code
 binary. A `MRENCLAVE` measurement is a strict comparison, any change in the
 enclave's code binary will result in a verification failure.
 
-A `MRSIGNER` is a more lenient verification which allows for newer versions of
+`MRSIGNER`
+: is a more lenient verification which allows for newer versions of
 an enclave's code binary to be used. A `MRSIGNER` value set consists of three
 values:
 
 1. A hash that uniquely identifies the entity or group that signed the enclave.
-   This is often refered to as the `MRSIGNER` value, not to be confused with the
-   "`MRSIGNER` value set" being described here.
+   This is often refereed to as the `MRSIGNER` value, not to be confused with the
+   _`MRSIGNER` value set_ being described here.
 2. The enclave's security version number. This number is incremented when the
-   enclave is updated with security fixes. This is refered to as the ISV SVN. An
+   enclave is updated with security fixes. This is referred to as the ISV SVN. An
    enclave that has a higher security version number will still pass
    verification as it is assumed to be more secure than the previous security
    version.
 3. The enclave's product version number. This number varies based on the
-   enclave's purpose. For example fog view has a different product ID than
-   consensus. This is often refered to as the ISV product ID.
+   enclave's purpose. For example, fog view has a different product version
+   number than consensus. This is often referred to as the ISV product ID.
 
 Advisories are a list of advisory IDs that an enclave is allowed to have. If
 there is an advisory ID in the evidence that is not in the allowed list, the
 verification will fail.
 
-The verifier needs to be able to interpret the evidence and verify that the
-evidence meets the requirements of the expected measurements and advisories.
+The verifier interprets the evidence and verifies that the
+evidence meets the requirements for the expected measurements and advisories.
 
 The verifier also ensures that the evidence is signed by a trusted party. This
 signature is provided in an X509 certificate chain that is verified by a trust
@@ -63,26 +67,9 @@ output of verifying an enclave's evidence is the enclave's public key.
 
 ```mermaid
 flowchart TD
-    C[Client] -->|Expected Measurements\nAdvisories| V[Verifier]
-    subgraph EPID Specific
-    V --> Vy{Verify}
-    T[Trust Root] --> Vy
-    E[Evidence] --> Vy
-    Vy --> |No| F[Fail]
-    Vy --> |Yes| Va[Valid Report]
-    end
-    Va --> |Get Enclave Key| K[Key]
-    F --> Er[Error Handling]
-```
-
-From the application's perspective, the main difference between EPID and DCAP is the provided `Evidence` format.
-
-Based on the diagram above we should be able to create a similar flow for DCAP. The evidence will differ and will be the deciding factor on which flow to take. We'll propagate the evidence with the client measurements down to the respective verifier.
-
-```mermaid
-flowchart TD
     C[Client] -->|Expected Measurements\nAdvisories| Ki
     E[Evidence] --> Ki{Evidence Kind}
+    subgraph Common Backend
     Ki --> Ev[EPID Verifier]
     subgraph EPID
     Ev --> EVy{Verify}
@@ -93,13 +80,12 @@ flowchart TD
     Dv --> DVy{Verify}
     DVy --> |Yes| Dr[Valid DCAP Report]
     end
+    end
     DVy --> |No| F[Error]
     EVy --> |No| F[Error]
     Er --> |Get Enclave Key| K[Key]
     Dr --> |Get Enclave Key| K[Key]
 ```
-
-In order for this to work the client's expected measurements and advisories will need to be formatted the same.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -118,27 +104,31 @@ The client provides two lists of advisory IDs, one for each category. The lists
 contain the advisory IDs that the client is willing to accept. If the evidence
 contains an advisory ID that is not in the list, the verification will fail.
 
-At the time of this writing no config advisories are allowed. This means that clients expect all advisories to be mitigated by the correct configuration of the hardware. 
+At the time of this writing no config advisories are allowed. This means that
+clients expect all advisories to be mitigated by the correct configuration of
+the hardware.
 
 For software hardening advisories, the only way to ensure the advisory has been
 mitigated is through the software implementation. This means that the evidence
 the enclave provides will not be able to prove that the advisory has been
 mitigated. Thus the evidence will list all software advisories which the enclave
-may be suseptable to. It is up to the client to know which versions of the
+may be susceptible to. It is up to the client to know which versions of the
 enclave has mitigated which advisories.
 
 For example if a new software advisory "INTEL-SA-12345" is published, enclave
-version _n_  may not have mitigated this advisory. The client should *not* list
+version _n_  may not have mitigated this advisory. The client should **not** list
 "INTEL-SA-12345" in the list of allowed advisories when talking to enclave
 version _n_. The the client would provide "INTEL-SA-12345" for enclave version
 _n+1_, assuming enclave version _n+1_ provides necessary software mitigations for the
-advisory. The client would still not provide "INTEL-SA-12345" for enclave version _n_ since it does not have the necessary mitigations.
+advisory. The client would still not provide "INTEL-SA-12345" for enclave
+version _n_ since it does not have the necessary mitigations.
 
 ## Combined Measurement and Advisory Format
 
 In JSON format for the combined measurment and advisories are of the form:
 
 `MRENCLAVE`
+
 ```json
 {
   "MRENCLAVE": "3370f131b41e5a49ed97c4188f7a976461ac6127f8d222a37929ac46b46d560e",
@@ -148,6 +138,7 @@ In JSON format for the combined measurment and advisories are of the form:
 ```
 
 `MRSIGNER`
+
 ```json
 {
   "MRSIGNER": "2c1a561c4ab64cbc04bfa445cdf7bed9b2ad6f6b04d38d3137f3622b29fdb30e",
@@ -160,11 +151,11 @@ In JSON format for the combined measurment and advisories are of the form:
 
 ## Evidence Format
 
-The term "Evidence" is used in this MCIP to refer to all the attestation data
-that needs to be verified by the client. The terminology is  inconcistent in the
+The term _Evidence_ is used in this MCIP to refer to all the attestation data
+that needs to be verified by the client. The terminology is  inconsistent in the
 EPID and DCAP documentation. The EPID documentation refers to the data as
-"report". While the DCAP documentation refers to the data as "quote" and
-"collateral".
+_report_. While the DCAP documentation refers to the data as _quote_ and
+_collateral_.
 
 ### EPID
 
@@ -195,10 +186,15 @@ provide this cached evidence to any clients. The caching provides a reduced load
 on the attestation service as well as robustness against transient network
 issues between the server and the attestation service.
 
-Since the enclave host communicates with both the enclave and the attesation
-service, the enclave host will only need to support one of EPID or DCAP. The details of how the enclave host caches and retrieves the evidence from the attestation service is out of scope for this MCIP.
+Since the enclave host communicates with both the enclave and the attestation
+service, the enclave host will only need to support one of EPID or DCAP. The
+details of how the enclave host caches and retrieves the evidence from the
+attestation service is out of scope for this MCIP.
 
-The clients only need to communicate with the enclave host to retriev the evidence. The trust root that the client has will be used to verify the evidence. The client will key off the type of evidence to determine how to verify the evidence.
+The clients only need to communicate with the enclave host to retrieve the
+evidence. The trust root that the client has will be used to verify the
+evidence. The client will key off the type of evidence to determine how to
+verify the evidence.
 
 ```mermaid
 sequenceDiagram
@@ -229,7 +225,7 @@ sequenceDiagram
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-TBD
+None at this time
 
 # Prior art
 [prior-art]: #prior-art
