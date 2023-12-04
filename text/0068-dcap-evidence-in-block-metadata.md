@@ -64,17 +64,14 @@ message BlockMetadataContents {
 [drawbacks]: #drawbacks
 
 This requires a block version bump since it changes the `BlockMetadataContents`.
+Consumers that only know about block version 3 will be unable to verify
+`BlockMetadataContents` or the attestation evidence it contains.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
 The `VerificationReport` and `DcapEvidence` were disparate enough that it didn't
 seem feasible to try and convert a `DcapEvidence` into a `VerificationReport`.
-
-While requiring a version bump, this change is able to be backwards compatible
-such that clients only knowing about version 3 can still consume the blocks.
-They will **not** be able to perform verification due to lacking the necessary
-evidence.
 
 # Prior art
 [prior-art]: #prior-art
